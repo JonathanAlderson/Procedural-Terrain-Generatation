@@ -8,7 +8,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 // Store the vertex shader source code as a string, dynamically compiled at run time
-const char* vertexShaderSource = "#version 460 core\n"
+const char* vertexShaderSource = "#version 330 core\n"
 	"layout (location = 0) in vec3 aPos;\n"
 	"void main()\n"
 	"{\n"
@@ -16,14 +16,14 @@ const char* vertexShaderSource = "#version 460 core\n"
 	"}\0";
 
 // Fragment shader code as a string
-const char* firstFragmentShaderSource = "#version 460 core\n"
+const char* firstFragmentShaderSource = "#version 330 core\n"
 	"out vec4 FragColor;\n"
 	"void main()\n"
 	"{\n"
 	"	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 	"}\0";
 
-const char* secondFragmentShaderSource = "#version 460 core\n"
+const char* secondFragmentShaderSource = "#version 330 core\n"
 	"out vec4 FragColor;\n"
 	"void main()\n"
 	"{\n"
@@ -31,9 +31,9 @@ const char* secondFragmentShaderSource = "#version 460 core\n"
 	"}\0";
 
 // Call back function that adjusts the viewport whenever the window is resized
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	// Tell OpenGL the size of the viewport (our window) 
+	// Tell OpenGL the size of the viewport (our window)
 	glViewport(0, 0, width, height);
 }
 
@@ -124,7 +124,7 @@ int main() {
 	unsigned int firstShaderProgram;
 	firstShaderProgram = glCreateProgram();
 
-	// link the program with the shaders 
+	// link the program with the shaders
 	glAttachShader(firstShaderProgram, vertexShader);
 	glAttachShader(firstShaderProgram, firstFragmentShader);
 	glLinkProgram(firstShaderProgram);
@@ -139,7 +139,7 @@ int main() {
 	unsigned int secondShaderProgram;
 	secondShaderProgram = glCreateProgram();
 
-	// link the program with the shaders 
+	// link the program with the shaders
 	glAttachShader(secondShaderProgram, vertexShader);
 	glAttachShader(secondShaderProgram, secondFragmentShader);
 	glLinkProgram(secondShaderProgram);
@@ -160,7 +160,7 @@ int main() {
 	// Buffer objects and related data
 	// **
 
-	// Vertex input as an array, goes to the vertex shader	
+	// Vertex input as an array, goes to the vertex shader
 	float verticesTri1[] = {
 		-1.0f, 1.0f, 0.0f, // top right
 		0.0f, 1.0f, 0.0f, // bottom right
@@ -193,7 +193,7 @@ int main() {
 	// generate buffer objects
 	glGenBuffers(2, VBOS);
 	//glGenBuffers(1, &EBO);
-	
+
 	// Bind vertex array objet
 	glBindVertexArray(VAOS[0]);
 
@@ -213,7 +213,7 @@ int main() {
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// tell OpenGL how to interpret our data 
+	// tell OpenGL how to interpret our data
 	// specify which vertex attribute (location 0 so 0), size of vertex attribute (vec3 so 3 values), type of data (float so GL_FLOAT),
 	// specify if we want data normalised (applies to int and byte to set to GL_FALSE), specify the stride - space between consecutive
 	// verte attributes, last is offset and must be void pointe hence cast
@@ -222,12 +222,12 @@ int main() {
 
 	// wireframe mode for draing polygons
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
+
 
 	// while loop - the render loop - to keep the application running
 	while(!glfwWindowShouldClose(window))
 	{
-		// input 
+		// input
 		processInput(window);
 
 		// rendering
@@ -252,8 +252,8 @@ int main() {
 
 		// There are two buffers being drawn to by the application. The front one contains the final
 		// rendered image and the back one contains the image that is being drawn to. If a single buffer
-		// was used, we would see a flickering of the final image being drawn as an artifact of the 
-		// rendering process. We remove this by drawing to the back buffer and swapping once the 
+		// was used, we would see a flickering of the final image being drawn as an artifact of the
+		// rendering process. We remove this by drawing to the back buffer and swapping once the
 		// rendering in the back buffer is completed.
 		glfwSwapBuffers(window);
 		// check for keyboard and mouse events (press, release, etc)
@@ -261,6 +261,6 @@ int main() {
 	}
 
 	// clean up the resources allocated to the application
-	glfwTerminate();	
+	glfwTerminate();
 	return 0;
 }
