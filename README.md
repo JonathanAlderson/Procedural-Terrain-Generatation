@@ -1,10 +1,10 @@
-# LearnOpenGL
+LearnOpenGL
 ======
 ps://www.google.com
 Small OpenGL projects made from following the [LearnOpenGL](https://learnopengl.com/) tutorials.
 
 
-### Goals
+Goals
 ======
 
 1. Make notes and understand the entirety of the LearnOpenGL series
@@ -15,7 +15,7 @@ Small OpenGL projects made from following the [LearnOpenGL](https://learnopengl.
 
 
 
-### Stretch Goals
+Stretch Goals
 ======
 
 1. Procedural Textures
