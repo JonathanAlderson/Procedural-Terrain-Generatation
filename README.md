@@ -1,6 +1,5 @@
 LearnOpenGL
 ======
-ps://www.google.com
 Small OpenGL projects made from following the [LearnOpenGL](https://learnopengl.com/) tutorials.
 
 
