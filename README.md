@@ -22,3 +22,16 @@ Stretch Goals
 3. Water/Boat wave interactions
 4. L System based Sea Vegetation
 5. Noise Distributed Sea Vegetation 
+
+
+Related Videos
+======
+
+[![Marching Cubes](http://img.youtube.com/vi/M3iI2l0ltbE/0.jpg)](http://www.youtube.com/watch?v=M3iI2l0ltbE)
+
+[![Ray Marching Water](http://img.youtube.com/vi/WXhUiI1nD2U/0.jpg)](http://www.youtube.com/watch?v=WXhUiI1nD2U)
+
+[![Frame Buffer Water](http://img.youtube.com/vi/HusvGeEDU_U/0.jpg)](http://www.youtube.com/watch?v=HusvGeEDU_U)
+
+
+
