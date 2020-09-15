@@ -1,11 +1,11 @@
 # LearnOpenGL
-=====
+======
 ps://www.google.com
 Small OpenGL projects made from following the [LearnOpenGL](https://learnopengl.com/) tutorials.
 
 
 ### Goals
-=====
+======
 
 1. Make notes and understand the entirety of the LearnOpenGL series
 2. Follow along and program the important parts for our project
@@ -16,7 +16,7 @@ Small OpenGL projects made from following the [LearnOpenGL](https://learnopengl.
 
 
 ### Stretch Goals
-=====
+======
 
 1. Procedural Textures
 2. RayMarching Based Water
