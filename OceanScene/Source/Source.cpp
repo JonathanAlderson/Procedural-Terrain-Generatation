@@ -8,7 +8,7 @@
 
 #include "../headers/shader.h"
 #include "../headers/camera.h"
-#include "../headers/model.h"
+//#include "../headers/model.h"
 
 #include <iostream>
 
