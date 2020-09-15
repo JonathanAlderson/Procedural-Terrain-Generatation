@@ -1,4 +1,3 @@
----
 LearnOpenGL
 ======
 Small OpenGL projects made from following the [LearnOpenGL](https://learnopengl.com/) tutorials.
