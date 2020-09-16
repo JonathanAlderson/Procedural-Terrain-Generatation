@@ -8,8 +8,8 @@
 #include<iostream>
 #include<string.h>
 
+// Finds the CWD on Windows or Linux
 using namespace std;
-
 char * get_current_dir() {
    char buff[FILENAME_MAX]; //create string buffer to hold path
    char * cwd = GetCurrentDir( buff, FILENAME_MAX );

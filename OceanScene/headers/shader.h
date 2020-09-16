@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iostream>
 
+// Used for loading shaders 
 class Shader
 {
 public:

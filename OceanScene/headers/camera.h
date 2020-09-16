@@ -112,7 +112,7 @@ public:
       float parabola = (Acceleration - MaxAcceleration)/MaxAcceleration;
       float boost  = (-(parabola*parabola)+1)*MaxBoost;
 
-      Position += Front * boost * abs(deltaTime);
+      Position += Front * boost * (float)abs(deltaTime);
 
     }
 
