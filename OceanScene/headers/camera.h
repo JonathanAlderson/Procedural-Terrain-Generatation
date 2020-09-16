@@ -12,7 +12,7 @@ enum Camera_Movement {
     FORWARD,
     BACKWARD,
     LEFT,
-    RIGHT
+    RIGHT,
 };
 
 // Default camera values
@@ -20,7 +20,9 @@ const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
-const float ZOOM        =  45.0f;
+const float ZOOM        =  70.0f;
+const float BOOST       =  20.0f;
+const float ACCEL       =  20.5f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -40,23 +42,34 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    // Boost
+    float MaxBoost;
+    float MaxAcceleration;
+    float Acceleration;
 
     // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), MaxBoost(BOOST), Acceleration(ACCEL)
     {
         Position = position;
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
+        MaxBoost = MaxBoost;
+        MaxAcceleration = Acceleration;
+        Acceleration = 0;
+
         updateCameraVectors();
     }
     // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), MaxBoost(BOOST), Acceleration(ACCEL)
     {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
+        MaxBoost = MaxBoost;
+        MaxAcceleration = Acceleration;
+        Acceleration = 0;
         updateCameraVectors();
     }
 
@@ -78,6 +91,29 @@ public:
             Position -= Right * velocity;
         if (direction == RIGHT)
             Position += Right * velocity;
+    }
+
+    void ProcessBoost(float deltaTime)
+    {
+      Acceleration += deltaTime;
+
+      // Decelerate
+      if(deltaTime < 0){ Acceleration += deltaTime; }
+
+      // Limit Acceleration
+      if(Acceleration < 0.){ Acceleration = 0.; }
+      if(Acceleration > MaxAcceleration){ Acceleration = MaxAcceleration; }
+
+      // Decelerate Faster Than It accelerates
+
+
+
+      // Find boost for corresponding Accel
+      float parabola = (Acceleration - MaxAcceleration)/MaxAcceleration;
+      float boost  = (-(parabola*parabola)+1)*MaxBoost;
+
+      Position += Front * boost * abs(deltaTime);
+
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
