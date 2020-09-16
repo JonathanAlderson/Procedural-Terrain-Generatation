@@ -83,7 +83,7 @@ int main()
 
 
 
-    //  Configure Cubes and Lights
+    //  Configure Cubes, Lights, and seaweed
     // --------------------
     sceneSetup();
 
@@ -158,6 +158,7 @@ int main()
            glActiveTexture(GL_TEXTURE1);
            glBindTexture(GL_TEXTURE_2D, specularMap);
 
+
            // render containers
            glBindVertexArray(cubeVAO);
            for (unsigned int i = 0; i < 10; i++)
@@ -188,6 +189,23 @@ int main()
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
 
+
+            //
+            // // Draw Seaweed
+            // // render containers
+            // glBindVertexArray(seaweedVAO);
+            // for (unsigned int i = 0; i < 5; i++)
+            // {
+            //     // calculate the model matrix for each object and pass it to shader before drawing
+            //     glm::mat4 model = glm::mat4(1.0f);
+            //     model = glm::translate(model, seaweedPositions[i]);
+            //     float angle = 20.0f * i;
+            //     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            //     lightingShader.setMat4("model", model);
+            //
+            //     glDrawArrays(GL_TRIANGLES, 0, 6);
+            // }
+
             ///////////////////////////////////////////
             // END OF RENDER LOGIC
             ///////////////////////////////////////////
@@ -202,6 +220,7 @@ int main()
        // ------------------------------------------------------------------------
        glDeleteVertexArrays(1, &cubeVAO);
        glDeleteVertexArrays(1, &lightCubeVAO);
+       glDeleteVertexArrays(1, &seaweedVAO);
        glDeleteBuffers(1, &VBO);
 
        // glfw: terminate, clearing all previously allocated GLFW resources.

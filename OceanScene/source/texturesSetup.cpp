@@ -7,12 +7,14 @@
 // Global Texture Names
 unsigned int diffuseMap;
 unsigned int specularMap;
+unsigned int seaweed;
 
 // List below all textures used in the scene
 void texturesSetup()
 {
   diffuseMap = loadTexture(FileSystem::getPath("resources/textures/marble.jpg").c_str());
   specularMap = loadTexture(FileSystem::getPath("resources/textures/metal.png").c_str());
+  seaweed = loadTexture(FileSystem::getPath("resources/textures/seaweed.png").c_str());
   return;
 }
 
