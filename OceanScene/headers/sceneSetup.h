@@ -1,6 +1,6 @@
 #ifndef SCENESETUP_H
 #define SCENESETUP_H
-#include "../glm/glm.hpp"
+#include "glm.hpp"
 
 
 //////////////////////////////////

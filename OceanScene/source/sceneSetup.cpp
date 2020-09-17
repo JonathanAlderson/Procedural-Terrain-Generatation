@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../glm/glm.hpp"
+#include "glm.hpp"
 #include "../headers/sceneSetup.h"
 #include "../headers/verticies.h"
 

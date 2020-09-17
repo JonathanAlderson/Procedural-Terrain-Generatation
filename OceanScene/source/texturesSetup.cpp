@@ -1,8 +1,8 @@
 #include "../headers/texturesSetup.h"
-#include "../headers/filesystem.h"
+#include "filesystem.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../headers/stb_image.h"
+#include "stb_image.h"
 
 // Global Texture Names
 unsigned int diffuseMap;
