@@ -33,25 +33,6 @@ glm::vec3 pointLightPositions[4] = {
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 
-glm::vec3 seaweedPositions[5] = {
-    glm::vec3( 0.2f,  0.0f,  0.2f),
-    glm::vec3( 1.2f,  0.0f,  0.2f),
-    glm::vec3( 0.4f,  0.0f,  0.4f),
-    glm::vec3( 1.6f,  0.0f,  0.6f),
-    glm::vec3( 1.0f,  0.0f,  0.8f)
-};
-
-
-
-// Call All Of The Setup Functions
-
-void sceneSetup()
-{
-  cubesSetup();
-  lightsSetup();
-  seaweedSetup();
-}
-
 void cubesSetup()
 {
 
@@ -82,11 +63,11 @@ void lightsSetup()
   glEnableVertexAttribArray(0);
 }
 
-void seaweedSetup()
+void seaweedSetup(int max)
 {
   // Get the random positions of the seaweed
-  glm::vec3 translations[100];
-  for (unsigned int i = 0; i < 100; i++)
+  glm::vec3 translations[max];
+  for (int i = 0; i < max; i++)
   {
     translations[i] = glm::vec3((float)(i%10), 0., i/10);
   }
@@ -94,7 +75,7 @@ void seaweedSetup()
   unsigned int instanceVBO;
   glGenBuffers(1, &instanceVBO);
   glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 100, &translations[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glGenVertexArrays(1, &seaweedVAO);
@@ -113,7 +94,5 @@ void seaweedSetup()
   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glVertexAttribDivisor(2, 1);
-
-
 
 }

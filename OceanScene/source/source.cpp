@@ -24,6 +24,7 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+const int MAX_SEAWEED = 25;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -83,9 +84,11 @@ int main()
 
 
 
-    //  Configure Cubes, Lights, and seaweed
+    //  Scene Setup
     // --------------------
-    sceneSetup();
+    cubesSetup();
+    lightsSetup();
+    seaweedSetup(MAX_SEAWEED);
 
     // load textures
     // --------------------
@@ -211,24 +214,8 @@ int main()
 
             glBindVertexArray(seaweedVAO);
 
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_SEAWEED);
             glBindVertexArray(0);
-
-            // for (unsigned int i = 0; i < 100; i++)
-            // {
-            //     // calculate the model matrix for each object and pass it to shader before drawing
-            //     glm::mat4 model = glm::mat4(1.0f);
-            //
-            //
-            //     //model = glm::translate(model, seaweedPositions[i]);
-            //     model = glm::translate(model, seaweedPositions[i]);
-            //
-            //     float angle = 20.0f * i;
-            //     model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-            //     model = glm::scale(model, glm::vec3(.5f));
-            //     seaweedShader.setMat4("model", model);
-            //     glDrawArrays(GL_TRIANGLES, 0, 6);
-            // }
 
             ///////////////////////////////////////////
             // END OF RENDER LOGIC

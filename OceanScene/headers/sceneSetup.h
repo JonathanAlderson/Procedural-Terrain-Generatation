@@ -10,13 +10,11 @@ extern unsigned int cubeVBO, cubeVAO;
 extern unsigned int lightCubeVAO;
 extern unsigned int seaweedVAO, quadVBO;
 
-// Scene Setup Calls All The Below Functions
-void sceneSetup();
 
 // Individual Setup Functions
 void cubesSetup();
 void lightsSetup();
-void seaweedSetup();
+extern void seaweedSetup(int max);
 
 
 // Scene Setup Header
@@ -28,7 +26,5 @@ extern glm::vec3 lightPos;
 
 // positions of the point lights
 extern glm::vec3 pointLightPositions[4];
-
-extern glm::vec3 seaweedPositions[5];
 
 #endif
