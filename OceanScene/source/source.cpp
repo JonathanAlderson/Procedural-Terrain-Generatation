@@ -22,9 +22,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-const int MAX_SEAWEED = 25;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
+const int MAX_SEAWEED = 5000;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));

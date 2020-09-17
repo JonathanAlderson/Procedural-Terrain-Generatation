@@ -69,7 +69,7 @@ void seaweedSetup(int max)
   glm::vec3 translations[max];
   for (int i = 0; i < max; i++)
   {
-    translations[i] = glm::vec3((float)(i%10), 0., i/10);
+    translations[i] = glm::vec3((float)(i%10), 0., (i/10));
   }
 
   unsigned int instanceVBO;

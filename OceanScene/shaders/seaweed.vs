@@ -44,7 +44,11 @@ void main()
 
     // Scale the seaweed randomly
     vec3 vert = aPos;
-    vert = vert * rand(vec2(gl_InstanceID, 36.7));
+    float scale = 0.2 + 1.5 * rand(vec2(gl_InstanceID, 36.7));
+    vert = vert * scale;
+
+    // Adjust the height after scaling
+    movedModel[3][1] += scale;//pos.y;
 
 
     // Outputs
