@@ -84,15 +84,36 @@ void lightsSetup()
 
 void seaweedSetup()
 {
+  // Get the random positions of the seaweed
+  glm::vec3 translations[100];
+  for (unsigned int i = 0; i < 100; i++)
+  {
+    translations[i] = glm::vec3((float)(i%10), 0., i/10);
+  }
+
+  unsigned int instanceVBO;
+  glGenBuffers(1, &instanceVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 100, &translations[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   glGenVertexArrays(1, &seaweedVAO);
   glBindVertexArray(seaweedVAO);
   glGenBuffers(1, &quadVBO);
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticies), quadVerticies, GL_STATIC_DRAW);
   glBindVertexArray(seaweedVAO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+  glEnableVertexAttribArray(2);
+  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glVertexAttribDivisor(2, 1);
+
+
 
 }

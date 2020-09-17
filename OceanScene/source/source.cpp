@@ -104,11 +104,10 @@ int main()
     lightingShaderSetup(lightingShader, camera);
 
 
+    // Seaweed setup stuff
     seaweedShader.use();
     seaweedShader.setInt("texture1", 0);
     seaweedShader.setFloat("time", 1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, seaweedTex);
 
 
     while (!glfwWindowShouldClose(window))
@@ -203,22 +202,33 @@ int main()
             // render containers
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, seaweedTex);
+            model = glm::mat4(1.0f);
             seaweedShader.use();
-            seaweedShader.setMat4("projection", projection);
+            seaweedShader.setMat4("model", model);
             seaweedShader.setMat4("view", view);
+            seaweedShader.setMat4("projection", projection);
             seaweedShader.setFloat("time", glfwGetTime());
+
             glBindVertexArray(seaweedVAO);
-            for (unsigned int i = 0; i < 5; i++)
-            {
-                // calculate the model matrix for each object and pass it to shader before drawing
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, seaweedPositions[i]);
-                float angle = 20.0f * i;
-                model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-                model = glm::scale(model, glm::vec3(.5f));
-                seaweedShader.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 6);
-            }
+
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+            glBindVertexArray(0);
+
+            // for (unsigned int i = 0; i < 100; i++)
+            // {
+            //     // calculate the model matrix for each object and pass it to shader before drawing
+            //     glm::mat4 model = glm::mat4(1.0f);
+            //
+            //
+            //     //model = glm::translate(model, seaweedPositions[i]);
+            //     model = glm::translate(model, seaweedPositions[i]);
+            //
+            //     float angle = 20.0f * i;
+            //     model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+            //     model = glm::scale(model, glm::vec3(.5f));
+            //     seaweedShader.setMat4("model", model);
+            //     glDrawArrays(GL_TRIANGLES, 0, 6);
+            // }
 
             ///////////////////////////////////////////
             // END OF RENDER LOGIC
