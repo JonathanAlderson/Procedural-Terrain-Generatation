@@ -6,9 +6,9 @@
 //////////////////////////////////
 // Scene Globals
 /////////////////////////////////
-extern unsigned int VBO, cubeVAO;
+extern unsigned int cubeVBO, cubeVAO;
 extern unsigned int lightCubeVAO;
-extern unsigned int seaweedVAO;
+extern unsigned int seaweedVAO, quadVBO;
 
 // Scene Setup Calls All The Below Functions
 void sceneSetup();
