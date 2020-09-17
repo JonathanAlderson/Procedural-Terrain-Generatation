@@ -104,6 +104,12 @@ int main()
     lightingShaderSetup(lightingShader, camera);
 
 
+    seaweedShader.use();
+    seaweedShader.setInt("texture1", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, seaweedTex);
+
+
     while (!glfwWindowShouldClose(window))
        {
            // per-frame time logic
@@ -161,40 +167,40 @@ int main()
 
 
            // // render containers
-           // glBindVertexArray(cubeVAO);
-           // for (unsigned int i = 0; i < 10; i++)
-           // {
-           //     // calculate the model matrix for each object and pass it to shader before drawing
-           //     glm::mat4 model = glm::mat4(1.0f);
-           //     model = glm::translate(model, cubePositions[i]);
-           //     float angle = 20.0f * i;
-           //     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-           //     lightingShader.setMat4("model", model);
-           //
-           //     glDrawArrays(GL_TRIANGLES, 0, 36);
-           // }
-           //
-           //  // also draw the lamp object(s)
-           //  lightCubeShader.use();
-           //  lightCubeShader.setMat4("projection", projection);
-           //  lightCubeShader.setMat4("view", view);
-           //
-           //  // we now draw as many light bulbs as we have point lights.
-           //  glBindVertexArray(lightCubeVAO);
-           //  for (unsigned int i = 0; i < 4; i++)
-           //  {
-           //      model = glm::mat4(1.0f);
-           //      model = glm::translate(model, pointLightPositions[i]);
-           //      model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-           //      lightCubeShader.setMat4("model", model);
-           //      glDrawArrays(GL_TRIANGLES, 0, 36);
-           //  }
+           glBindVertexArray(cubeVAO);
+           for (unsigned int i = 0; i < 10; i++)
+           {
+               // calculate the model matrix for each object and pass it to shader before drawing
+               glm::mat4 model = glm::mat4(1.0f);
+               model = glm::translate(model, cubePositions[i]);
+               float angle = 20.0f * i;
+               model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+               lightingShader.setMat4("model", model);
+
+               glDrawArrays(GL_TRIANGLES, 0, 36);
+           }
+
+            // also draw the lamp object(s)
+            lightCubeShader.use();
+            lightCubeShader.setMat4("projection", projection);
+            lightCubeShader.setMat4("view", view);
+
+            // we now draw as many light bulbs as we have point lights.
+            glBindVertexArray(lightCubeVAO);
+            for (unsigned int i = 0; i < 4; i++)
+            {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, pointLightPositions[i]);
+                model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+                lightCubeShader.setMat4("model", model);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
 
 
 
             // Draw Seaweed
             // render containers
-            
+
             glBindVertexArray(seaweedVAO);
             for (unsigned int i = 0; i < 5; i++)
             {
@@ -223,7 +229,8 @@ int main()
        glDeleteVertexArrays(1, &cubeVAO);
        glDeleteVertexArrays(1, &lightCubeVAO);
        glDeleteVertexArrays(1, &seaweedVAO);
-       glDeleteBuffers(1, &VBO);
+       glDeleteBuffers(1, &cubeVBO);
+       glDeleteBuffers(1, &quadVBO);
 
        // glfw: terminate, clearing all previously allocated GLFW resources.
        // ------------------------------------------------------------------

@@ -6,9 +6,9 @@
 
 
 // Global Defenitions For Scene Setup
-unsigned int VBO, cubeVAO;
+unsigned int cubeVBO, cubeVAO;
 unsigned int lightCubeVAO;
-unsigned int seaweedVAO;
+unsigned int seaweedVAO, quadVBO;
 
 glm::vec3 cubePositions[10] = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -57,9 +57,9 @@ void cubesSetup()
 
   glGenVertexArrays(1, &cubeVAO);
   glBindVertexArray(cubeVAO);
-  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &cubeVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(containerVertices), containerVertices, GL_STATIC_DRAW);
 
   glBindVertexArray(cubeVAO);
@@ -76,7 +76,7 @@ void lightsSetup()
   glGenVertexArrays(1, &lightCubeVAO);
   glBindVertexArray(lightCubeVAO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
   // note that we update the lamp's position attribute's stride to reflect the updated buffer data
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -86,12 +86,12 @@ void seaweedSetup()
 {
   glGenVertexArrays(1, &seaweedVAO);
   glBindVertexArray(seaweedVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glGenBuffers(1, &cubeVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticies), quadVerticies, GL_STATIC_DRAW);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-
 
 }

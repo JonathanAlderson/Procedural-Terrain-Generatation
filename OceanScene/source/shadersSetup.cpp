@@ -6,7 +6,6 @@ void lightingShaderSetup(Shader lightingShader, Camera camera)
   lightingShader.use();
 
   lightingShader.setFloat("material.shininess", 32.0f);
-  lightingShader.use();
   lightingShader.setInt("material.diffuse", 0);
   lightingShader.setInt("material.specular", 1);
 
