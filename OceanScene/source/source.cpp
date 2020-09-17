@@ -106,6 +106,7 @@ int main()
 
     seaweedShader.use();
     seaweedShader.setInt("texture1", 0);
+    seaweedShader.setFloat("time", 1);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, seaweedTex);
 
@@ -205,6 +206,7 @@ int main()
             seaweedShader.use();
             seaweedShader.setMat4("projection", projection);
             seaweedShader.setMat4("view", view);
+            seaweedShader.setFloat("time", glfwGetTime());
             glBindVertexArray(seaweedVAO);
             for (unsigned int i = 0; i < 5; i++)
             {
