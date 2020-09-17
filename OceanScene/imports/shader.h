@@ -8,8 +8,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <string.h>
 
-// Used for loading shaders 
+// Used for loading shaders
 class Shader
 {
 public:
@@ -25,6 +26,22 @@ public:
         std::ifstream vShaderFile;
         std::ifstream fShaderFile;
         std::ifstream gShaderFile;
+
+        // Allows for our shaders to be stored in a seperate
+        // shaders directory
+        const char * directory = "../shaders/";
+
+        char * extendedVertexPath;
+        char * extendedFragmentPath;
+
+        extendedVertexPath = (char*)malloc(strlen(vertexPath)+strlen(directory)); /* make space for the new string (should check the return value ...) */
+        strcpy(extendedVertexPath, directory); /* copy name into the new var */
+        strcat(extendedVertexPath, vertexPath); /* add the extension */
+
+        extendedFragmentPath = (char*)malloc(strlen(fragmentPath)+strlen(directory)); /* make space for the new string (should check the return value ...) */
+        strcpy(extendedFragmentPath, directory); /* copy name into the new var */
+        strcat(extendedFragmentPath, fragmentPath); /* add the extension */
+
         // ensure ifstream objects can throw exceptions:
         vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
@@ -32,8 +49,8 @@ public:
         try
         {
             // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
+            vShaderFile.open(extendedVertexPath);
+            fShaderFile.open(extendedFragmentPath);
             std::stringstream vShaderStream, fShaderStream;
             // read file's buffer contents into streams
             vShaderStream << vShaderFile.rdbuf();
