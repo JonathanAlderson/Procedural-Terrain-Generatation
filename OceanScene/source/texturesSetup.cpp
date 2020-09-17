@@ -1,4 +1,4 @@
-#include "../headers/texturesSetup.h"
+#include "texturesSetup.h"
 #include "filesystem.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

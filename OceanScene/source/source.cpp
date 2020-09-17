@@ -11,9 +11,9 @@
 #include "camera.h"
 
 
-#include "../headers/sceneSetup.h"
-#include "../headers/texturesSetup.h"
-#include "../headers/shadersSetup.h"
+#include "sceneSetup.h"
+#include "texturesSetup.h"
+#include "shadersSetup.h"
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

@@ -1,6 +1,6 @@
 #ifndef SHADERSETUP
 #define SHADERSETUP
-#include "../headers/sceneSetup.h"
+#include "sceneSetup.h"
 #include "shader.h"
 #include "camera.h"
 

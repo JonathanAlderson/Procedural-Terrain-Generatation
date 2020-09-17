@@ -1,4 +1,4 @@
-#include "../headers/shadersSetup.h"
+#include "shadersSetup.h"
 
 
 void lightingShaderSetup(Shader lightingShader, Camera camera)

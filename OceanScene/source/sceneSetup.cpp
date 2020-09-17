@@ -1,8 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm.hpp"
-#include "../headers/sceneSetup.h"
-#include "../headers/verticies.h"
+#include "sceneSetup.h"
+#include "verticies.h"
 
 
 // Global Defenitions For Scene Setup
