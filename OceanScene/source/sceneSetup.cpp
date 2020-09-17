@@ -86,9 +86,10 @@ void seaweedSetup()
 {
   glGenVertexArrays(1, &seaweedVAO);
   glBindVertexArray(seaweedVAO);
-  glGenBuffers(1, &cubeVBO);
+  glGenBuffers(1, &quadVBO);
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticies), quadVerticies, GL_STATIC_DRAW);
+  glBindVertexArray(seaweedVAO);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
