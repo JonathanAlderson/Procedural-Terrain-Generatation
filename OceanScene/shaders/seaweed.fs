@@ -15,9 +15,13 @@ void main()
 {
   // Create random variables
   float r = rand(vec2(ID, ID));
-  float sway = 0.006 * r;
-  float freq = 3.0 * r;
+  float smoothR = smoothstep(0., 1., r);
+
+
+  float sway = 0.01 + 0.02 * smoothR;
+  float freq = 1. + 3. * smoothR;
   float offset = r;
+  float speed = 1. + 2. * smoothR; //10.0 * (r+.5);
 
 
   // create a random piece of seaweed
@@ -27,15 +31,13 @@ void main()
 
 
   // calculate the waving effect
-  float xOff = sin(tex.y*freq + time + offset);
+  float xOff = sin(tex.y*freq + time*speed + offset);
   xOff *= sway;
 
   // make it less prevelent at the bottom
-  float prevelence = smoothstep(1.0, 0.8, tex.y);
+  float prevelence = smoothstep(1.0, 0.0, tex.y);
 
   xOff *= prevelence;
-
-
   tex.x += xOff;
 
 
