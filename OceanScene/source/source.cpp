@@ -90,7 +90,10 @@ int main()
     cubesSetup();
     lightsSetup();
     seaweedSetup(MAX_SEAWEED);
-    fishSetup(MAX_FISH);
+    glm::vec3 *fishLocations = (glm::vec3 *)malloc(sizeof(glm::vec3) * MAX_FISH);
+
+    fishLocations = fishSetup(MAX_FISH, fishLocations);
+
 
     //terrainSetup();
 
@@ -243,12 +246,17 @@ int main()
             // Draw Fish
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, fishTex);
+
+            fishLocations = updateFish(MAX_FISH, fishLocations);
+
             model = glm::mat4(1.0f);
             fishShader.use();
             fishShader.setMat4("model", model);
             fishShader.setMat4("view", view);
             fishShader.setMat4("projection", projection);
             fishShader.setFloat("time", glfwGetTime());
+
+
 
             glBindVertexArray(fishVAO);
 

@@ -9,7 +9,7 @@
 unsigned int cubeVBO, cubeVAO;
 unsigned int lightCubeVAO;
 unsigned int seaweedVAO, quadVBO;
-unsigned int fishVAO;
+unsigned int fishVAO, fishVBO;
 
 glm::vec3 cubePositions[10] = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -99,16 +99,15 @@ void seaweedSetup(int max)
 }
 
 
-void fishSetup(int max)
+glm::vec3 * fishSetup(int max, glm::vec3 * translations)
 {
   // Get the random positions of the seaweed
-  glm::vec3 translations[max];
   for (int i = 0; i < max; i++)
   {
     translations[i] = glm::vec3((float)(i%10), 0., (i/10));
   }
 
-  unsigned int fishVBO;
+
   glGenBuffers(1, &fishVBO);
   glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
@@ -131,4 +130,19 @@ void fishSetup(int max)
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glVertexAttribDivisor(2, 1);
 
+  return translations;
+
+}
+
+
+glm::vec3 *  updateFish(int max, glm::vec3 * translations)
+{
+  for (int i = 0; i < max; i++)
+  {
+    translations[i].x += 0.01; //glm::vec3((float)(i%10), 0., (i/10));
+  }
+  glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  return translations;
 }
