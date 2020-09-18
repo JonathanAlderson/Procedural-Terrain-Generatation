@@ -25,6 +25,8 @@ public:
     // mesh Data
 
     Vertex *vertices;
+    glm::vec3 *positions;
+    glm::vec3 *normals;
     int *indices;
 
     int verticesSize;
@@ -50,6 +52,8 @@ public:
         verticesSize = xRange * zRange;
         indicesSize = (xRange - 1) * (zRange - 1) * 6;
         vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        positions = (glm::vec3 *) malloc(verticesSize * sizeof(glm::vec3));
+        normals = (glm::vec3 *) calloc(verticesSize, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
 
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -59,6 +63,8 @@ public:
         // Being good
         //free(vertices);
         //free(indices);
+        //free(normals);
+        //free(positions)
     }
 
     // render the mesh
@@ -89,9 +95,16 @@ private:
       int ind3;
       int ind4;
 
-      Vertex thisVertex;
       int count;
       count = 0;
+
+      // normals
+      glm::vec3 lowerNormal;
+      glm::vec3 upperNormal;
+      glm::vec3 vert1;
+      glm::vec3 vert2;
+      glm::vec3 vert3;
+      glm::vec3 vert4;
 
 
       for(int z = 0; z < zRange; z++)
@@ -103,15 +116,16 @@ private:
           vertX = x * scale;
           vertZ = z * scale;
 
-          thisVertex = {glm::vec3(vertX, height, vertZ), glm::vec3(0., 0., 0.) };
-
-          vertices[(xRange * z) + x] = thisVertex;
+          // Update this Vertexs' positon
+          positions[(xRange * z) + x] = glm::vec3(vertX, height, vertZ);
 
           //std::cout << (xRange * z + x) * 3 << ": " << vertX << " - " << vertZ << std::endl;
 
-          // Only make the indicies if we are not on the edge
+          // If we are not on bottom or rightmost edge
           if(x < xRange - 1 && z < zRange - 1)
           {
+            // Find the bottom right square of
+            // indicies to create mesh
             ind1 = x + (z * xRange);
             ind2 = x + (z * xRange) + 1;
             ind3 = x + ((z+1) * xRange);
@@ -124,11 +138,48 @@ private:
             indices[count * 6 + 3] = ind1;
             indices[count * 6 + 4] = ind2;
             indices[count * 6 + 5] = ind4;
-
             count ++;
+          }
+
+          // If we are not on the top or leftmost edge
+          if(z > 0 && x > 0)
+          {
+            // Find the top left square
+            // of indicies to create normals
+            ind4 = x + (z * xRange);
+            ind3 = x-1 + (z * xRange);
+            ind2 = x + ((z-1) * xRange);
+            ind1 = x-1 + ((z-1) * xRange);
+
+            vert1 = positions[ind1];
+            vert2 = positions[ind2];
+            vert3 = positions[ind3];
+            vert4 = positions[ind4];
+
+            // Calc normals for two planes
+            lowerNormal = normal(vert1, vert4, vert3);
+            upperNormal = normal(vert1, vert2, vert4);
+
+            // Add normals
+            normals[ind1] += lowerNormal + upperNormal;
+            normals[ind2] += upperNormal;
+            normals[ind3] += lowerNormal;
+            normals[ind4] += lowerNormal + upperNormal;
           }
         }
       }
+
+      // Put the positions and normals into the vertex struct
+      Vertex thisVertex;
+      glm::vec3 thisNormal;
+      for(int i = 0; i < verticesSize; i++)
+      {
+        thisNormal = glm::normalize(normals[i]);
+        thisVertex.Position = positions[i];
+        thisVertex.Normal =  thisNormal;
+        vertices[i] = thisVertex;
+      }
+
     }
 
     glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)

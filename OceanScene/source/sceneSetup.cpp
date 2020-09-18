@@ -1,17 +1,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm.hpp"
-#include "gtc/noise.hpp"
 #include "sceneSetup.h"
 #include "verticies.h"
-#include <iostream>
 
 
 // Global Defenitions For Scene Setup
 unsigned int cubeVBO, cubeVAO;
 unsigned int lightCubeVAO;
 unsigned int seaweedVAO, quadVBO;
-unsigned int terrainVBO, terrainVAO, terrainEBO;
 
 glm::vec3 cubePositions[10] = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
