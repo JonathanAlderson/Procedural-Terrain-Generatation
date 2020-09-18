@@ -8,6 +8,7 @@
 unsigned int diffuseMap;
 unsigned int specularMap;
 unsigned int seaweedTex;
+unsigned int fishTex;
 
 // List below all textures used in the scene
 void texturesSetup()
@@ -15,6 +16,7 @@ void texturesSetup()
   diffuseMap = loadTexture(FileSystem::getPath("resources/textures/marble.jpg").c_str());
   specularMap = loadTexture(FileSystem::getPath("resources/textures/metal.png").c_str());
   seaweedTex = loadTexture(FileSystem::getPath("resources/textures/allSeaweed.png").c_str());
+  fishTex = loadTexture(FileSystem::getPath("resources/textures/allFish.png").c_str());
   return;
 }
 

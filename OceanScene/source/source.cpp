@@ -23,8 +23,9 @@ unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 800;
-const int MAX_SEAWEED = 5;
+const unsigned int SCR_HEIGHT = 400;
+const int MAX_SEAWEED = 0;
+const int MAX_FISH = 100;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -89,6 +90,8 @@ int main()
     cubesSetup();
     lightsSetup();
     seaweedSetup(MAX_SEAWEED);
+    fishSetup(MAX_FISH);
+
     //terrainSetup();
 
     Terrain t = Terrain(100, 500, 3.0, 40., .2);
@@ -105,6 +108,7 @@ int main()
     Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
     Shader seaweedShader("seaweed.vs", "seaweed.fs");
     Shader terrainShader("terrain.vs", "terrain.fs");
+    Shader fishShader("fish.vs", "fish.fs");
     //shadersSetup();
 
     // shader configuration
@@ -225,25 +229,31 @@ int main()
 
 
             // Draw Terrain
-            terrainShader.use();
-            terrainShader.setMat4("projection", projection);
-            terrainShader.setMat4("view", view);
 
-            model = glm::translate(model, glm::vec3(-2., -1., -5.));
-            terrainShader.setMat4("model", model);
-            terrainShader.setVec3("viewPos", camera.Position);
-            t.Draw();
-
-            // model = glm::mat4(1.0f);
+            // terrainShader.use();
+            // terrainShader.setMat4("projection", projection);
+            // terrainShader.setMat4("view", view);
             //
-            // model = glm::mat4(1.0f);
-            //
-            // glBindVertexArray(terrainVAO);
-            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
-            // glDrawElements(GL_TRIANGLES, 3*2*6, GL_UNSIGNED_INT, 0);
-            // glBindVertexArray(0);
+            // model = glm::translate(model, glm::vec3(-2., -1., -5.));
+            // terrainShader.setMat4("model", model);
+            // terrainShader.setVec3("viewPos", camera.Position);
+            // t.Draw();
 
 
+            // Draw Fish
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, fishTex);
+            model = glm::mat4(1.0f);
+            fishShader.use();
+            fishShader.setMat4("model", model);
+            fishShader.setMat4("view", view);
+            fishShader.setMat4("projection", projection);
+            fishShader.setFloat("time", glfwGetTime());
+
+            glBindVertexArray(fishVAO);
+
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_FISH);
+            glBindVertexArray(0);
 
             ///////////////////////////////////////////
             // END OF RENDER LOGIC

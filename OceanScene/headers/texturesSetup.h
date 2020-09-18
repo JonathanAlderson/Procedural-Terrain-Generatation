@@ -4,6 +4,7 @@
 extern unsigned int diffuseMap;
 extern unsigned int specularMap;
 extern unsigned int seaweedTex;
+extern unsigned int fishTex;
 
 // Loading texture function
 unsigned int loadTexture(char const * path);

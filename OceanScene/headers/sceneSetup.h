@@ -10,12 +10,14 @@ extern unsigned int cubeVBO, cubeVAO;
 extern unsigned int lightCubeVAO;
 extern unsigned int seaweedVAO, quadVBO;
 extern unsigned int terrainVBO, terrainVAO, terrainEBO;
+extern unsigned int fishVAO;
 
 
 // Individual Setup Functions
 void cubesSetup();
 void lightsSetup();
 extern void seaweedSetup(int max);
+extern void fishSetup(int max);
 void terrainSetup();
 
 

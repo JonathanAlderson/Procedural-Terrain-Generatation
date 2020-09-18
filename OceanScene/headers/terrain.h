@@ -132,7 +132,7 @@ private:
           {
             height += glm::perlin(glm::vec2((float)x/ns , (float)z/ns)) * hs;
             ns *= .5;
-            hs *= (float)z/zRange;
+            hs *= (float)z/zRange; // Makes the terrain more jagged as it moves
           }
 
 
