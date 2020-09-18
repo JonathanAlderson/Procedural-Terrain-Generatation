@@ -9,7 +9,7 @@
 #include "stb_image.h"
 #include "shader.h"
 #include "camera.h"
-
+#include "terrain.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -22,9 +22,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
-const int MAX_SEAWEED = 5000;
+const unsigned int SCR_WIDTH = 700;
+const unsigned int SCR_HEIGHT = 400;
+const int MAX_SEAWEED = 5;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -89,6 +89,10 @@ int main()
     cubesSetup();
     lightsSetup();
     seaweedSetup(MAX_SEAWEED);
+    //terrainSetup();
+
+    Terrain t = Terrain(10, 10, 2., 2., 1.);
+
 
     // load textures
     // --------------------
@@ -100,6 +104,7 @@ int main()
     Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
     Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
     Shader seaweedShader("seaweed.vs", "seaweed.fs");
+    Shader terrainShader("terrain.vs", "terrain.fs");
     //shadersSetup();
 
     // shader configuration
@@ -171,7 +176,7 @@ int main()
 
            // // render containers
            glBindVertexArray(cubeVAO);
-           for (unsigned int i = 0; i < 10; i++)
+           for (unsigned int i = 0; i < 0; i++)
            {
                // calculate the model matrix for each object and pass it to shader before drawing
                glm::mat4 model = glm::mat4(1.0f);
@@ -202,7 +207,6 @@ int main()
 
 
             // Draw Seaweed
-            // render containers
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, seaweedTex);
             model = glm::mat4(1.0f);
@@ -216,6 +220,26 @@ int main()
 
             glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_SEAWEED);
             glBindVertexArray(0);
+
+
+
+            // Draw Terrain
+            terrainShader.use();
+            terrainShader.setMat4("projection", projection);
+            terrainShader.setMat4("view", view);
+            terrainShader.setMat4("model", model);
+            t.Draw();
+
+            // model = glm::mat4(1.0f);
+            //
+            // model = glm::mat4(1.0f);
+            //
+            // glBindVertexArray(terrainVAO);
+            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
+            // glDrawElements(GL_TRIANGLES, 3*2*6, GL_UNSIGNED_INT, 0);
+            // glBindVertexArray(0);
+
+
 
             ///////////////////////////////////////////
             // END OF RENDER LOGIC
