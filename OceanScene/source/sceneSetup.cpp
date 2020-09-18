@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm.hpp"
+#include "gtc/noise.hpp"
 #include "sceneSetup.h"
 #include "verticies.h"
 
@@ -101,10 +102,13 @@ void seaweedSetup(int max)
 
 glm::vec3 * fishSetup(int max, glm::vec3 * translations)
 {
+  float randX = (float)(rand()) / RAND_MAX;
+  float randY = (float)(rand()) / RAND_MAX;
   // Get the random positions of the seaweed
   for (int i = 0; i < max; i++)
   {
-    translations[i] = glm::vec3((float)(i%10), 0., (i/10));
+
+    translations[i] = glm::vec3((float)(i%10) + randX, 0., (i/10) + randY);
   }
 
 
@@ -137,9 +141,13 @@ glm::vec3 * fishSetup(int max, glm::vec3 * translations)
 
 glm::vec3 *  updateFish(int max, glm::vec3 * translations)
 {
+  float p;
+  float speed = 50.;
   for (int i = 0; i < max; i++)
   {
-    translations[i].x += 0.01; //glm::vec3((float)(i%10), 0., (i/10));
+    p = glm::perlin(glm::vec2(translations[i].x, translations[i].y));
+    translations[i].z += sin(3.14159 * p)/speed;
+    translations[i].x += cos(3.14159 * p)/speed;
   }
   glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
