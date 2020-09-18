@@ -13,12 +13,12 @@ struct DirLight {
     vec3 specular;
 };
 
-uniform shininess;
+uniform float shininess;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 
 // calculates the color when using a directional light.
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 diffuseCol, vec3 specCol)
 {
     vec3 lightDir = normalize(-light.direction);
     // diffuse shading
@@ -30,6 +30,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 ambient = light.ambient * diffuseCol;
     vec3 diffuse = light.diffuse * diff * diffuseCol;
     vec3 specular = light.specular * spec * specCol;
+
     return (ambient + diffuse + specular);
 }
 
@@ -43,7 +44,7 @@ void main()
     vec3 specCol = vec3(1., 1., 1.);
 
 
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
+    vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol);
 
     FragColor = vec4(result, 1.0);
 

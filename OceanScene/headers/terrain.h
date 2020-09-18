@@ -119,7 +119,7 @@ private:
           // Update this Vertexs' positon
           positions[(xRange * z) + x] = glm::vec3(vertX, height, vertZ);
 
-          //std::cout << (xRange * z + x) * 3 << ": " << vertX << " - " << vertZ << std::endl;
+          //std::cout << x << ":" << z << "  =  " << height << std::endl;
 
           // If we are not on bottom or rightmost edge
           if(x < xRange - 1 && z < zRange - 1)
@@ -178,13 +178,15 @@ private:
         thisVertex.Position = positions[i];
         thisVertex.Normal =  thisNormal;
         vertices[i] = thisVertex;
+
+        //std::cout << positions[i].x << ":" << positions[i].z << "  =  " << thisNormal.x << ", " << thisNormal.y << ", " << thisNormal.z << std::endl;
       }
 
     }
 
     glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
     {
-      return glm::cross(b-a, c-a);
+      return glm::cross(c-a, b-a);
     }
 
     // initializes all the buffer objects/arrays
