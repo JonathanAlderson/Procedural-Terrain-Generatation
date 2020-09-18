@@ -23,8 +23,12 @@ struct Vertex {
 class Terrain {
 public:
     // mesh Data
-    vector<Vertex>       vertices;
-    vector<unsigned int> indices;
+
+    Vertex *vertices;
+    int *indices;
+
+    int verticesSize;
+    int indicesSize;
 
     unsigned int VAO;
     int xRange;
@@ -42,9 +46,19 @@ public:
         this-> noiseScale = noiseScale;
         this ->scale = scale;
 
+        // Malloc
+        verticesSize = xRange * zRange;
+        indicesSize = (xRange - 1) * (zRange - 1) * 6;
+        vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        indices = (int *) malloc(indicesSize * sizeof(int));
+
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
         generatePoints();
         setupMesh();
+
+        // Being good
+        //free(vertices);
+        //free(indices);
     }
 
     // render the mesh
@@ -52,7 +66,7 @@ public:
     {
         // draw mesh
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, indicesSize , GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 
@@ -91,7 +105,7 @@ private:
 
           thisVertex = {glm::vec3(vertX, height, vertZ), glm::vec3(0., 0., 0.) };
 
-          vertices.push_back(thisVertex);
+          vertices[(xRange * z) + x] = thisVertex;
 
           //std::cout << (xRange * z + x) * 3 << ": " << vertX << " - " << vertZ << std::endl;
 
@@ -104,16 +118,22 @@ private:
             ind4 = x + ((z+1) * xRange) + 1;
 
             // Assign correct indicies
-            indices.push_back(ind1);
-            indices.push_back(ind4);
-            indices.push_back(ind3);
-            indices.push_back(ind1);
-            indices.push_back(ind2);
-            indices.push_back(ind4);
+            indices[count * 6    ] = ind1;
+            indices[count * 6 + 1] = ind4;
+            indices[count * 6 + 2] = ind3;
+            indices[count * 6 + 3] = ind1;
+            indices[count * 6 + 4] = ind2;
+            indices[count * 6 + 5] = ind4;
+
             count ++;
           }
         }
       }
+    }
+
+    glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
+    {
+      return glm::cross(b-a, c-a);
     }
 
     // initializes all the buffer objects/arrays
@@ -130,10 +150,10 @@ private:
         // A great thing about structs is that their memory layout is sequential for all its items.
         // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
         // again translates to 3/2 floats which translates to a byte array.
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
         // set the vertex attribute pointers
         // vertex Positions
