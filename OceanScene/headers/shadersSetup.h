@@ -5,5 +5,6 @@
 #include "camera.h"
 
 void lightingShaderSetup(Shader shader, Camera camera);
+void terrainShaderSetup(Shader terrainShader);
 
 #endif

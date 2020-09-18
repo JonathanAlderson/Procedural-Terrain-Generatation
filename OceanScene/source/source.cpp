@@ -91,7 +91,7 @@ int main()
     seaweedSetup(MAX_SEAWEED);
     //terrainSetup();
 
-    Terrain t = Terrain(10, 10, 2., 2., 1.);
+    Terrain t = Terrain(100, 100, 2., 2., 2.);
 
 
     // load textures
@@ -110,6 +110,7 @@ int main()
     // shader configuration
     // --------------------
     lightingShaderSetup(lightingShader, camera);
+    terrainShaderSetup(terrainShader);
 
 
     // Seaweed setup stuff
@@ -228,6 +229,7 @@ int main()
             terrainShader.setMat4("projection", projection);
             terrainShader.setMat4("view", view);
             terrainShader.setMat4("model", model);
+            terrainShader.setVec3("viewPos", camera.Position);
             t.Draw();
 
             // model = glm::mat4(1.0f);
