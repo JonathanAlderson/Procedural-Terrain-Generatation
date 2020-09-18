@@ -22,8 +22,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
-const unsigned int SCR_WIDTH = 700;
-const unsigned int SCR_HEIGHT = 400;
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 800;
 const int MAX_SEAWEED = 5;
 
 // camera
@@ -91,7 +91,7 @@ int main()
     seaweedSetup(MAX_SEAWEED);
     //terrainSetup();
 
-    Terrain t = Terrain(100, 200, 2., 2., 2.);
+    Terrain t = Terrain(100, 500, 3.0, 40., .2);
 
 
     // load textures

@@ -37,7 +37,7 @@ public:
     int zRange;
     int heightScale;
     int noiseScale;
-    int scale;
+    float scale;
 
     // constructor
     Terrain(int xRange, int zRange, float heightScale, float noiseScale, float scale)
@@ -107,11 +107,35 @@ private:
       glm::vec3 vert4;
 
 
+      // perlin noise settings
+      int octaves = 4.;
+
+      float height;
+
+
+
+      float ns = noiseScale;
+      float hs = heightScale;
+
+
+
       for(int z = 0; z < zRange; z++)
       {
         for(int x = 0; x < xRange; x++)
         {
-          float height = glm::perlin(glm::vec2((float)x/noiseScale, (float)z/noiseScale)) * heightScale;
+          // reset the height
+          height = 0;
+          ns = noiseScale;
+          hs = heightScale;
+
+          for(int i = 0; i < octaves; i++)
+          {
+            height += glm::perlin(glm::vec2((float)x/ns , (float)z/ns)) * hs;
+            ns *= .5;
+            hs *= (float)z/zRange;
+          }
+
+
 
           vertX = x * scale;
           vertZ = z * scale;
