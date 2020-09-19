@@ -94,7 +94,7 @@ int main()
     //terrainSetup();
 
     // Chunk
-    Terrain t = Terrain(15, 6.0, 40., .2, 0.5);
+    Terrain t = Terrain(20, 6.0, 40., .2, 0.5);
 
 
     // load textures
@@ -108,6 +108,7 @@ int main()
     Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
     Shader seaweedShader("seaweed.vs", "seaweed.fs");
     Shader terrainShader("terrain.vs", "terrain.fs");
+    Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
     //shadersSetup();
 
     // shader configuration
@@ -232,10 +233,20 @@ int main()
             terrainShader.setMat4("projection", projection);
             terrainShader.setMat4("view", view);
 
-            model = glm::translate(model, glm::vec3(-2., -1., -5.));
+            //model = glm::translate(model, glm::vec3(-2., -1., -5.));
             terrainShader.setMat4("model", model);
             terrainShader.setVec3("viewPos", camera.Position);
+
+
             t.Draw();
+
+            // normalsShader.use();
+            // normalsShader.setMat4("projection", projection);
+            // normalsShader.setMat4("view", view);
+            // normalsShader.setMat4("model", model);
+            // t.Draw();
+            // then draw with normals
+
 
             // model = glm::mat4(1.0f);
             //

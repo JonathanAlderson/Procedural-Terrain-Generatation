@@ -33,6 +33,7 @@ public:
 
         char * extendedVertexPath;
         char * extendedFragmentPath;
+        char * extendedGeometryPath;
 
         extendedVertexPath = (char*)malloc(strlen(vertexPath)+strlen(directory)); /* make space for the new string (should check the return value ...) */
         strcpy(extendedVertexPath, directory); /* copy name into the new var */
@@ -41,6 +42,13 @@ public:
         extendedFragmentPath = (char*)malloc(strlen(fragmentPath)+strlen(directory)); /* make space for the new string (should check the return value ...) */
         strcpy(extendedFragmentPath, directory); /* copy name into the new var */
         strcat(extendedFragmentPath, fragmentPath); /* add the extension */
+
+        if(geometryPath != nullptr)
+        {
+          extendedGeometryPath = (char*)malloc(strlen(geometryPath)+strlen(directory)); /* make space for the new string (should check the return value ...) */
+          strcpy(extendedGeometryPath, directory); /* copy name into the new var */
+          strcat(extendedGeometryPath, geometryPath); /* add the extension */
+        }
 
         // ensure ifstream objects can throw exceptions:
         vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
@@ -64,7 +72,7 @@ public:
             // if geometry shader path is present, also load a geometry shader
             if(geometryPath != nullptr)
             {
-                gShaderFile.open(geometryPath);
+                gShaderFile.open(extendedGeometryPath);
                 std::stringstream gShaderStream;
                 gShaderStream << gShaderFile.rdbuf();
                 gShaderFile.close();

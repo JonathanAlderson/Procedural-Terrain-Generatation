@@ -35,7 +35,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 3.;
+    int chunkSize = 4.;
 
     Chunk *chunks;
 
@@ -82,6 +82,11 @@ public:
         {
           for(int j = 0; j < numChunks; j++)
           {
+            // Reseting normals
+            for(int k = 0; k < verticesSizeBorder; k++)
+            {
+              normals[k] = glm::vec3(0., 0., 0.);
+            }
             generateChunkPoints(j, i);
             setupChunk(j, i);
           }
@@ -141,7 +146,7 @@ private:
       int offsetX =  - chunkSize * ((numChunks)/2 - xChunk);
       int offsetZ =  - chunkSize * ((numChunks)/2 - zChunk);
 
-      std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
+      //std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
 
       // perlin noise settings
       int octaves = 1.;
@@ -182,7 +187,7 @@ private:
           // Update this Vertexs' positon
           positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
 
-          std::cout << x << ":" << z << " --> " << ((chunkSize+3) * (z+1)) + (x+1) << std::endl;
+          //std::cout << x << ":" << z << " --> " << ((chunkSize+3) * (z+1)) + (x+1) << std::endl;
 
           // If we are not on bottom or rightmost edge
           // or in the outer ring
@@ -195,7 +200,7 @@ private:
             ind3 = x + ((z+1) * (chunkSize+1));
             ind4 = x + ((z+1) * (chunkSize+1)) + 1;
 
-            std::cout << " Make Face " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
+            //std::cout << " Make Face " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
             // Assign correct indicies
             indices[count * 6    ] = ind1;
             indices[count * 6 + 1] = ind4;
@@ -215,7 +220,7 @@ private:
             ind3 = x + ((z+1) * (chunkSize+3));
             ind2 = x+1 + (z * (chunkSize+3));
             ind1 = x + (z * (chunkSize+3));
-            std::cout << " Normals " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
+            //std::cout << " Normals " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
 
             vert1 = positions[ind1];
             vert2 = positions[ind2];
@@ -225,12 +230,12 @@ private:
 
 
             // Calc normals for two planes
-            lowerNormal = glm::normalize(normal(vert1, vert4, vert3));
-            upperNormal = glm::normalize(normal(vert1, vert2, vert4));
+            lowerNormal = normal(vert1, vert4, vert3);
+            upperNormal = normal(vert1, vert2, vert4);
 
 
-            std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            //std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            //std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
 
             // Add normals
             normals[ind1] += lowerNormal + upperNormal;
@@ -261,7 +266,7 @@ private:
               // If not in the last row
               if(i < (chunkSize+3)*(chunkSize+2))
               {
-                std::cout << i << std::endl;
+                //std::cout << i << std::endl;
                 // -(chunkSize+4)  go back one row one column
                 thisNormal = glm::normalize(normals[i - (chunkSize+4)]);
                 thisVertex.Position = positions[i - (chunkSize+4)];
@@ -282,7 +287,7 @@ private:
 
     glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
     {
-      return glm::cross(c-a, b-a);
+      return glm::normalize(glm::cross(c-a, b-a));
     }
 
     // initializes all the buffer objects/arrays
