@@ -35,7 +35,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 100.;
+    int chunkSize = 3.;
 
     Chunk *chunks;
 
@@ -139,7 +139,7 @@ private:
       int offsetX =  - chunkSize * ((numChunks)/2 - xChunk);
       int offsetZ =  - chunkSize * ((numChunks)/2 - zChunk);
 
-      //std::cout << xChunk << " : " << zChunk << " " << offsetX << "  =  " << offsetZ << std::endl;
+      std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
 
       // perlin noise settings
       int octaves = 1.;
@@ -179,7 +179,7 @@ private:
           // Update this Vertexs' positon
           positions[(chunkSize * z) + x] = glm::vec3(vertX, height, vertZ);
 
-          //std::cout << x << ":" << z << "  =  " << height << std::endl;
+          std::cout << x << ":" << z << "  =  " << height << std::endl;
 
           // If we are not on bottom or rightmost edge
           if(x < chunkSize - 1 && z < chunkSize - 1)

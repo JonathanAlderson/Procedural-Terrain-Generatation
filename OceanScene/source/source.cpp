@@ -70,6 +70,7 @@ int main()
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -81,6 +82,7 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 
 
@@ -92,7 +94,7 @@ int main()
     //terrainSetup();
 
     // Chunk
-    Terrain t = Terrain(4, 3.0, 40., .2, 0.5);
+    Terrain t = Terrain(2, 6.0, 40., .2, 0.5);
 
 
     // load textures
