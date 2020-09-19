@@ -94,7 +94,7 @@ int main()
     //terrainSetup();
 
     // Chunk
-    Terrain t = Terrain(20, 6.0, 40., .2, 0.5);
+    Terrain t = Terrain(20, 1.0, 20., .2, 0.01);
 
 
     // load textures
@@ -240,11 +240,11 @@ int main()
 
             t.Draw();
 
-            // normalsShader.use();
-            // normalsShader.setMat4("projection", projection);
-            // normalsShader.setMat4("view", view);
-            // normalsShader.setMat4("model", model);
-            // t.Draw();
+            normalsShader.use();
+            normalsShader.setMat4("projection", projection);
+            normalsShader.setMat4("view", view);
+            normalsShader.setMat4("model", model);
+            t.Draw();
             // then draw with normals
 
 

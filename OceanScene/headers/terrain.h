@@ -35,7 +35,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 4.;
+    int chunkSize = 3.;
 
     Chunk *chunks;
 
@@ -110,7 +110,6 @@ public:
           glDrawElements(GL_TRIANGLES, indicesSize , GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
-
     }
 
 
@@ -120,6 +119,7 @@ private:
     // puts all current chunk information inside vertices, normals, indices
     void generateChunkPoints(int xChunk, int zChunk)
     {
+
       // Current Position
       float vertX;
       float vertZ;
@@ -145,8 +145,8 @@ private:
       int posZ;
       int offsetX =  - chunkSize * ((numChunks)/2 - xChunk);
       int offsetZ =  - chunkSize * ((numChunks)/2 - zChunk);
-
-      //std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
+      //
+      // std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
 
       // perlin noise settings
       int octaves = 1.;
@@ -216,11 +216,14 @@ private:
           {
             // Find the top left square
             // of indicies to create normals
+
             ind4 = x+1 + ((z+1) * (chunkSize+3));
             ind3 = x + ((z+1) * (chunkSize+3));
             ind2 = x+1 + (z * (chunkSize+3));
             ind1 = x + (z * (chunkSize+3));
-            //std::cout << " Normals " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
+
+
+            // std::cout << " Normals " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
 
             vert1 = positions[ind1];
             vert2 = positions[ind2];
@@ -243,9 +246,57 @@ private:
             normals[ind3] += lowerNormal;
             normals[ind4] += lowerNormal + upperNormal;
 
+            // if(ind1 == 25 || ind2 == 25 || ind3 == 25 || ind4 == 25)
+            // {
+            //   std::cout << "Currently -->  ";
+            //   std::cout << normals[25].x << " " << normals[25].y << normals[25].z << std::endl;
+            // }
+
+            // bottom left
+            // if((x == 0 && z == 0))
+            // {
+            //   //std::cout << "here " << ind1 << std::endl;
+            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            // }
+            // if((x == 1 && z == 0))
+            // {
+            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            // }
+            // if((x == 0 && z == 1))
+            // {
+            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            // }
+            // if((x == 1 && z == 1))
+            // {
+            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            // }
+
+            // top left
+            // if((x == 0 && z == 3))
+            // {
+            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            // }
+            // if((x == 1 && z == 3))
+            // {
+            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            // }
+            // if((x == 0 && z == 4))
+            // {
+            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            // }
+            // if((x == 1 && z == 4))
+            // {
+            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
+            // }
+
           }
         }
       }
+
 
       // Put the positions and normals into the vertex struct
       // mess around with indicies to not include the outer ring
@@ -268,10 +319,22 @@ private:
               {
                 //std::cout << i << std::endl;
                 // -(chunkSize+4)  go back one row one column
-                thisNormal = glm::normalize(normals[i - (chunkSize+4)]);
+                //thisNormal = glm::normalize(normals[i - (chunkSize+4)]);
+                thisNormal = glm::normalize(normals[i]);
                 thisVertex.Position = positions[i - (chunkSize+4)];
                 thisVertex.Normal =  thisNormal;
                 vertices[counter] = thisVertex;
+
+                // if(counter == 12)
+                // {
+                //   //std::cout << "Final Result:  ";
+                //   //std::cout << i << std::endl;
+                //   thisNormal = normals[i];
+                //   std::cout << thisNormal.x << " " << thisNormal.y << " " << thisNormal.z << std::endl;
+                //   thisNormal = glm::normalize(normals[i]);
+                //   std::cout << thisNormal.x << " " << thisNormal.y << " " << thisNormal.z << std::endl;
+                //
+                // }
 
                 //std::cout << "C: " << counter << " i: " << i << " --> " << i - (chunkSize+4) << std::endl;
                 counter++;
@@ -287,7 +350,7 @@ private:
 
     glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
     {
-      return glm::normalize(glm::cross(c-a, b-a));
+      return glm::cross(c-a, b-a);
     }
 
     // initializes all the buffer objects/arrays
