@@ -65,8 +65,8 @@ public:
         this->waterLevel = waterLevel;
 
         // Malloc for each chunk
-        verticesSize = chunkSize * chunkSize;
-        indicesSize = (chunkSize - 1) * (chunkSize - 1) * 6;
+        verticesSize = (chunkSize+1) * (chunkSize+1);
+        indicesSize = (chunkSize) * (chunkSize) * 6;
         vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
         positions = (glm::vec3 *) malloc(verticesSize * sizeof(glm::vec3));
         normals = (glm::vec3 *) calloc(verticesSize, sizeof(glm::vec3));
@@ -149,9 +149,9 @@ private:
       float ns = noiseScale;
       float hs = heightScale;
 
-      for(int z = 0; z < chunkSize; z++)
+      for(int z = 0; z <= chunkSize; z++)
       {
-        for(int x = 0; x < chunkSize; x++)
+        for(int x = 0; x <= chunkSize; x++)
         {
           // Adjust positions based on chunks
           // Goes from chunk space to world space
@@ -177,19 +177,19 @@ private:
           vertZ = posZ * scale;
 
           // Update this Vertexs' positon
-          positions[(chunkSize * z) + x] = glm::vec3(vertX, height, vertZ);
+          positions[((chunkSize+1) * z) + x] = glm::vec3(vertX, height, vertZ);
 
           std::cout << x << ":" << z << "  =  " << height << std::endl;
 
           // If we are not on bottom or rightmost edge
-          if(x < chunkSize - 1 && z < chunkSize - 1)
+          if(x <= chunkSize - 1 && z <= chunkSize - 1)
           {
             // Find the bottom right square of
             // indicies to create mesh
-            ind1 = x + (z * chunkSize);
-            ind2 = x + (z * chunkSize) + 1;
-            ind3 = x + ((z+1) * chunkSize);
-            ind4 = x + ((z+1) * chunkSize) + 1;
+            ind1 = x + (z * (chunkSize+1));
+            ind2 = x + (z * (chunkSize+1)) + 1;
+            ind3 = x + ((z+1) * (chunkSize+1));
+            ind4 = x + ((z+1) * (chunkSize+1)) + 1;
 
             // Assign correct indicies
             indices[count * 6    ] = ind1;
@@ -206,10 +206,10 @@ private:
           {
             // Find the top left square
             // of indicies to create normals
-            ind4 = x + (z * chunkSize);
-            ind3 = x-1 + (z * chunkSize);
-            ind2 = x + ((z-1) * chunkSize);
-            ind1 = x-1 + ((z-1) * chunkSize);
+            ind4 = x + (z * (chunkSize+1));
+            ind3 = x-1 + (z * (chunkSize+1));
+            ind2 = x + ((z-1) * (chunkSize+1));
+            ind1 = x-1 + ((z-1) * (chunkSize+1));
 
             vert1 = positions[ind1];
             vert2 = positions[ind2];
