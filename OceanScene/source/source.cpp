@@ -91,7 +91,8 @@ int main()
     seaweedSetup(MAX_SEAWEED);
     //terrainSetup();
 
-    Terrain t = Terrain(100, 500, 3.0, 40., .2);
+    // Chunk
+    Terrain t = Terrain(4, 3.0, 40., .2, 0.5);
 
 
     // load textures
