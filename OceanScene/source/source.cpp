@@ -82,7 +82,7 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 
 
@@ -94,7 +94,7 @@ int main()
     //terrainSetup();
 
     // Chunk
-    Terrain t = Terrain(2, 6.0, 40., .2, 0.5);
+    Terrain t = Terrain(15, 6.0, 40., .2, 0.5);
 
 
     // load textures

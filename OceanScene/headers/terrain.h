@@ -46,6 +46,7 @@ public:
     int *indices;
 
     int verticesSize;
+    int verticesSizeBorder; // used for the extra ring for normal calculations
     int indicesSize;
 
     unsigned int VAO;
@@ -66,10 +67,11 @@ public:
 
         // Malloc for each chunk
         verticesSize = (chunkSize+1) * (chunkSize+1);
+        verticesSizeBorder = (chunkSize+3) * (chunkSize+3);
         indicesSize = (chunkSize) * (chunkSize) * 6;
         vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
-        positions = (glm::vec3 *) malloc(verticesSize * sizeof(glm::vec3));
-        normals = (glm::vec3 *) calloc(verticesSize, sizeof(glm::vec3));
+        positions = (glm::vec3 *) malloc(verticesSizeBorder * sizeof(glm::vec3));
+        normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
 
         // Malloc for all the chunks
@@ -149,9 +151,10 @@ private:
       float ns = noiseScale;
       float hs = heightScale;
 
-      for(int z = 0; z <= chunkSize; z++)
+      // -1 and +1 to include extra ring for normals calculations
+      for(int z = -1; z <= chunkSize + 1; z++)
       {
-        for(int x = 0; x <= chunkSize; x++)
+        for(int x = -1; x <= chunkSize + 1; x++)
         {
           // Adjust positions based on chunks
           // Goes from chunk space to world space
@@ -177,12 +180,13 @@ private:
           vertZ = posZ * scale;
 
           // Update this Vertexs' positon
-          positions[((chunkSize+1) * z) + x] = glm::vec3(vertX, height, vertZ);
+          positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
 
-          std::cout << x << ":" << z << "  =  " << height << std::endl;
+          std::cout << x << ":" << z << " --> " << ((chunkSize+3) * (z+1)) + (x+1) << std::endl;
 
           // If we are not on bottom or rightmost edge
-          if(x <= chunkSize - 1 && z <= chunkSize - 1)
+          // or in the outer ring
+          if(x > -1 && z > -1 && x <= chunkSize -1 && z <= chunkSize -1 )
           {
             // Find the bottom right square of
             // indicies to create mesh
@@ -191,6 +195,7 @@ private:
             ind3 = x + ((z+1) * (chunkSize+1));
             ind4 = x + ((z+1) * (chunkSize+1)) + 1;
 
+            std::cout << " Make Face " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
             // Assign correct indicies
             indices[count * 6    ] = ind1;
             indices[count * 6 + 1] = ind4;
@@ -202,42 +207,74 @@ private:
           }
 
           // If we are not on the top or leftmost edge
-          if(z > 0 && x > 0)
+          if(z > -1 && x > -1)
           {
             // Find the top left square
             // of indicies to create normals
-            ind4 = x + (z * (chunkSize+1));
-            ind3 = x-1 + (z * (chunkSize+1));
-            ind2 = x + ((z-1) * (chunkSize+1));
-            ind1 = x-1 + ((z-1) * (chunkSize+1));
+            ind4 = x+1 + ((z+1) * (chunkSize+3));
+            ind3 = x + ((z+1) * (chunkSize+3));
+            ind2 = x+1 + (z * (chunkSize+3));
+            ind1 = x + (z * (chunkSize+3));
+            std::cout << " Normals " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
 
             vert1 = positions[ind1];
             vert2 = positions[ind2];
             vert3 = positions[ind3];
             vert4 = positions[ind4];
 
+
+
             // Calc normals for two planes
-            lowerNormal = normal(vert1, vert4, vert3);
-            upperNormal = normal(vert1, vert2, vert4);
+            lowerNormal = glm::normalize(normal(vert1, vert4, vert3));
+            upperNormal = glm::normalize(normal(vert1, vert2, vert4));
+
+
+            std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
+            std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
 
             // Add normals
             normals[ind1] += lowerNormal + upperNormal;
             normals[ind2] += upperNormal;
             normals[ind3] += lowerNormal;
             normals[ind4] += lowerNormal + upperNormal;
+
           }
         }
       }
 
       // Put the positions and normals into the vertex struct
+      // mess around with indicies to not include the outer ring
       Vertex thisVertex;
+      int counter = 0;
       glm::vec3 thisNormal;
-      for(int i = 0; i < verticesSize; i++)
+      for(int i = 0; i < verticesSizeBorder; i++)
       {
-        thisNormal = glm::normalize(normals[i]);
-        thisVertex.Position = positions[i];
-        thisVertex.Normal =  thisNormal;
-        vertices[i] = thisVertex;
+        // If not in the first row
+        if(i > chunkSize + 2)
+        {
+          // If not in the first column
+          if(i%(chunkSize + 3) != 0)
+          {
+            // If not in the last column
+            if(i%(chunkSize + 3) != 5)
+            {
+              // If not in the last row
+              if(i < (chunkSize+3)*(chunkSize+2))
+              {
+                std::cout << i << std::endl;
+                // -(chunkSize+4)  go back one row one column
+                thisNormal = glm::normalize(normals[i - (chunkSize+4)]);
+                thisVertex.Position = positions[i - (chunkSize+4)];
+                thisVertex.Normal =  thisNormal;
+                vertices[counter] = thisVertex;
+
+                //std::cout << "C: " << counter << " i: " << i << " --> " << i - (chunkSize+4) << std::endl;
+                counter++;
+              }
+            }
+          }
+        }
+
         //std::cout << positions[i].x << ":" << positions[i].z << "  =  " << thisNormal.x << ", " << thisNormal.y << ", " << thisNormal.z << std::endl;
       }
 
