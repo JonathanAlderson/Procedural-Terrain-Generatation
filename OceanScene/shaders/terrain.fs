@@ -13,6 +13,7 @@ struct DirLight {
     vec3 specular;
 };
 
+uniform float time;
 uniform float shininess;
 uniform float maxHeight;
 uniform vec3 viewPos;
@@ -55,6 +56,7 @@ vec3 colour()
   }
   if(height < .1)
   {
+    return grass;
     return(sand * (1. - height*10.) * grass * (height*10.));
   }
 
@@ -65,6 +67,38 @@ vec3 colour()
   return rgb(maxHeight, 0. , 0.);
 
 }
+
+// Give nice patterns on the sand
+vec3 caustics()
+{
+  float tau = 6.28318530718;
+  int max_iter = 4;
+
+  float cTime = time * .5+23.0;
+    // uv should be the 0-1 uv of texture...
+	vec2 uv = FragPos.xz * .1;
+
+  uv.x += time * .1;
+
+	vec2 p = mod(uv*tau*2.0, tau)-250.0;
+
+	vec2 i = vec2(p);
+	float c = 1.0;
+	float inten = .002;
+
+	for (int n = 0; n < max_iter; n++)
+	{
+		float t = cTime * (1.0 - (3.5 / float(n+1))) + FragPos.x + FragPos.z;
+		i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+		c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+	}
+	c /= float(max_iter);
+	c = 1.17-pow(c, 1.4);
+	vec3 colour = vec3(pow(abs(c), 8.0));
+
+	return colour;
+}
+
 
 void main()
 {
@@ -78,6 +112,9 @@ void main()
     vec3 specCol = vec3(1., 1., 1.);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
+
+    result += caustics();
+
 
     FragColor = vec4(result, 1.0);
 

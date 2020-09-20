@@ -231,6 +231,7 @@ int main()
 
             // Draw Terrain
             terrainShader.use();
+            terrainShader.setFloat("time", glfwGetTime());
             terrainShader.setMat4("projection", projection);
             terrainShader.setMat4("view", view);
 
