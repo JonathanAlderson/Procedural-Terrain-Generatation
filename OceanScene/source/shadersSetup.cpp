@@ -61,11 +61,13 @@ void lightingShaderSetup(Shader lightingShader, Camera camera)
 
 
 
-void terrainShaderSetup(Shader terrainShader)
+void terrainShaderSetup(Shader terrainShader, float terrainHeight)
 {
   terrainShader.use();
 
   terrainShader.setFloat("shininess", 32.0f);
+
+  terrainShader.setFloat("maxHeight", terrainHeight);
 
   // directional light
   terrainShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
