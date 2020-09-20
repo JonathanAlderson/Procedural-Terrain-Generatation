@@ -94,7 +94,8 @@ int main()
     //terrainSetup();
 
     // Chunk
-    Terrain t = Terrain(6, 15.0, 150., .2, 0.4, .5);
+    float terrainHeight = 15.;
+    Terrain t = Terrain(6, terrainHeight, 150., .2, 0.4, .5);
 
 
     // load textures
@@ -114,7 +115,7 @@ int main()
     // shader configuration
     // --------------------
     lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader);
+    terrainShaderSetup(terrainShader, terrainHeight);
 
 
     // Seaweed setup stuff
