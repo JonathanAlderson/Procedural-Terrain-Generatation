@@ -45,20 +45,35 @@ vec3 rgb(float r, float g, float b)
 vec3 colour()
 {
   vec3 sand = rgb(251., 244., 157.);
-  vec3 grass = rgb(124., 124., 124.);
-  vec3 rock = rgb(153., 170., 56.);
+  vec3 grass = rgb(153., 170., 56.);
+  vec3 rock = rgb(124., 124., 124.);
 
-  float height = FragPos.y;
+  float height = FragPos.y/maxHeight;
+
+  float sandLower = 0.;
+  float sandUpper = .05;
+
+  float grassLower = 0.05;
+  float grassUpper = 0.6;
+
+  float hMultiplier;
 
   if(height < 0.)
   {
     return sand;
   }
-  if(height < .1)
+  if(height < sandUpper)
   {
-    return grass;
-    return(sand * (1. - height*10.) * grass * (height*10.));
+    hMultiplier = (height-sandLower)*(1./sandUpper);
+    return(sand * (1. - hMultiplier) + grass * hMultiplier);
   }
+  if(height < grassUpper)
+  {
+    hMultiplier = (height-grassLower)*(1./grassUpper);
+    return(grass * (1.-hMultiplier) + rock * hMultiplier);
+  }
+
+  return rock;
 
   return vec3(0., 0., 0.);
 
@@ -113,7 +128,7 @@ void main()
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
 
-    result += caustics();
+    //result += caustics();
 
 
     FragColor = vec4(result, 1.0);
