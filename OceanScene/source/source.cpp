@@ -94,7 +94,7 @@ int main()
     //terrainSetup();
 
     // Chunk
-    Terrain t = Terrain(6, 15.0, 150., .2, 0.1, .5);
+    Terrain t = Terrain(6, 15.0, 150., .2, 0.4, .5);
 
 
     // load textures

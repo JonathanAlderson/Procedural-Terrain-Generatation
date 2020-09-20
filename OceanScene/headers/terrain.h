@@ -351,7 +351,8 @@ private:
       float ns = noiseScale;
       float hs = heightScale;
       float toCenter = std::sqrt((posX * posX) + (posZ * posZ));
-      float seaDepth = 2.;
+      float seaDepth;
+      float seaOffset;
 
       // Mountains
       octaves = 4;
@@ -369,18 +370,18 @@ private:
       // If we are underwater
       if((height/heightScale) < waterLevel)
       {
-        // below the sea depth
-        if((height/heightScale) < waterLevel-seaDepth)
-        {
-            height = (waterLevel - seaDepth) - seaDepth;
-        }
+        seaOffset = 0.;
+        seaDepth = waterLevel - (height/heightScale);
+
         ns = noiseScale;
         hs = heightScale/5.;
-        height -= ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
+        seaOffset -= ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
 
         ns = noiseScale/32.;
         hs = heightScale/70.;
-        height -= ((glm::perlin(glm::vec2((float)(posX*34.1)/ns , (float)posZ/ns))+.707)/1.414) * hs;
+        seaOffset -= ((glm::perlin(glm::vec2((float)(posX*34.1)/ns , (float)posZ/ns))+.707)/1.414) * hs;
+
+        height = height + seaOffset * seaDepth * 4.;
       }
 
 
