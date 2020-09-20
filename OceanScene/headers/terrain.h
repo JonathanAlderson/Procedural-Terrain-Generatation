@@ -35,7 +35,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 3.;
+    int chunkSize = 100.;
 
     Chunk *chunks;
 
@@ -52,18 +52,22 @@ public:
     unsigned int VAO;
     int numChunks;
     float waterLevel;
+    float landPrevelence;
+    float heightMultiplier;
     int heightScale;
     int noiseScale;
     float scale;
 
     // constructor
-    Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel)
+    Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
     {
         this->numChunks = numChunks;
         this->heightScale = heightScale;
         this->noiseScale = noiseScale;
         this->scale = scale;
         this->waterLevel = waterLevel;
+        this->landPrevelence = landPrevelence;
+        this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
 
         // Malloc for each chunk
         verticesSize = (chunkSize+1) * (chunkSize+1);
@@ -114,6 +118,9 @@ public:
 
 
 private:
+    int octaves = 1.;
+    float ns = noiseScale;
+    float hs = heightScale;
 
     // creates the verticies and the indicies and the normals
     // puts all current chunk information inside vertices, normals, indices
@@ -149,12 +156,7 @@ private:
       // std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
 
       // perlin noise settings
-      int octaves = 1.;
-
       float height;
-
-      float ns = noiseScale;
-      float hs = heightScale;
 
       // -1 and +1 to include extra ring for normals calculations
       for(int z = -1; z <= chunkSize + 1; z++)
@@ -168,21 +170,11 @@ private:
           posX = x + offsetX;
           posZ = z + offsetZ;
 
-
-          // reset the height
-          height = 0;
-          ns = noiseScale;
-          hs = heightScale;
-
-          for(int i = 0; i < octaves; i++)
-          {
-            height += glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns)) * hs;
-            ns *= .5;
-            hs *= (float)z/chunkSize;
-          }
-
           vertX = posX * scale;
           vertZ = posZ * scale;
+
+          // Calculate the height for this position
+          height = getHeight(posX, posZ);
 
           // Update this Vertexs' positon
           positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
@@ -345,6 +337,55 @@ private:
 
         //std::cout << positions[i].x << ":" << positions[i].z << "  =  " << thisNormal.x << ", " << thisNormal.y << ", " << thisNormal.z << std::endl;
       }
+
+    }
+
+
+    float getHeight(float posX, float posZ)
+    {
+      // Get the height of the terrain
+      // with different logic for being in the ocean
+      // or on land
+
+      float height = 0;
+      float ns = noiseScale;
+      float hs = heightScale;
+      float toCenter = std::sqrt((posX * posX) + (posZ * posZ));
+      float seaDepth = 2.;
+
+      // Mountains
+      octaves = 4;
+      for(int i = 0; i < octaves; i++)
+      {
+        height += ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
+
+        ns *= .5;
+        hs *= ((height/heightScale))/1.5;
+      }
+
+      // Less Pronounced as you get further away
+      height = height * (1. - std::min((toCenter/heightMultiplier), (1.0f)));
+
+      // If we are underwater
+      if((height/heightScale) < waterLevel)
+      {
+        // below the sea depth
+        if((height/heightScale) < waterLevel-seaDepth)
+        {
+            height = (waterLevel - seaDepth) - seaDepth;
+        }
+        ns = noiseScale;
+        hs = heightScale/5.;
+        height -= ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
+
+        ns = noiseScale/32.;
+        hs = heightScale/70.;
+        height -= ((glm::perlin(glm::vec2((float)(posX*34.1)/ns , (float)posZ/ns))+.707)/1.414) * hs;
+      }
+
+
+
+      return height;
 
     }
 
