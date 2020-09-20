@@ -95,7 +95,7 @@ int main()
 
     // Chunk
     float terrainHeight = 15.;
-    Terrain t = Terrain(6, terrainHeight, 150., .2, 0.4, .5);
+    Terrain t = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
 
 
     // load textures

@@ -42,6 +42,14 @@ vec3 rgb(float r, float g, float b)
   return vec3(r / 255., g / 255., b / 255.);
 }
 
+float rand(float n){return fract(sin(n) * 43758.5453123);}
+
+float noise(float p){
+	float fl = floor(p);
+  float fc = fract(p);
+	return mix(rand(fl), rand(fl + 1.0), fc);
+}
+
 vec3 colour()
 {
   vec3 sand = rgb(251., 244., 157.);
@@ -58,22 +66,24 @@ vec3 colour()
 
   float hMultiplier;
 
+  vec3 col = vec3(0.); // vec3(noise(Normal.y), 0., 0.);
+
   if(height < 0.)
   {
-    return sand;
+    return col + sand;
   }
   if(height < sandUpper)
   {
     hMultiplier = (height-sandLower)*(1./sandUpper);
-    return(sand * (1. - hMultiplier) + grass * hMultiplier);
+    return col + (sand * (1. - hMultiplier) + grass * hMultiplier);
   }
   if(height < grassUpper)
   {
     hMultiplier = (height-grassLower)*(1./grassUpper);
-    return(grass * (1.-hMultiplier) + rock * hMultiplier);
+    return col + (grass * (1.-hMultiplier) + rock * hMultiplier);
   }
 
-  return rock;
+  return col + rock;
 
   return vec3(0., 0., 0.);
 

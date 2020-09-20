@@ -57,6 +57,7 @@ public:
     int heightScale;
     int noiseScale;
     float scale;
+    float seed;
 
     // constructor
     Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
@@ -68,6 +69,7 @@ public:
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
         this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
+        this->seed = 1305640.;//(float)rand();
 
         // Malloc for each chunk
         verticesSize = (chunkSize+1) * (chunkSize+1);
@@ -354,6 +356,10 @@ private:
       float seaDepth;
       float seaOffset;
 
+      // Add the seed
+      posX += seed;
+      posZ += seed;
+
       // Mountains
       octaves = 4;
       for(int i = 0; i < octaves; i++)
@@ -365,7 +371,9 @@ private:
       }
 
       // Less Pronounced as you get further away
-      height = height * (1. - std::min((toCenter/heightMultiplier), (1.0f)));
+      //height = height * (1. - std::min((toCenter/heightMultiplier), (1.0f)));
+      height = height * 1. / max((6. * (toCenter/heightMultiplier)), 1.);
+
 
       // If we are underwater
       if((height/heightScale) < waterLevel)
