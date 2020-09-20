@@ -24,7 +24,7 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
-const int MAX_SEAWEED = 5;
+const int MAX_SEAWEED = 500;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));

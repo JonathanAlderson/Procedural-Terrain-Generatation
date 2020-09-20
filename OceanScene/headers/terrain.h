@@ -370,13 +370,16 @@ private:
       // If we are underwater
       if((height/heightScale) < waterLevel)
       {
+        // To make a smooth transition
         seaOffset = 0.;
         seaDepth = waterLevel - (height/heightScale);
 
+        // Sand Dunes
         ns = noiseScale;
         hs = heightScale/5.;
         seaOffset -= ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
 
+        // Actual Sand
         ns = noiseScale/32.;
         hs = heightScale/70.;
         seaOffset -= ((glm::perlin(glm::vec2((float)(posX*34.1)/ns , (float)posZ/ns))+.707)/1.414) * hs;
@@ -384,7 +387,7 @@ private:
         height = height + seaOffset * seaDepth * 4.;
       }
 
-
+      height -= waterLevel * heightScale;
 
       return height;
 
