@@ -118,7 +118,7 @@ int main()
     // shader configuration
     // --------------------
     lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader, terrainHeight);
+    terrainShaderSetup(terrainShader, t.heightScale);
 
 
     // Seaweed setup stuff
