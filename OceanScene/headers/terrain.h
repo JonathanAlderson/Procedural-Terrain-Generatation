@@ -1,5 +1,5 @@
-#ifndef MESH_H
-#define MESH_H
+#ifndef TERRAIN_H
+#define TERRAIN_H
 
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <time.h>
@@ -58,8 +58,14 @@ public:
     int noiseScale;
     float scale;
     float seed;
+    Shader* shader = new Shader("terrain.vs", "terrain.fs");
 
     // constructor
+
+    // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
+    // 10, 15., 150., .2, 0.1, .8
+
+
     Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
     {
         this->numChunks = numChunks;
@@ -72,6 +78,8 @@ public:
         srand(time(NULL));
         std::cout << rand() << std::endl;
         this->seed = rand();//(float)rand();
+        //this->shader = new Shader("terrain.vs", "terrain.fs");
+        setupShader();
 
         // Malloc for each chunk
         verticesSize = (chunkSize+1) * (chunkSize+1);
@@ -81,20 +89,13 @@ public:
         positions = (glm::vec3 *) malloc(verticesSizeBorder * sizeof(glm::vec3));
         normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
-
-        // Malloc for all the chunks
         chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
 
-        // now that we have all the required data, set the vertex buffers and its attribute pointers.
+        // Generate data for each chunk
         for(int i = 0; i < numChunks; i++)
         {
           for(int j = 0; j < numChunks; j++)
           {
-            // Reseting normals
-            for(int k = 0; k < verticesSizeBorder; k++)
-            {
-              normals[k] = glm::vec3(0., 0., 0.);
-            }
             generateChunkPoints(j, i);
             setupChunk(j, i);
           }
@@ -108,9 +109,14 @@ public:
     }
 
     // render the mesh
-    void Draw()
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
     {
-        // draw mesh
+        shader->use();
+        shader->setFloat("time", time);
+        shader->setMat4("projection", projection);
+        shader->setMat4("view", view);
+        shader->setMat4("model", model);
+        shader->setVec3("viewPos", camPos);
         // draw each chunk individually
         for(int i = 0; i < numChunks * numChunks; i++)
         {
@@ -118,6 +124,19 @@ public:
           glDrawElements(GL_TRIANGLES, indicesSize , GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
+    }
+
+    void setupShader()
+    {
+      shader->use();
+      shader->setFloat("shininess", 32.0f);
+      shader->setFloat("maxHeight", heightScale);
+
+      // directional light
+      shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+      shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+      shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
+      shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
     }
 
 
@@ -132,8 +151,11 @@ private:
     {
 
       // Current Position
+      int count;
       float vertX;
       float vertZ;
+      float height;
+      count = 0;
 
       // The indicies for a single face
       int ind1;
@@ -141,10 +163,7 @@ private:
       int ind3;
       int ind4;
 
-      int count;
-      count = 0;
-
-      // normals
+      // Normals for a single face
       glm::vec3 lowerNormal;
       glm::vec3 upperNormal;
       glm::vec3 vert1;
@@ -152,17 +171,24 @@ private:
       glm::vec3 vert3;
       glm::vec3 vert4;
 
+      Vertex thisVertex;
+      glm::vec3 thisNormal;
+
+      // World Position
       int posX;
       int posZ;
       int offsetX =  - chunkSize * ((numChunks)/2 - xChunk);
       int offsetZ =  - chunkSize * ((numChunks)/2 - zChunk);
-      //
-      // std::cout << "Chunk: " << xChunk << ":" << zChunk << std::endl;
 
-      // perlin noise settings
-      float height;
 
-      // -1 and +1 to include extra ring for normals calculations
+      // Reset normals
+      for(int k = 0; k < verticesSizeBorder; k++)
+      {
+        normals[k] = glm::vec3(0., 0., 0.);
+      }
+
+
+      // Step through each vertex on and around chunk
       for(int z = -1; z <= chunkSize + 1; z++)
       {
         for(int x = -1; x <= chunkSize + 1; x++)
@@ -173,7 +199,6 @@ private:
           // but not for index data
           posX = x + offsetX;
           posZ = z + offsetZ;
-
           vertX = posX * scale;
           vertZ = posZ * scale;
 
@@ -183,10 +208,7 @@ private:
           // Update this Vertexs' positon
           positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
 
-          //std::cout << x << ":" << z << " --> " << ((chunkSize+3) * (z+1)) + (x+1) << std::endl;
-
-          // If we are not on bottom or rightmost edge
-          // or in the outer ring
+          // Create Face
           if(x > -1 && z > -1 && x <= chunkSize -1 && z <= chunkSize -1 )
           {
             // Find the bottom right square of
@@ -196,7 +218,6 @@ private:
             ind3 = x + ((z+1) * (chunkSize+1));
             ind4 = x + ((z+1) * (chunkSize+1)) + 1;
 
-            //std::cout << " Make Face " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
             // Assign correct indicies
             indices[count * 6    ] = ind1;
             indices[count * 6 + 1] = ind4;
@@ -207,7 +228,7 @@ private:
             count ++;
           }
 
-          // If we are not on the top or leftmost edge
+          // Calculate Plane Normals
           if(z > -1 && x > -1)
           {
             // Find the top left square
@@ -218,164 +239,76 @@ private:
             ind2 = x+1 + (z * (chunkSize+3));
             ind1 = x + (z * (chunkSize+3));
 
-
-            // std::cout << " Normals " << ind1 << " " << ind2 << " " << ind3 << " " << ind4 << std::endl;
-
             vert1 = positions[ind1];
             vert2 = positions[ind2];
             vert3 = positions[ind3];
             vert4 = positions[ind4];
 
-
-
             // Calc normals for two planes
             lowerNormal = normal(vert1, vert4, vert3);
             upperNormal = normal(vert1, vert2, vert4);
-
-
-            //std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            //std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
 
             // Add normals
             normals[ind1] += lowerNormal + upperNormal;
             normals[ind2] += upperNormal;
             normals[ind3] += lowerNormal;
             normals[ind4] += lowerNormal + upperNormal;
-
-            // if(ind1 == 25 || ind2 == 25 || ind3 == 25 || ind4 == 25)
-            // {
-            //   std::cout << "Currently -->  ";
-            //   std::cout << normals[25].x << " " << normals[25].y << normals[25].z << std::endl;
-            // }
-
-            // bottom left
-            // if((x == 0 && z == 0))
-            // {
-            //   //std::cout << "here " << ind1 << std::endl;
-            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
-            // }
-            // if((x == 1 && z == 0))
-            // {
-            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            // }
-            // if((x == 0 && z == 1))
-            // {
-            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
-            // }
-            // if((x == 1 && z == 1))
-            // {
-            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
-            // }
-
-            // top left
-            // if((x == 0 && z == 3))
-            // {
-            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
-            // }
-            // if((x == 1 && z == 3))
-            // {
-            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            // }
-            // if((x == 0 && z == 4))
-            // {
-            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
-            // }
-            // if((x == 1 && z == 4))
-            // {
-            //   std::cout << lowerNormal.x << " " << lowerNormal.y << " " << lowerNormal.z << std::endl;
-            //   std::cout << upperNormal.x << " " << upperNormal.y << " " << upperNormal.z << std::endl;
-            // }
-
           }
         }
       }
 
-
-      // Put the positions and normals into the vertex struct
-      // mess around with indicies to not include the outer ring
-      Vertex thisVertex;
-      int counter = 0;
-      glm::vec3 thisNormal;
+      // Put Positions and Normals into Struct
+      count = 0; // reset counter
       for(int i = 0; i < verticesSizeBorder; i++)
       {
-        // If not in the first row
-        if(i > chunkSize + 2)
+
+        // If not in the first or last row
+        if(i > chunkSize + 2 && i < (chunkSize+3)*(chunkSize+2))
         {
-          // If not in the first column
-          if(i%(chunkSize + 3) != 0)
+          // If not in the first or last column
+          if(i%(chunkSize + 3) != 0 && i%(chunkSize + 3) != 5)
           {
-            // If not in the last column
-            if(i%(chunkSize + 3) != 5)
-            {
-              // If not in the last row
-              if(i < (chunkSize+3)*(chunkSize+2))
-              {
-                //std::cout << i << std::endl;
-                // -(chunkSize+4)  go back one row one column
-                //thisNormal = glm::normalize(normals[i - (chunkSize+4)]);
-                thisNormal = glm::normalize(normals[i]);
-                thisVertex.Position = positions[i - (chunkSize+4)];
-                thisVertex.Normal =  thisNormal;
-                vertices[counter] = thisVertex;
-
-                // if(counter == 12)
-                // {
-                //   //std::cout << "Final Result:  ";
-                //   //std::cout << i << std::endl;
-                //   thisNormal = normals[i];
-                //   std::cout << thisNormal.x << " " << thisNormal.y << " " << thisNormal.z << std::endl;
-                //   thisNormal = glm::normalize(normals[i]);
-                //   std::cout << thisNormal.x << " " << thisNormal.y << " " << thisNormal.z << std::endl;
-                //
-                // }
-
-                //std::cout << "C: " << counter << " i: " << i << " --> " << i - (chunkSize+4) << std::endl;
-                counter++;
-              }
-            }
+            // Put data in struct
+            thisNormal = glm::normalize(normals[i]);
+            thisVertex.Position = positions[i - (chunkSize+4)];
+            thisVertex.Normal =  thisNormal;
+            vertices[count] = thisVertex;
+            count++;
           }
         }
-
-        //std::cout << positions[i].x << ":" << positions[i].z << "  =  " << thisNormal.x << ", " << thisNormal.y << ", " << thisNormal.z << std::endl;
       }
-
     }
 
+    glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
+    {
+      return glm::cross(c-a, b-a);
+    }
 
     float getHeight(float posX, float posZ)
     {
       // Get the height of the terrain
-      // with different logic for being in the ocean
-      // or on land
-
       float height = 0;
       float ns = noiseScale;
       float hs = heightScale;
       float toCenter = std::sqrt((posX * posX) + (posZ * posZ));
       float seaDepth;
       float seaOffset;
+      octaves = 4;
 
       // Add the seed
       posX += seed;
       posZ += seed;
 
       // Mountains
-      octaves = 4;
       for(int i = 0; i < octaves; i++)
       {
         height += ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
-
         ns *= .5;
         hs *= ((height/heightScale))/1.5;
       }
 
       // Less Pronounced as you get further away
-      //height = height * (1. - std::min((toCenter/heightMultiplier), (1.0f)));
       height = height * 1. / max((6. * (toCenter/heightMultiplier)), 1.);
-
 
       // If we are underwater
       if((height/heightScale) < waterLevel)
@@ -396,16 +329,9 @@ private:
 
         height = height + seaOffset * seaDepth * 4.;
       }
-
       height -= waterLevel * heightScale;
 
       return height;
-
-    }
-
-    glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
-    {
-      return glm::cross(c-a, b-a);
     }
 
     // initializes all the buffer objects/arrays
@@ -414,35 +340,34 @@ private:
     {
         // Create the chunk and put it in our chunks
         int chunkID = x + (z*numChunks);
-        //VAO, VBO, EBO
-        Chunk thisChunk = {.points = vertices,
-                           .indices = indices,
-                           .x = x,
-                           .z = z,
-                           .id = chunkID,
-                           .chunkSize = chunkSize};
+        Chunk thisChunk = {VAO : 0,
+                           VBO : 0,
+                           EBO : 0,
+                           points : vertices,
+                           indices : indices,
+                           x : x,
+                           z : z,
+                           id : chunkID,
+                           chunkSize : chunkSize};
 
         // create buffers/arrays
         glGenVertexArrays(1, &thisChunk.VAO);
         glGenBuffers(1, &thisChunk.VBO);
         glGenBuffers(1, &thisChunk.EBO);
-
         glBindVertexArray(thisChunk.VAO);
+
         // load data into vertex buffers
         glBindBuffer(GL_ARRAY_BUFFER, thisChunk.VBO);
         glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, thisChunk.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
-        // set the vertex attribute pointers
-        // vertex Positions
+        // VERTEX ATTRIBUTE POINTERS
+        // vertex Positions and vertex normals
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-        // vertex normals
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-
         glBindVertexArray(0);
 
         // Put the data in the main chunks

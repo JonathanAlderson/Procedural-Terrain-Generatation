@@ -9,8 +9,10 @@
 #include "stb_image.h"
 #include "shader.h"
 #include "camera.h"
-#include "terrain.h"
-#include "fileLoader.h"
+// #include "terrain.h"
+// #include "fileLoader.h"
+// #include "seaweed.h"
+#include "scene.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -25,7 +27,6 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
-const int MAX_SEAWEED = 500;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -88,43 +89,8 @@ int main()
 
     //  Scene Setup
     // --------------------
-    FileLoader fileSys = FileLoader();
-    fileSys.WriteFile();
+    Scene scene = Scene(0);
 
-    cubesSetup();
-    lightsSetup();
-    seaweedSetup(MAX_SEAWEED);
-    //terrainSetup();
-
-    // Chunk
-    float terrainHeight = 15.;
-    Terrain t = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
-
-
-    // load textures
-    // --------------------
-    texturesSetup();
-
-
-    // create shaders
-    // ------------------------------------
-    Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
-    Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
-    Shader seaweedShader("seaweed.vs", "seaweed.fs");
-    Shader terrainShader("terrain.vs", "terrain.fs");
-    Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
-    //shadersSetup();
-
-    // shader configuration
-    // --------------------
-    lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader, terrainHeight);
-
-
-    // Seaweed setup stuff
-    seaweedShader.use();
-    seaweedShader.setInt("texture1", 0);
-    seaweedShader.setFloat("time", 1);
 
 
     while (!glfwWindowShouldClose(window))
@@ -141,132 +107,9 @@ int main()
 
            // render
            // ------
-           glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame);
 
 
-           ///////////////////////////////////////////
-           // Render logic
-           ///////////////////////////////////////////
-
-
-           // be sure to activate shader when setting uniforms/drawing objects
-           lightingShader.use();
-           lightingShader.setVec3("viewPos", camera.Position);
-           lightingShader.setFloat("material.shininess", 32.0f);
-
-           /*
-              Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index
-              the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
-              by defining light types as classes and set their values in there, or by using a more efficient uniform approach
-              by using 'Uniform buffer objects', but that is something we'll discuss in the 'Advanced GLSL' tutorial.
-           */
-           // spotLight
-           lightingShader.setVec3("spotLight.position", camera.Position);
-           lightingShader.setVec3("spotLight.direction", camera.Front);
-
-           // view/projection transformations
-           glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-           glm::mat4 view = camera.GetViewMatrix();
-           lightingShader.setMat4("projection", projection);
-           lightingShader.setMat4("view", view);
-
-           // world transformation
-           glm::mat4 model = glm::mat4(1.0f);
-           lightingShader.setMat4("model", model);
-
-           // bind diffuse map
-           glActiveTexture(GL_TEXTURE0);
-           glBindTexture(GL_TEXTURE_2D, diffuseMap);
-           // bind specular map
-           glActiveTexture(GL_TEXTURE1);
-           glBindTexture(GL_TEXTURE_2D, specularMap);
-
-
-           // // render containers
-           glBindVertexArray(cubeVAO);
-           for (unsigned int i = 0; i < 0; i++)
-           {
-               // calculate the model matrix for each object and pass it to shader before drawing
-               glm::mat4 model = glm::mat4(1.0f);
-               model = glm::translate(model, cubePositions[i]);
-               float angle = 20.0f * i;
-               model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-               lightingShader.setMat4("model", model);
-
-               glDrawArrays(GL_TRIANGLES, 0, 36);
-           }
-
-            // also draw the lamp object(s)
-            lightCubeShader.use();
-            lightCubeShader.setMat4("projection", projection);
-            lightCubeShader.setMat4("view", view);
-
-            // we now draw as many light bulbs as we have point lights.
-            glBindVertexArray(lightCubeVAO);
-            for (unsigned int i = 0; i < 4; i++)
-            {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, pointLightPositions[i]);
-                model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-                lightCubeShader.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-
-
-
-            // Draw Seaweed
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, seaweedTex);
-            model = glm::mat4(1.0f);
-            seaweedShader.use();
-            seaweedShader.setMat4("model", model);
-            seaweedShader.setMat4("view", view);
-            seaweedShader.setMat4("projection", projection);
-            seaweedShader.setFloat("time", glfwGetTime());
-
-            glBindVertexArray(seaweedVAO);
-
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_SEAWEED);
-            glBindVertexArray(0);
-
-
-
-            // Draw Terrain
-            terrainShader.use();
-            terrainShader.setFloat("time", glfwGetTime());
-            terrainShader.setMat4("projection", projection);
-            terrainShader.setMat4("view", view);
-
-            //model = glm::translate(model, glm::vec3(-2., -1., -5.));
-            terrainShader.setMat4("model", model);
-            terrainShader.setVec3("viewPos", camera.Position);
-
-
-            t.Draw();
-
-            // normalsShader.use();
-            // normalsShader.setMat4("projection", projection);
-            // normalsShader.setMat4("view", view);
-            // normalsShader.setMat4("model", model);
-            // t.Draw();
-            // then draw with normals
-
-
-            // model = glm::mat4(1.0f);
-            //
-            // model = glm::mat4(1.0f);
-            //
-            // glBindVertexArray(terrainVAO);
-            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
-            // glDrawElements(GL_TRIANGLES, 3*2*6, GL_UNSIGNED_INT, 0);
-            // glBindVertexArray(0);
-
-
-
-            ///////////////////////////////////////////
-            // END OF RENDER LOGIC
-            ///////////////////////////////////////////
 
            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
            // -------------------------------------------------------------------------------
@@ -276,11 +119,7 @@ int main()
 
        // optional: de-allocate all resources once they've outlived their purpose:
        // ------------------------------------------------------------------------
-       glDeleteVertexArrays(1, &cubeVAO);
-       glDeleteVertexArrays(1, &lightCubeVAO);
-       glDeleteVertexArrays(1, &seaweedVAO);
-       glDeleteBuffers(1, &cubeVBO);
-       glDeleteBuffers(1, &quadVBO);
+       // cleanup done somewhere else
 
        // glfw: terminate, clearing all previously allocated GLFW resources.
        // ------------------------------------------------------------------
