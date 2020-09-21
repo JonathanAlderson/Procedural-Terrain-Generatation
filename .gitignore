@@ -5,3 +5,4 @@ OceanScene/source/OceanScene.vcxproj.filters
 OceanScene/source/OceanScene.vcxproj.user
 OceanScene/source/x64
 OceanScene/glm/out
+OceanScene/.vs/

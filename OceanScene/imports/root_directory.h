@@ -1,7 +1,7 @@
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <direct.h>
 #define GetCurrentDir _getcwd
-#else
+#elif __LINUX__
 #include <unistd.h>
 #define GetCurrentDir getcwd
 #endif
@@ -11,11 +11,10 @@
 // Finds the CWD on Windows or Linux
 using namespace std;
 char * get_current_dir() {
-   char buff[FILENAME_MAX]; //create string buffer to hold path
-   char * cwd = GetCurrentDir( buff, FILENAME_MAX );
-   char shortCwd[strlen(cwd) - 7];
-   strncpy(shortCwd, cwd, strlen(cwd) - 7);
-   char * shortCwdReturn = shortCwd;
-   return shortCwdReturn;
+	char * cwd = GetCurrentDir( NULL, FILENAME_MAX );
+	char* shortCwd = (char*) malloc((strlen(cwd) - 7) * sizeof(char));
+	strcpy(shortCwd, cwd);
+	std::cout << shortCwd << std::endl;
+	return shortCwd;
    // in some real pointer hell here
 }

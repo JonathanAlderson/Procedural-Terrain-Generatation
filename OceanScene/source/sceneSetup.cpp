@@ -66,7 +66,7 @@ void lightsSetup()
 void seaweedSetup(int max)
 {
   // Get the random positions of the seaweed
-  glm::vec3 translations[max];
+    glm::vec3* translations = (glm::vec3*)malloc(max * sizeof(glm::vec3));
   for (int i = 0; i < max; i++)
   {
     translations[i] = glm::vec3((float)(i%10), 0., (i/10));
@@ -94,5 +94,7 @@ void seaweedSetup(int max)
   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glVertexAttribDivisor(2, 1);
+
+  free(translations);
 
 }
