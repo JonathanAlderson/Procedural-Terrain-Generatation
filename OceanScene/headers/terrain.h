@@ -58,6 +58,7 @@ public:
     int noiseScale;
     float scale;
     float seed;
+    Shader *shader;
 
     // constructor
 
@@ -74,6 +75,7 @@ public:
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
         this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
+        this->shader = new Shader("terrain.vs", "terrain.fs");
         srand(time(NULL));
         std::cout << rand() << std::endl;
         this->seed = rand();//(float)rand();
@@ -103,11 +105,21 @@ public:
         free(indices);
         free(normals);
         free(positions);
+        setupShader();
     }
 
     // render the mesh
-    void Draw()
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
     {
+        shader->use();
+        shader->setFloat("time", time);
+        shader->setMat4("projection", projection);
+        shader->setMat4("view", view);
+
+        //model = glm::translate(model, glm::vec3(-2., -1., -5.));
+        shader->setMat4("model", model);
+        shader->setVec3("viewPos", camPos);
+
         // draw each chunk individually
         for(int i = 0; i < numChunks * numChunks; i++)
         {
@@ -347,6 +359,19 @@ private:
 
         // Put the data in the main chunks
         chunks[chunkID] = thisChunk;
+    }
+
+    void setupShader()
+    {
+      shader->use();
+      shader->setFloat("shininess", 32.0f);
+      shader->setFloat("maxHeight", heightScale);
+
+      // directional light
+      shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+      shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+      shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
+      shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
     }
 };
 #endif

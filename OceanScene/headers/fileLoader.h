@@ -1,3 +1,5 @@
+#ifndef FILELOADER_H
+#define FILELOADER_H
 
 #include <string>
 #include <vector>
@@ -37,3 +39,5 @@ public:
 private:
 
 };
+
+#endif
