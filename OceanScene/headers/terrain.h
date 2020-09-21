@@ -92,6 +92,9 @@ public:
         chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
 
         // Generate data for each chunk
+
+        std::cout << &chunks[0] << std::endl;
+        // numChunks
         for(int i = 0; i < numChunks; i++)
         {
           for(int j = 0; j < numChunks; j++)
@@ -101,11 +104,16 @@ public:
           }
         }
 
+        for(int i = 0; i < 10; i++)
+        {
+          std::cout << chunks[0].points[i].Position.y << "     " << chunks[12].points[i].Position.y  << std::endl; 
+        }
+
         // Being good
-        free(vertices);
-        free(indices);
-        free(normals);
-        free(positions);
+        // free(vertices);
+        // free(indices);
+        // free(normals);
+        // free(positions);
     }
 
     // render the mesh

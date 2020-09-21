@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "json.hpp"
+#include "terrain.h"
 #include <fstream>
 #include <iomanip>
 
@@ -20,17 +21,29 @@ public:
     }
 
     // render the mesh
-    void WriteFile()
+    void WriteTerrainFile(int seed, Terrain* t)
     {
       nlohmann::json j;
-      j["chunks"] = 6;
-      j["chunkSize"] = 100;
-      j["data"] = {1, 2, 3, 4, 5, 6};
+
+      vector<int> indiciesSave;
+
+      // Get the indicies
+      for(int i = 0; i < t->indicesSize; i++)
+      {
+        indiciesSave.push_back(t->chunks[0].indices[i]);
+      }
+
+      j["numChunks"] = t->numChunks;
+      j["chunkSize"] = t->chunkSize;
+      j["indiciesSize"] = t->indicesSize;
+      j["indicies"] = indiciesSave;
 
       std::ofstream myFile;
       myFile.open("../saveFiles/test.json");
       myFile << std::setw(4) << j << std::endl;
       myFile.close();
+
+      std::cout << " writing to file" << std::endl;
 
 
     }

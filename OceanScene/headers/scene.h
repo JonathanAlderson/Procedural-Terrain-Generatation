@@ -32,6 +32,9 @@ public:
         seaweed = new Seaweed(100);
         seed = seed;
 
+        fileSys = FileLoader();
+        fileSys.WriteTerrainFile(seed, terrain);
+
     }
 
     // render the mesh
