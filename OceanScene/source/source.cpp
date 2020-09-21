@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "terrain.h"
 #include "fileLoader.h"
+#include "seaweed.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -93,12 +94,12 @@ int main()
 
     cubesSetup();
     lightsSetup();
-    seaweedSetup(MAX_SEAWEED);
     //terrainSetup();
 
-    // Chunk
+    // Terrain Setup
     float terrainHeight = 15.;
-    Terrain t = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
+    Terrain terrain = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
+    Seaweed seaweed = Seaweed(100);
 
 
     // load textures
@@ -110,7 +111,7 @@ int main()
     // ------------------------------------
     Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
     Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
-    Shader seaweedShader("seaweed.vs", "seaweed.fs");
+    //Shader seaweedShader("seaweed.vs", "seaweed.fs");
     Shader terrainShader("terrain.vs", "terrain.fs");
     Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
     //shadersSetup();
@@ -118,13 +119,7 @@ int main()
     // shader configuration
     // --------------------
     lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader, t.heightScale);
-
-
-    // Seaweed setup stuff
-    seaweedShader.use();
-    seaweedShader.setInt("texture1", 0);
-    seaweedShader.setFloat("time", 1);
+    terrainShaderSetup(terrainShader, terrain.heightScale);
 
 
     while (!glfwWindowShouldClose(window))
@@ -216,19 +211,7 @@ int main()
 
 
             // Draw Seaweed
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, seaweedTex);
-            model = glm::mat4(1.0f);
-            seaweedShader.use();
-            seaweedShader.setMat4("model", model);
-            seaweedShader.setMat4("view", view);
-            seaweedShader.setMat4("projection", projection);
-            seaweedShader.setFloat("time", glfwGetTime());
-
-            glBindVertexArray(seaweedVAO);
-
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_SEAWEED);
-            glBindVertexArray(0);
+            seaweed.Draw(model, view, projection, glfwGetTime());
 
 
 
@@ -243,7 +226,7 @@ int main()
             terrainShader.setVec3("viewPos", camera.Position);
 
 
-            t.Draw();
+            terrain.Draw();
 
             // normalsShader.use();
             // normalsShader.setMat4("projection", projection);
