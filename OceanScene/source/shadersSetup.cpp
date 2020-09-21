@@ -58,21 +58,3 @@ void lightingShaderSetup(Shader lightingShader, Camera camera)
   lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
   lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 }
-
-
-
-void terrainShaderSetup(Shader terrainShader, float terrainHeight)
-{
-  terrainShader.use();
-
-  terrainShader.setFloat("shininess", 32.0f);
-
-  terrainShader.setFloat("maxHeight", terrainHeight);
-
-  // directional light
-  terrainShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-  terrainShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-  terrainShader.setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
-  terrainShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-
-}
