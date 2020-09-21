@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "terrain.h"
+#include "fileLoader.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -85,9 +86,11 @@ int main()
     //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
 
-
     //  Scene Setup
     // --------------------
+    FileLoader fileSys = FileLoader();
+    fileSys.WriteFile();
+
     cubesSetup();
     lightsSetup();
     seaweedSetup(MAX_SEAWEED);
