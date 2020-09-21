@@ -40,7 +40,7 @@ public:
     Chunk *chunks;
 
     // mesh Data
-    Vertex *vertices;
+    Vertex **vertices;
     glm::vec3 *positions;
     glm::vec3 *normals;
     int *indices;
@@ -59,6 +59,8 @@ public:
     float scale;
     float seed;
     Shader* shader = new Shader("terrain.vs", "terrain.fs");
+    int vertRowLen; // For memory offsets
+    int chunkID;
 
     // constructor
 
@@ -85,20 +87,25 @@ public:
         verticesSize = (chunkSize+1) * (chunkSize+1);
         verticesSizeBorder = (chunkSize+3) * (chunkSize+3);
         indicesSize = (chunkSize) * (chunkSize) * 6;
-        vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+
+        vertices = (Vertex **) malloc(numChunks * numChunks * sizeof(Vertex *));
+        for(int i = 0; i < numChunks * numChunks; i++)
+        {
+          vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        }
         positions = (glm::vec3 *) malloc(verticesSizeBorder * sizeof(glm::vec3));
         normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
         chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
 
-        // Generate data for each chunk
+        vertRowLen = verticesSize;
 
-        std::cout << &chunks[0] << std::endl;
-        // numChunks
+        // Generate data for each chunk
         for(int i = 0; i < numChunks; i++)
         {
           for(int j = 0; j < numChunks; j++)
           {
+            chunkID = j + (i*numChunks);
             generateChunkPoints(j, i);
             setupChunk(j, i);
           }
@@ -106,7 +113,7 @@ public:
 
         for(int i = 0; i < 10; i++)
         {
-          std::cout << chunks[0].points[i].Position.y << "     " << chunks[12].points[i].Position.y  << std::endl; 
+          std::cout << chunks[0].points[i].Position.y << "     " << chunks[12].points[i].Position.y  << std::endl;
         }
 
         // Being good
@@ -213,7 +220,7 @@ private:
           // Calculate the height for this position
           height = getHeight(posX, posZ);
 
-          // Update this Vertexs' positon
+          // Update this Vertexs' positon in correct memory space
           positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
 
           // Create Face
@@ -280,7 +287,7 @@ private:
             thisNormal = glm::normalize(normals[i]);
             thisVertex.Position = positions[i - (chunkSize+4)];
             thisVertex.Normal =  thisNormal;
-            vertices[count] = thisVertex;
+            vertices[chunkID][count] = thisVertex;
             count++;
           }
         }
@@ -347,11 +354,10 @@ private:
     void setupChunk(int x, int z)
     {
         // Create the chunk and put it in our chunks
-        int chunkID = x + (z*numChunks);
         Chunk thisChunk = {VAO : 0,
                            VBO : 0,
                            EBO : 0,
-                           points : vertices,
+                           points : vertices[chunkID],
                            indices : indices,
                            x : x,
                            z : z,
@@ -366,7 +372,7 @@ private:
 
         // load data into vertex buffers
         glBindBuffer(GL_ARRAY_BUFFER, thisChunk.VBO);
-        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[chunkID][0], GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, thisChunk.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
