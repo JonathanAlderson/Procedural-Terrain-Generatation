@@ -2,7 +2,7 @@
 #define MESH_H
 
 #include <glad/glad.h> // holds all OpenGL type declarations
-
+#include <time.h>
 #include "glm.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/noise.hpp"
@@ -35,7 +35,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 100.;
+    int chunkSize = 10.;
 
     Chunk *chunks;
 
@@ -69,7 +69,9 @@ public:
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
         this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
-        this->seed = 1305640.;//(float)rand();
+        srand(time(NULL));
+        std::cout << rand() << std::endl;
+        this->seed = rand();//(float)rand();
 
         // Malloc for each chunk
         verticesSize = (chunkSize+1) * (chunkSize+1);

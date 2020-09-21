@@ -138,7 +138,7 @@ void main()
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
 
-    //result += caustics();
+    result += caustics();
 
 
     FragColor = vec4(result, 1.0);
