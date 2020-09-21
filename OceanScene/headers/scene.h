@@ -33,7 +33,7 @@ public:
         seed = seed;
 
         fileSys = FileLoader();
-        fileSys.WriteTerrainFile(seed, terrain);
+        fileSys.writeTerrainFile(seed, terrain);
 
     }
 
