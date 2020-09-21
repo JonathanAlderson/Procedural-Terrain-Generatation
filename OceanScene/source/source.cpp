@@ -107,17 +107,14 @@ int main()
 
     // create shaders
     // ------------------------------------
-    Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
-    Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
-    //Shader seaweedShader("seaweed.vs", "seaweed.fs");
     Shader terrainShader("terrain.vs", "terrain.fs");
     Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
     //shadersSetup();
 
     // shader configuration
     // --------------------
-    lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader, terrain.heightScale);
+    // lightingShaderSetup(lightingShader, camera);
+    // terrainShaderSetup(terrainShader, terrain.heightScale);
 
 
     while (!glfwWindowShouldClose(window))
@@ -142,38 +139,10 @@ int main()
            // Render logic
            ///////////////////////////////////////////
 
-
-           // be sure to activate shader when setting uniforms/drawing objects
-           lightingShader.use();
-           lightingShader.setVec3("viewPos", camera.Position);
-           lightingShader.setFloat("material.shininess", 32.0f);
-
-           /*
-              Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index
-              the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
-              by defining light types as classes and set their values in there, or by using a more efficient uniform approach
-              by using 'Uniform buffer objects', but that is something we'll discuss in the 'Advanced GLSL' tutorial.
-           */
-           // spotLight
-           lightingShader.setVec3("spotLight.position", camera.Position);
-           lightingShader.setVec3("spotLight.direction", camera.Front);
-
-           // view/projection transformations
+           // view/projection/model transformations
            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
            glm::mat4 view = camera.GetViewMatrix();
-           lightingShader.setMat4("projection", projection);
-           lightingShader.setMat4("view", view);
-
-           // world transformation
            glm::mat4 model = glm::mat4(1.0f);
-           lightingShader.setMat4("model", model);
-
-           // bind diffuse map
-           glActiveTexture(GL_TEXTURE0);
-           glBindTexture(GL_TEXTURE_2D, diffuseMap);
-           // bind specular map
-           glActiveTexture(GL_TEXTURE1);
-           glBindTexture(GL_TEXTURE_2D, specularMap);
 
 
 
