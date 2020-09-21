@@ -12,6 +12,7 @@
 #include "terrain.h"
 #include "fileLoader.h"
 #include "seaweed.h"
+#include "verticies.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -110,14 +111,13 @@ int main()
     Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
     Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
     //Shader seaweedShader("seaweed.vs", "seaweed.fs");
-    Shader terrainShader("terrain.vs", "terrain.fs");
+    //Shader terrainShader("terrain.vs", "terrain.fs");
     Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
     //shadersSetup();
 
     // shader configuration
     // --------------------
     lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader, terrain.heightScale);
 
 
     while (!glfwWindowShouldClose(window))
@@ -185,17 +185,7 @@ int main()
 
 
             // Draw Terrain
-            terrainShader.use();
-            terrainShader.setFloat("time", glfwGetTime());
-            terrainShader.setMat4("projection", projection);
-            terrainShader.setMat4("view", view);
-
-            //model = glm::translate(model, glm::vec3(-2., -1., -5.));
-            terrainShader.setMat4("model", model);
-            terrainShader.setVec3("viewPos", camera.Position);
-
-
-            terrain.Draw();
+            terrain.Draw(model, view, projection, glfwGetTime(), camera.Position);
 
             // normalsShader.use();
             // normalsShader.setMat4("projection", projection);
