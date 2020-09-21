@@ -9,9 +9,10 @@
 #include "stb_image.h"
 #include "shader.h"
 #include "camera.h"
-#include "terrain.h"
-#include "fileLoader.h"
-#include "seaweed.h"
+// #include "terrain.h"
+// #include "fileLoader.h"
+// #include "seaweed.h"
+#include "scene.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -26,7 +27,6 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
-const int MAX_SEAWEED = 500;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -89,32 +89,8 @@ int main()
 
     //  Scene Setup
     // --------------------
-    FileLoader fileSys = FileLoader();
-    fileSys.WriteFile();
+    Scene scene = Scene(0);
 
-    //terrainSetup();
-
-    // Terrain Setup
-    float terrainHeight = 15.;
-    Terrain terrain = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
-    Seaweed seaweed = Seaweed(100);
-
-
-    // load textures
-    // --------------------
-    texturesSetup();
-
-
-    // create shaders
-    // ------------------------------------
-    Shader terrainShader("terrain.vs", "terrain.fs");
-    Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
-    //shadersSetup();
-
-    // shader configuration
-    // --------------------
-    // lightingShaderSetup(lightingShader, camera);
-    // terrainShaderSetup(terrainShader, terrain.heightScale);
 
 
     while (!glfwWindowShouldClose(window))
@@ -131,63 +107,9 @@ int main()
 
            // render
            // ------
-           glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame);
 
 
-           ///////////////////////////////////////////
-           // Render logic
-           ///////////////////////////////////////////
-
-           // view/projection/model transformations
-           glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-           glm::mat4 view = camera.GetViewMatrix();
-           glm::mat4 model = glm::mat4(1.0f);
-
-
-
-
-
-            // Draw Seaweed
-            seaweed.Draw(model, view, projection, glfwGetTime());
-
-
-
-            // Draw Terrain
-            terrainShader.use();
-            terrainShader.setFloat("time", glfwGetTime());
-            terrainShader.setMat4("projection", projection);
-            terrainShader.setMat4("view", view);
-
-            //model = glm::translate(model, glm::vec3(-2., -1., -5.));
-            terrainShader.setMat4("model", model);
-            terrainShader.setVec3("viewPos", camera.Position);
-
-
-            terrain.Draw();
-
-            // normalsShader.use();
-            // normalsShader.setMat4("projection", projection);
-            // normalsShader.setMat4("view", view);
-            // normalsShader.setMat4("model", model);
-            // t.Draw();
-            // then draw with normals
-
-
-            // model = glm::mat4(1.0f);
-            //
-            // model = glm::mat4(1.0f);
-            //
-            // glBindVertexArray(terrainVAO);
-            // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
-            // glDrawElements(GL_TRIANGLES, 3*2*6, GL_UNSIGNED_INT, 0);
-            // glBindVertexArray(0);
-
-
-
-            ///////////////////////////////////////////
-            // END OF RENDER LOGIC
-            ///////////////////////////////////////////
 
            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
            // -------------------------------------------------------------------------------

@@ -58,6 +58,7 @@ public:
     int noiseScale;
     float scale;
     float seed;
+    Shader* shader = new Shader("terrain.vs", "terrain.fs");
 
     // constructor
 
@@ -77,6 +78,8 @@ public:
         srand(time(NULL));
         std::cout << rand() << std::endl;
         this->seed = rand();//(float)rand();
+        //this->shader = new Shader("terrain.vs", "terrain.fs");
+        setupShader();
 
         // Malloc for each chunk
         verticesSize = (chunkSize+1) * (chunkSize+1);
@@ -106,8 +109,14 @@ public:
     }
 
     // render the mesh
-    void Draw()
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
     {
+        shader->use();
+        shader->setFloat("time", time);
+        shader->setMat4("projection", projection);
+        shader->setMat4("view", view);
+        shader->setMat4("model", model);
+        shader->setVec3("viewPos", camPos);
         // draw each chunk individually
         for(int i = 0; i < numChunks * numChunks; i++)
         {
@@ -115,6 +124,19 @@ public:
           glDrawElements(GL_TRIANGLES, indicesSize , GL_UNSIGNED_INT, 0);
           glBindVertexArray(0);
         }
+    }
+
+    void setupShader()
+    {
+      shader->use();
+      shader->setFloat("shininess", 32.0f);
+      shader->setFloat("maxHeight", heightScale);
+
+      // directional light
+      shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+      shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+      shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
+      shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
     }
 
 
@@ -318,12 +340,15 @@ private:
     {
         // Create the chunk and put it in our chunks
         int chunkID = x + (z*numChunks);
-        Chunk thisChunk = {.points = vertices,
-                           .indices = indices,
-                           .x = x,
-                           .z = z,
-                           .id = chunkID,
-                           .chunkSize = chunkSize};
+        Chunk thisChunk = {VAO : 0,
+                           VBO : 0,
+                           EBO : 0,
+                           points : vertices,
+                           indices : indices,
+                           x : x,
+                           z : z,
+                           id : chunkID,
+                           chunkSize : chunkSize};
 
         // create buffers/arrays
         glGenVertexArrays(1, &thisChunk.VAO);
