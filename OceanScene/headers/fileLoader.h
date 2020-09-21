@@ -3,6 +3,7 @@
 #include <vector>
 #include "json.hpp"
 #include <fstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -26,7 +27,7 @@ public:
 
       std::ofstream myFile;
       myFile.open("../saveFiles/test.json");
-      myFile << j;
+      myFile << std::setw(4) << j << std::endl;
       myFile.close();
 
 

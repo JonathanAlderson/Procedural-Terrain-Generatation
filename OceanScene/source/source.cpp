@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "terrain.h"
 #include "fileLoader.h"
+#include "seaweed.h"
 
 #include "sceneSetup.h"
 #include "texturesSetup.h"
@@ -91,14 +92,12 @@ int main()
     FileLoader fileSys = FileLoader();
     fileSys.WriteFile();
 
-    cubesSetup();
-    lightsSetup();
-    seaweedSetup(MAX_SEAWEED);
     //terrainSetup();
 
-    // Chunk
+    // Terrain Setup
     float terrainHeight = 15.;
-    Terrain t = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
+    Terrain terrain = Terrain(10, terrainHeight, 150., .2, 0.1, .8);
+    Seaweed seaweed = Seaweed(100);
 
 
     // load textures
@@ -110,7 +109,7 @@ int main()
     // ------------------------------------
     Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
     Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
-    Shader seaweedShader("seaweed.vs", "seaweed.fs");
+    //Shader seaweedShader("seaweed.vs", "seaweed.fs");
     Shader terrainShader("terrain.vs", "terrain.fs");
     Shader normalsShader("normal.vs", "normal.fs", "normal.gs");
     //shadersSetup();
@@ -118,13 +117,7 @@ int main()
     // shader configuration
     // --------------------
     lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader, terrainHeight);
-
-
-    // Seaweed setup stuff
-    seaweedShader.use();
-    seaweedShader.setInt("texture1", 0);
-    seaweedShader.setFloat("time", 1);
+    terrainShaderSetup(terrainShader, terrain.heightScale);
 
 
     while (!glfwWindowShouldClose(window))
@@ -183,52 +176,11 @@ int main()
            glBindTexture(GL_TEXTURE_2D, specularMap);
 
 
-           // // render containers
-           glBindVertexArray(cubeVAO);
-           for (unsigned int i = 0; i < 0; i++)
-           {
-               // calculate the model matrix for each object and pass it to shader before drawing
-               glm::mat4 model = glm::mat4(1.0f);
-               model = glm::translate(model, cubePositions[i]);
-               float angle = 20.0f * i;
-               model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-               lightingShader.setMat4("model", model);
-
-               glDrawArrays(GL_TRIANGLES, 0, 36);
-           }
-
-            // also draw the lamp object(s)
-            lightCubeShader.use();
-            lightCubeShader.setMat4("projection", projection);
-            lightCubeShader.setMat4("view", view);
-
-            // we now draw as many light bulbs as we have point lights.
-            glBindVertexArray(lightCubeVAO);
-            for (unsigned int i = 0; i < 4; i++)
-            {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, pointLightPositions[i]);
-                model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-                lightCubeShader.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
 
 
 
             // Draw Seaweed
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, seaweedTex);
-            model = glm::mat4(1.0f);
-            seaweedShader.use();
-            seaweedShader.setMat4("model", model);
-            seaweedShader.setMat4("view", view);
-            seaweedShader.setMat4("projection", projection);
-            seaweedShader.setFloat("time", glfwGetTime());
-
-            glBindVertexArray(seaweedVAO);
-
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_SEAWEED);
-            glBindVertexArray(0);
+            seaweed.Draw(model, view, projection, glfwGetTime());
 
 
 
@@ -243,7 +195,7 @@ int main()
             terrainShader.setVec3("viewPos", camera.Position);
 
 
-            t.Draw();
+            terrain.Draw();
 
             // normalsShader.use();
             // normalsShader.setMat4("projection", projection);
@@ -276,11 +228,7 @@ int main()
 
        // optional: de-allocate all resources once they've outlived their purpose:
        // ------------------------------------------------------------------------
-       glDeleteVertexArrays(1, &cubeVAO);
-       glDeleteVertexArrays(1, &lightCubeVAO);
-       glDeleteVertexArrays(1, &seaweedVAO);
-       glDeleteBuffers(1, &cubeVBO);
-       glDeleteBuffers(1, &quadVBO);
+       // cleanup done somewhere else
 
        // glfw: terminate, clearing all previously allocated GLFW resources.
        // ------------------------------------------------------------------

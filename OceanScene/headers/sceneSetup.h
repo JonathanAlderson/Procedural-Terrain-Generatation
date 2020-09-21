@@ -15,7 +15,6 @@ extern unsigned int terrainVBO, terrainVAO, terrainEBO;
 // Individual Setup Functions
 void cubesSetup();
 void lightsSetup();
-extern void seaweedSetup(int max);
 void terrainSetup();
 
 
