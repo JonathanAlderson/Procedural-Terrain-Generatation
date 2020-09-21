@@ -340,15 +340,15 @@ private:
     {
         // Create the chunk and put it in our chunks
         int chunkID = x + (z*numChunks);
-        Chunk thisChunk = {VAO : 0,
-                           VBO : 0,
-                           EBO : 0,
-                           points : vertices,
-                           indices : indices,
-                           x : x,
-                           z : z,
-                           id : chunkID,
-                           chunkSize : chunkSize};
+        Chunk thisChunk = {.VAO = 0,
+                           .VBO = 0,
+                           .EBO = 0,
+                           .points = vertices,
+                           .indices = indices,
+                           .x = x,
+                           .z = z,
+                           .id = chunkID,
+                           .chunkSize = chunkSize};
 
         // create buffers/arrays
         glGenVertexArrays(1, &thisChunk.VAO);

@@ -1,5 +1,5 @@
 #include "root_directory.h"
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <direct.h>
 #define GetCurrentDir _getcwd
 #else
@@ -10,13 +10,15 @@
 #include<string.h>
 
 // Finds the CWD on Windows or Linux
-using namespace std;
-char * get_current_dir() {
-   char buff[FILENAME_MAX]; //create string buffer to hold path
-   char * cwd = GetCurrentDir( buff, FILENAME_MAX );
-   char shortCwd[strlen(cwd) - 7];
-   strncpy(shortCwd, cwd, strlen(cwd) - 7);
-   char * shortCwdReturn = shortCwd;
-   return shortCwdReturn;
-   // in some real pointer hell here
+char* get_current_dir() {
+	char* cwd = GetCurrentDir(NULL, FILENAME_MAX);
+	if (cwd) {
+		cwd[strlen(cwd) - 7] = '\0';
+		return cwd;
+	}
+	else {
+		throw "Could not obtain current working directory.";
+	}
+
+	// in some real pointer hell here
 }
