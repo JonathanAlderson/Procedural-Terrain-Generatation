@@ -239,67 +239,54 @@ private:
       count = 0; // reset counter
       for(int i = 0; i < verticesSizeBorder; i++)
       {
-        // If not in the first row
-        if(i > chunkSize + 2)
-        {
-          // If not in the first column
-          if(i%(chunkSize + 3) != 0)
-          {
-            // If not in the last column
-            if(i%(chunkSize + 3) != 5)
-            {
-              // If not in the last row
-              if(i < (chunkSize+3)*(chunkSize+2))
-              {
-                //std::cout << i << std::endl;
-                // -(chunkSize+4)  go back one row one column
-                //thisNormal = glm::normalize(normals[i - (chunkSize+4)]);
-                thisNormal = glm::normalize(normals[i]);
-                thisVertex.Position = positions[i - (chunkSize+4)];
-                thisVertex.Normal =  thisNormal;
-                vertices[count] = thisVertex;
 
-                //std::cout << "C: " << counter << " i: " << i << " --> " << i - (chunkSize+4) << std::endl;
-                count++;
-              }
-            }
+        // If not in the first or last row
+        if(i > chunkSize + 2 && i < (chunkSize+3)*(chunkSize+2))
+        {
+          // If not in the first or last column
+          if(i%(chunkSize + 3) != 0 && i%(chunkSize + 3) != 5)
+          {
+            // Put data in struct
+            thisNormal = glm::normalize(normals[i]);
+            thisVertex.Position = positions[i - (chunkSize+4)];
+            thisVertex.Normal =  thisNormal;
+            vertices[count] = thisVertex;
+            count++;
           }
         }
       }
     }
 
+    glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
+    {
+      return glm::cross(c-a, b-a);
+    }
 
     float getHeight(float posX, float posZ)
     {
       // Get the height of the terrain
-      // with different logic for being in the ocean
-      // or on land
-
       float height = 0;
       float ns = noiseScale;
       float hs = heightScale;
       float toCenter = std::sqrt((posX * posX) + (posZ * posZ));
       float seaDepth;
       float seaOffset;
+      octaves = 4;
 
       // Add the seed
       posX += seed;
       posZ += seed;
 
       // Mountains
-      octaves = 4;
       for(int i = 0; i < octaves; i++)
       {
         height += ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
-
         ns *= .5;
         hs *= ((height/heightScale))/1.5;
       }
 
       // Less Pronounced as you get further away
-      //height = height * (1. - std::min((toCenter/heightMultiplier), (1.0f)));
       height = height * 1. / max((6. * (toCenter/heightMultiplier)), 1.);
-
 
       // If we are underwater
       if((height/heightScale) < waterLevel)
@@ -320,16 +307,9 @@ private:
 
         height = height + seaOffset * seaDepth * 4.;
       }
-
       height -= waterLevel * heightScale;
 
       return height;
-
-    }
-
-    glm::vec3 normal(glm::vec3 a, glm::vec3 b, glm::vec3 c)
-    {
-      return glm::cross(c-a, b-a);
     }
 
     // initializes all the buffer objects/arrays
@@ -338,7 +318,6 @@ private:
     {
         // Create the chunk and put it in our chunks
         int chunkID = x + (z*numChunks);
-        //VAO, VBO, EBO
         Chunk thisChunk = {.points = vertices,
                            .indices = indices,
                            .x = x,
@@ -350,23 +329,20 @@ private:
         glGenVertexArrays(1, &thisChunk.VAO);
         glGenBuffers(1, &thisChunk.VBO);
         glGenBuffers(1, &thisChunk.EBO);
-
         glBindVertexArray(thisChunk.VAO);
+
         // load data into vertex buffers
         glBindBuffer(GL_ARRAY_BUFFER, thisChunk.VBO);
         glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, thisChunk.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
-        // set the vertex attribute pointers
-        // vertex Positions
+        // VERTEX ATTRIBUTE POINTERS
+        // vertex Positions and vertex normals
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-        // vertex normals
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-
         glBindVertexArray(0);
 
         // Put the data in the main chunks
