@@ -4,6 +4,7 @@
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <time.h>
 #include "glm.hpp"
+#include "json.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/noise.hpp"
 
@@ -11,19 +12,23 @@
 
 #include <string>
 #include <vector>
-using namespace std;
 
-struct Vertex {
+
+namespace v
+{
+  struct Vertex {
     // position
     glm::vec3 Position;
     // normal
     glm::vec3 Normal;
-};
 
+  };
+}
 
+using namespace std;
 struct Chunk {
   unsigned int VAO, VBO, EBO;
-  Vertex *points;
+  v::Vertex *points;
   int *indices;
   int x;
   int z;
@@ -31,6 +36,7 @@ struct Chunk {
   int chunkSize;
 };
 
+using namespace v;
 class Terrain {
 public:
 
@@ -67,7 +73,7 @@ public:
     // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
     // 10, 15., 150., .2, 0.1, .8
 
-
+    // Constructor For If We Want To Generate A New Map
     Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
     {
         this->numChunks = numChunks;
@@ -110,18 +116,62 @@ public:
             setupChunk(j, i);
           }
         }
+    }
 
-        for(int i = 0; i < 10; i++)
+    // Setup Function For If The Map Already Exists
+    Terrain(int seed, int numChunks, float heightScale, int indicesSize, vector<int> indicesIn, vector<vector<v::Vertex>> positionsIn)
+    {
+        this->seed = seed;
+        this->numChunks = numChunks;
+        this->chunkSize = chunkSize;
+        this->heightScale = heightScale;
+        this->indicesSize = indicesSize;
+
+
+        // Mallocing
+        verticesSize = (chunkSize+1) * (chunkSize+1);
+        vertices = (Vertex **) malloc(numChunks * numChunks * sizeof(Vertex *));
+        indices = (int *) malloc(indicesSize * sizeof(int));
+        for(int i = 0; i < numChunks * numChunks; i++)
         {
-          std::cout << chunks[0].points[i].Position.y << "     " << chunks[12].points[i].Position.y  << std::endl;
+          vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        }
+        chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
+
+        // Assigning Values From File
+        for(int i = 0; i < numChunks * numChunks; i ++)
+        {
+          for(int j = 0; j < verticesSize; j++)
+          {
+            vertices[i][j] = positionsIn[i][j];
+
+          }
         }
 
-        // Being good
-        // free(vertices);
-        // free(indices);
-        // free(normals);
-        // free(positions);
+        for(int i = 0; i < indicesSize; i++)
+        {
+          indices[i] = indicesIn[i];
+        }
+
+        this->vertices = vertices;
+        this->indices = indices;
+
+        setupShader();
+
+
+        for(int i = 0; i < numChunks; i++)
+        {
+          for(int j = 0; j < numChunks; j++)
+          {
+            chunkID = j + (i*numChunks);
+            setupChunk(j, i);
+          }
+        }
     }
+
+
+
+
 
     // render the mesh
     void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
@@ -364,6 +414,7 @@ private:
                            id : chunkID,
                            chunkSize : chunkSize};
 
+
         // create buffers/arrays
         glGenVertexArrays(1, &thisChunk.VAO);
         glGenBuffers(1, &thisChunk.VBO);
@@ -383,6 +434,7 @@ private:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
         glBindVertexArray(0);
+
 
         // Put the data in the main chunks
         chunks[chunkID] = thisChunk;
