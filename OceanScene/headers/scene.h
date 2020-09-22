@@ -31,8 +31,8 @@ public:
     Scene()
     {
         srand(time(NULL));
-        seed = rand();
-        seed = 1;
+        seed = rand()%10000;
+        //seed = 1;
         std::cout << "Seed: " << seed << '\n';
         fileSys = FileLoader();
 
