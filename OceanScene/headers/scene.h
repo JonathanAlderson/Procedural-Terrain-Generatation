@@ -7,6 +7,7 @@
 #include "seaweed.h"
 #include "fileLoader.h"
 #include "camera.h"
+#include "rock.h"
 
 #include <string>
 #include <vector>
@@ -24,12 +25,14 @@ public:
     FileLoader fileSys;
     Terrain* terrain;
     Seaweed* seaweed;
+    Rock* rock;
     int seed;
 
     Scene(int seed)
     {
         terrain = new Terrain(10, 15., 150., .2, 0.1, .8);
         seaweed = new Seaweed(100);
+        rock = new Rock(10.0f, 15.0f, glm::vec3(1.0f, 1.0f, 1.0f));
         seed = seed;
 
     }
@@ -48,8 +51,9 @@ public:
 
 
       // Draw all the things in the scene
-      terrain->Draw(model, view, projection, time, camera.Position);
-      seaweed->Draw(model, view, projection, time);
+      //terrain->Draw(model, view, projection, time, camera.Position);
+      //seaweed->Draw(model, view, projection, time);
+      rock->Draw(model, view, projection, time);
 
 
 
