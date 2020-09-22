@@ -69,13 +69,18 @@ public:
     int chunkID;
     float roughness;
 
+    // for generating seaweeds
+    glm::vec3* seaweedPos;
+    int maxSeaweed;
+    int seaweedCount;
+
     // constructor
 
     // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
     // 10, 15., 150., .2, 0.1, .8
 
     // Constructor For If We Want To Generate A New Map
-    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness)
+    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed)
     {
         std::cout << "Generating New Map" << '\n';
         this->numChunks = numChunks;
@@ -86,6 +91,8 @@ public:
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
         this->seed = seed;//(float)rand();
+        this->maxSeaweed = maxSeaweed;
+        this->seaweedCount = 0;
         //this->shader = new Shader("terrain.vs", "terrain.fs");
         setupShader();
 
@@ -103,6 +110,8 @@ public:
         normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
         chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
+
+        seaweedPos = (glm::vec3 *) malloc(maxSeaweed * sizeof(glm::vec3));
 
         vertRowLen = verticesSize;
 
@@ -414,7 +423,39 @@ private:
       }
       height -= waterLevel * heightScale;
 
+      seaweedPosition(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
+
       return height;
+    }
+
+    float randFloat()
+    {
+      return rand()/RAND_MAX;
+    }
+
+    void seaweedPosition(glm::vec3 position)
+    {
+      float noise = (glm::perlin(glm::vec2((float)(position.x+seed)/(noiseScale/8.), (float)(position.z+seed)/(noiseScale/8.)))+.707)/1.414;
+
+      float pLow = 0.0001;
+      float pHigh = 0.01;
+
+      float p = pLow + noise*(pHigh - pLow);
+
+      std::cout << "P: " << p << '\n';
+      if(seaweedCount < maxSeaweed)
+      {
+        if(p > randFloat())
+        {
+          if(position.y < 0)
+          {
+            //std::cout << "Pos: " << position.x << " " << position.y << " " << position.z << '\n';
+            seaweedPos[seaweedCount] = position;
+            seaweedCount++;
+          }
+        }
+
+      }
     }
 
     // initializes all the buffer objects/arrays

@@ -32,6 +32,9 @@ public:
     {
         srand(time(NULL));
         seed = rand()%10000;
+
+        int maxSeaweed = 10000;
+
         //seed = 1;
         std::cout << "Seed: " << seed << '\n';
         fileSys = FileLoader();
@@ -50,12 +53,14 @@ public:
         // }
         // else
         // {
-          terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30.);
+          terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30., maxSeaweed);
+
+
         //   fileSys.writeTerrainFile(seed, terrain);
         // }
 
         //
-        seaweed = new Seaweed(100);
+        seaweed = new Seaweed(maxSeaweed, terrain->seaweedPos);
 
     }
 

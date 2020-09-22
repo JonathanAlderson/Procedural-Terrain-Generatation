@@ -28,7 +28,7 @@ public:
 
 
     // constructor
-    Seaweed(int maxSeaweed)
+    Seaweed(int maxSeaweed, glm::vec3 *positions)
     {
 
       seaweedNum = maxSeaweed;
@@ -36,12 +36,8 @@ public:
 
       this->shader = new Shader("seaweed.vs", "seaweed.fs");
       // Malloc for translations
-      translations = (glm::vec3 *) malloc(sizeof(glm::vec3) * seaweedNum);
-      // create positions
-      for (int i = 0; i < seaweedNum; i++)
-      {
-        translations[i] = glm::vec3((float)(i%10), 0., (i/10));
-      }
+      translations = positions;
+
 
       // Do all the OpenGL setup
       setupSeaweed();
