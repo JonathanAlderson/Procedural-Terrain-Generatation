@@ -41,7 +41,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 10.;
+    int chunkSize = 100.;
 
     Chunk *chunks;
 
@@ -67,6 +67,7 @@ public:
     Shader* shader = new Shader("terrain.vs", "terrain.fs");
     int vertRowLen; // For memory offsets
     int chunkID;
+    float roughness;
 
     // constructor
 
@@ -74,18 +75,17 @@ public:
     // 10, 15., 150., .2, 0.1, .8
 
     // Constructor For If We Want To Generate A New Map
-    Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
+    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness)
     {
+        std::cout << "Generating New Map" << '\n';
         this->numChunks = numChunks;
         this->heightScale = heightScale;
         this->noiseScale = noiseScale;
         this->scale = scale;
+        this->roughness = roughness;
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
-        this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
-        srand(time(NULL));
-        std::cout << rand() << std::endl;
-        this->seed = rand();//(float)rand();
+        this->seed = seed;//(float)rand();
         //this->shader = new Shader("terrain.vs", "terrain.fs");
         setupShader();
 
@@ -364,17 +364,35 @@ private:
       posX += seed;
       posZ += seed;
 
-      // Mountains
+      // Harder to be a mountain as you get further away
+      height = - (.03 * toCenter) ;
+
+      // // // Mountains
       for(int i = 0; i < octaves; i++)
       {
         height += ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
+
+
+        if(i == 0)
+        {
+          // Initial height less pronounces as further away
+          height  += (.03 * toCenter);
+          height *= 1./(exp(3. * toCenter/(((chunkSize * numChunks)/2.) * landPrevelence)));
+          height -= (.03 * toCenter);
+          if(height < waterLevel)
+          {
+            break;
+          }
+          // Set rockyness based on height
+          hs = ((height/heightScale))*roughness;
+        }
+
+        // Adjust height and noiseScale
+        hs *= .5;
         ns *= .5;
-        hs *= ((height/heightScale))/1.5;
+
       }
-
-      // Less Pronounced as you get further away
-      height = height * 1. / max((6. * (toCenter/heightMultiplier)), 1.);
-
+      
       // If we are underwater
       if((height/heightScale) < waterLevel)
       {

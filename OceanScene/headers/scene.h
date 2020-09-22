@@ -8,6 +8,7 @@
 #include "fileLoader.h"
 #include "camera.h"
 #include "json.hpp"
+#include <time.h>
 
 #include <string>
 #include <vector>
@@ -27,36 +28,31 @@ public:
     Seaweed* seaweed;
     int seed;
 
-    Scene(int seed)
+    Scene()
     {
-
-        seed = seed;
+        srand(time(NULL));
+        seed = rand();
+        seed = 1;
+        std::cout << "Seed: " << seed << '\n';
         fileSys = FileLoader();
 
-        if(fileSys.fileExists(seed))
-        {
-          nlohmann::json j = fileSys.readTerrainFile(seed);
-          //auto json = nlohmann::json::parse(j);
-          //
-          std::cout << j["seed"].get<int>() << '\n';
-          std::cout << j["numChunks"].get<int>() << '\n';
-          std::cout << j["heightScale"].get<int>() << '\n';
-          std::cout << j["indicesSize"].get<int>() << '\n';
-          std::cout << j["indices"].get<vector<int>>()[1] << '\n';
-          std::cout << j["points"].get<vector<vector<v::Vertex>>>()[0][0].Position.x << '\n';
-
-          terrain = new Terrain(j["seed"].get<int>(),
-                                j["numChunks"].get<int>(),
-                                j["heightScale"].get<int>(),
-                                j["indicesSize"].get<int>(),
-                                j["indices"].get<vector<int>>(),
-                                j["points"].get<vector<vector<v::Vertex>>>());
-        }
-        else
-        {
-          terrain = new Terrain(10, 15., 150., .2, 0.1, .8);
-          fileSys.writeTerrainFile(seed, terrain);
-        }
+        // if(fileSys.fileExists(seed))
+        // {
+        //   nlohmann::json j = fileSys.readTerrainFile(seed);
+        //   //auto json = nlohmann::json::parse(j);
+        //
+        //   terrain = new Terrain(j["seed"].get<int>(),
+        //                         j["numChunks"].get<int>(),
+        //                         j["heightScale"].get<int>(),
+        //                         j["indicesSize"].get<int>(),
+        //                         j["indices"].get<vector<int>>(),
+        //                         j["points"].get<vector<vector<v::Vertex>>>());
+        // }
+        // else
+        // {
+          terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30.);
+        //   fileSys.writeTerrainFile(seed, terrain);
+        // }
 
         //
         seaweed = new Seaweed(100);
