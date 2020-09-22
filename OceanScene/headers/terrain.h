@@ -4,6 +4,7 @@
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <time.h>
 #include "glm.hpp"
+#include "json.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/noise.hpp"
 
@@ -11,19 +12,23 @@
 
 #include <string>
 #include <vector>
-using namespace std;
 
-struct Vertex {
+
+namespace v
+{
+  struct Vertex {
     // position
     glm::vec3 Position;
     // normal
     glm::vec3 Normal;
-};
 
+  };
+}
 
+using namespace std;
 struct Chunk {
   unsigned int VAO, VBO, EBO;
-  Vertex *points;
+  v::Vertex *points;
   int *indices;
   int x;
   int z;
@@ -31,16 +36,17 @@ struct Chunk {
   int chunkSize;
 };
 
+using namespace v;
 class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 10.;
+    int chunkSize = 100.;
 
     Chunk *chunks;
 
     // mesh Data
-    Vertex *vertices;
+    Vertex **vertices;
     glm::vec3 *positions;
     glm::vec3 *normals;
     int *indices;
@@ -59,25 +65,27 @@ public:
     float scale;
     float seed;
     Shader* shader = new Shader("terrain.vs", "terrain.fs");
+    int vertRowLen; // For memory offsets
+    int chunkID;
+    float roughness;
 
     // constructor
 
     // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
     // 10, 15., 150., .2, 0.1, .8
 
-
-    Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
+    // Constructor For If We Want To Generate A New Map
+    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness)
     {
+        std::cout << "Generating New Map" << '\n';
         this->numChunks = numChunks;
         this->heightScale = heightScale;
         this->noiseScale = noiseScale;
         this->scale = scale;
+        this->roughness = roughness;
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
-        this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
-        srand(time(NULL));
-        std::cout << rand() << std::endl;
-        this->seed = rand();//(float)rand();
+        this->seed = seed;//(float)rand();
         //this->shader = new Shader("terrain.vs", "terrain.fs");
         setupShader();
 
@@ -85,28 +93,85 @@ public:
         verticesSize = (chunkSize+1) * (chunkSize+1);
         verticesSizeBorder = (chunkSize+3) * (chunkSize+3);
         indicesSize = (chunkSize) * (chunkSize) * 6;
-        vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+
+        vertices = (Vertex **) malloc(numChunks * numChunks * sizeof(Vertex *));
+        for(int i = 0; i < numChunks * numChunks; i++)
+        {
+          vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        }
         positions = (glm::vec3 *) malloc(verticesSizeBorder * sizeof(glm::vec3));
         normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
         chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
+
+        vertRowLen = verticesSize;
 
         // Generate data for each chunk
         for(int i = 0; i < numChunks; i++)
         {
           for(int j = 0; j < numChunks; j++)
           {
+            chunkID = j + (i*numChunks);
             generateChunkPoints(j, i);
             setupChunk(j, i);
           }
         }
-
-        // Being good
-        free(vertices);
-        free(indices);
-        free(normals);
-        free(positions);
     }
+
+    // Setup Function For If The Map Already Exists
+    Terrain(int seed, int numChunks, float heightScale, int indicesSize, vector<int> indicesIn, vector<vector<v::Vertex>> positionsIn)
+    {
+        this->seed = seed;
+        this->numChunks = numChunks;
+        this->chunkSize = chunkSize;
+        this->heightScale = heightScale;
+        this->indicesSize = indicesSize;
+
+
+        // Mallocing
+        verticesSize = (chunkSize+1) * (chunkSize+1);
+        vertices = (Vertex **) malloc(numChunks * numChunks * sizeof(Vertex *));
+        indices = (int *) malloc(indicesSize * sizeof(int));
+        for(int i = 0; i < numChunks * numChunks; i++)
+        {
+          vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        }
+        chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
+
+        // Assigning Values From File
+        for(int i = 0; i < numChunks * numChunks; i ++)
+        {
+          for(int j = 0; j < verticesSize; j++)
+          {
+            vertices[i][j] = positionsIn[i][j];
+
+          }
+        }
+
+        for(int i = 0; i < indicesSize; i++)
+        {
+          indices[i] = indicesIn[i];
+        }
+
+        this->vertices = vertices;
+        this->indices = indices;
+
+        setupShader();
+
+
+        for(int i = 0; i < numChunks; i++)
+        {
+          for(int j = 0; j < numChunks; j++)
+          {
+            chunkID = j + (i*numChunks);
+            setupChunk(j, i);
+          }
+        }
+    }
+
+
+
+
 
     // render the mesh
     void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
@@ -205,7 +270,7 @@ private:
           // Calculate the height for this position
           height = getHeight(posX, posZ);
 
-          // Update this Vertexs' positon
+          // Update this Vertexs' positon in correct memory space
           positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
 
           // Create Face
@@ -272,7 +337,7 @@ private:
             thisNormal = glm::normalize(normals[i]);
             thisVertex.Position = positions[i - (chunkSize+4)];
             thisVertex.Normal =  thisNormal;
-            vertices[count] = thisVertex;
+            vertices[chunkID][count] = thisVertex;
             count++;
           }
         }
@@ -299,16 +364,34 @@ private:
       posX += seed;
       posZ += seed;
 
-      // Mountains
+      // Harder to be a mountain as you get further away
+      height = - (.03 * toCenter) ;
+
+      // // // Mountains
       for(int i = 0; i < octaves; i++)
       {
         height += ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
-        ns *= .5;
-        hs *= ((height/heightScale))/1.5;
-      }
 
-      // Less Pronounced as you get further away
-      height = height * 1. / max((6. * (toCenter/heightMultiplier)), 1.);
+
+        if(i == 0)
+        {
+          // Initial height less pronounces as further away
+          height  += (.03 * toCenter);
+          height *= 1./(exp(3. * toCenter/(((chunkSize * numChunks)/2.) * landPrevelence)));
+          height -= (.03 * toCenter);
+          if(height < waterLevel)
+          {
+            break;
+          }
+          // Set rockyness based on height
+          hs = ((height/heightScale))*roughness;
+        }
+
+        // Adjust height and noiseScale
+        hs *= .5;
+        ns *= .5;
+
+      }
 
       // If we are underwater
       if((height/heightScale) < waterLevel)
@@ -343,12 +426,13 @@ private:
         Chunk thisChunk = {.VAO = 0,
                            .VBO = 0,
                            .EBO = 0,
-                           .points = vertices,
+                           .points = vertices[chunkID],
                            .indices = indices,
                            .x = x,
                            .z = z,
                            .id = chunkID,
                            .chunkSize = chunkSize};
+
 
         // create buffers/arrays
         glGenVertexArrays(1, &thisChunk.VAO);
@@ -358,7 +442,7 @@ private:
 
         // load data into vertex buffers
         glBindBuffer(GL_ARRAY_BUFFER, thisChunk.VBO);
-        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[chunkID][0], GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, thisChunk.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
@@ -369,6 +453,7 @@ private:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
         glBindVertexArray(0);
+
 
         // Put the data in the main chunks
         chunks[chunkID] = thisChunk;

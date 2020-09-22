@@ -89,7 +89,7 @@ int main()
 
     //  Scene Setup
     // --------------------
-    Scene scene = Scene(0);
+    Scene scene = Scene();
 
 
 

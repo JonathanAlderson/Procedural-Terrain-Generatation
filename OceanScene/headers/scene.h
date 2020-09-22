@@ -7,6 +7,8 @@
 #include "seaweed.h"
 #include "fileLoader.h"
 #include "camera.h"
+#include "json.hpp"
+#include <time.h>
 
 #include <string>
 #include <vector>
@@ -26,11 +28,34 @@ public:
     Seaweed* seaweed;
     int seed;
 
-    Scene(int seed)
+    Scene()
     {
-        terrain = new Terrain(10, 15., 150., .2, 0.1, .8);
+        srand(time(NULL));
+        seed = rand()%10000;
+        //seed = 1;
+        std::cout << "Seed: " << seed << '\n';
+        fileSys = FileLoader();
+
+        // if(fileSys.fileExists(seed))
+        // {
+        //   nlohmann::json j = fileSys.readTerrainFile(seed);
+        //   //auto json = nlohmann::json::parse(j);
+        //
+        //   terrain = new Terrain(j["seed"].get<int>(),
+        //                         j["numChunks"].get<int>(),
+        //                         j["heightScale"].get<int>(),
+        //                         j["indicesSize"].get<int>(),
+        //                         j["indices"].get<vector<int>>(),
+        //                         j["points"].get<vector<vector<v::Vertex>>>());
+        // }
+        // else
+        // {
+          terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30.);
+        //   fileSys.writeTerrainFile(seed, terrain);
+        // }
+
+        //
         seaweed = new Seaweed(100);
-        seed = seed;
 
     }
 
