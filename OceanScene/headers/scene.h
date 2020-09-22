@@ -32,7 +32,8 @@ public:
     {
         terrain = new Terrain(10, 15., 150., .2, 0.1, .8);
         seaweed = new Seaweed(100);
-        rock = new Rock(10.0f, 15.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+        // rock arguments: nr Vertices, length of cube grid, rockPosition, isosurface level
+        rock = new Rock(2.0f, 10.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.07f);
         seed = seed;
 
     }

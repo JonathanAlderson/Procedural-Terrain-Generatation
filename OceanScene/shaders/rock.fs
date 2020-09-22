@@ -7,5 +7,4 @@ uniform vec4 cubeColor;
 void main()
 {
 	FragColor = cubeColor;
-
 }
