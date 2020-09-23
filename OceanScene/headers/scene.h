@@ -8,6 +8,8 @@
 #include "fileLoader.h"
 #include "camera.h"
 #include "json.hpp"
+#include "water.h"
+#include "waterTile.h"
 #include <time.h>
 
 #include <string>
@@ -26,6 +28,9 @@ public:
     FileLoader fileSys;
     Terrain* terrain;
     Seaweed* seaweed;
+    Water* water;
+    WaterTile* waterTile;
+
     int seed;
 
     Scene()
@@ -41,27 +46,12 @@ public:
         std::cout << "Max Seaweed: " << maxSeaweed << '\n';
         seaweed = new Seaweed(maxSeaweed, terrain->seaweedPos);
 
-        // fileSys = FileLoader();
-        // if(fileSys.fileExists(seed))
-        // {
-        //   nlohmann::json j = fileSys.readTerrainFile(seed);
-        //   //auto json = nlohmann::json::parse(j);
-        //
-        //   terrain = new Terrain(j["seed"].get<int>(),
-        //                         j["numChunks"].get<int>(),
-        //                         j["heightScale"].get<int>(),
-        //                         j["indicesSize"].get<int>(),
-        //                         j["indices"].get<vector<int>>(),
-        //                         j["points"].get<vector<vector<v::Vertex>>>());
-        // }
-        // else
-        // {
+
+        waterTile = new WaterTile(0., 0., 0.);
+        water = new Water();
 
 
-        //   fileSys.writeTerrainFile(seed, terrain);
-        // }
 
-        //
 
     }
 
@@ -81,6 +71,7 @@ public:
       // Draw all the things in the scene
       terrain->Draw(model, view, projection, time, camera.Position);
       seaweed->Draw(model, view, projection, time);
+      water->Draw(waterTile, model, view, projection, camera);
 
 
 
