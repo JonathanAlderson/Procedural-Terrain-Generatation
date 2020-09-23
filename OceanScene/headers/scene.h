@@ -32,13 +32,16 @@ public:
     {
         srand(time(NULL));
         seed = rand()%10000;
-
-        int maxSeaweed = 1000;
-
-        //seed = 1;
+        int maxSeaweed = 20000;
         std::cout << "Seed: " << seed << '\n';
-        fileSys = FileLoader();
 
+        terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30., maxSeaweed);
+        maxSeaweed = terrain->maxSeaweed;
+
+        std::cout << "Max Seaweed: " << maxSeaweed << '\n';
+        seaweed = new Seaweed(maxSeaweed, terrain->seaweedPos);
+
+        // fileSys = FileLoader();
         // if(fileSys.fileExists(seed))
         // {
         //   nlohmann::json j = fileSys.readTerrainFile(seed);
@@ -53,14 +56,12 @@ public:
         // }
         // else
         // {
-          terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30., maxSeaweed);
 
 
         //   fileSys.writeTerrainFile(seed, terrain);
         // }
 
         //
-        seaweed = new Seaweed(maxSeaweed, terrain->seaweedPos);
 
     }
 

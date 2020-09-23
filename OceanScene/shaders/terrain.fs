@@ -121,6 +121,9 @@ vec3 caustics()
 	c = 1.17-pow(c, 1.4);
 	vec3 colour = vec3(pow(abs(c), 8.0));
 
+  // Only once you get underwater
+  colour *= smoothstep(0, -10., FragPos.y);
+
 	return colour;
 }
 
@@ -139,7 +142,6 @@ void main()
     vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
 
     result += caustics();
-
 
     FragColor = vec4(result, 1.0);
 

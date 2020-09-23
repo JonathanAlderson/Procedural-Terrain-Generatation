@@ -74,7 +74,7 @@ public:
     int maxSeaweed;
     int seaweedCount;
     float seaweedMin;
-    float maxSeaweedSpawnChance = 0.01;
+    float maxSeaweedSpawnChance = 0.15;
     int didntSpawn = 0;
     int didSpawn = 0;
 
@@ -135,9 +135,8 @@ public:
           }
         }
         std::cout << "Spawned: " << seaweedCount << std::endl;
-        std::cout << "Total: " << maxSeaweed << '\n';
-        std::cout << "Did: " << didSpawn << '\n';
-        std::cout << "Didn't: " << didntSpawn << '\n';
+        // Don't render the seaweed that didn't get a position
+        this->maxSeaweed = seaweedCount;
     }
 
     // Setup Function For If The Map Already Exists
@@ -459,10 +458,6 @@ private:
         maxSeaweedSpawnChance += 0.01;
         seaweedMin = 1.0 - (((float)maxSeaweed / (float)totalVertices) / (maxSeaweedSpawnChance / 2));
       }
-      std::cout << "Vertices: " << totalVertices << '\n';
-      std::cout << "Max Seaweed: " << maxSeaweed << '\n';
-      std::cout << "SeaweedMin: " << seaweedMin << '\n';
-      std::cout << "MaxSpawnChance: " << maxSeaweedSpawnChance << '\n';
     }
 
     int spawnSeaweed(float noise, float min, float maxSpawnChance)
