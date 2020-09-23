@@ -33,7 +33,7 @@ public:
         srand(time(NULL));
         seed = rand()%10000;
 
-        int maxSeaweed = 10000;
+        int maxSeaweed = 1000;
 
         //seed = 1;
         std::cout << "Seed: " << seed << '\n';

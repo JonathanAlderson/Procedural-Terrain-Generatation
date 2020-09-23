@@ -73,6 +73,10 @@ public:
     glm::vec3* seaweedPos;
     int maxSeaweed;
     int seaweedCount;
+    float seaweedMin;
+    float maxSeaweedSpawnChance = 0.01;
+    int didntSpawn = 0;
+    int didSpawn = 0;
 
     // constructor
 
@@ -91,8 +95,13 @@ public:
         this->waterLevel = waterLevel;
         this->landPrevelence = landPrevelence;
         this->seed = seed;//(float)rand();
+
+        // Seaweed Things
         this->maxSeaweed = maxSeaweed;
         this->seaweedCount = 0;
+
+
+        seaweedSetup();
         //this->shader = new Shader("terrain.vs", "terrain.fs");
         setupShader();
 
@@ -125,6 +134,10 @@ public:
             setupChunk(j, i);
           }
         }
+        std::cout << "Spawned: " << seaweedCount << std::endl;
+        std::cout << "Total: " << maxSeaweed << '\n';
+        std::cout << "Did: " << didSpawn << '\n';
+        std::cout << "Didn't: " << didntSpawn << '\n';
     }
 
     // Setup Function For If The Map Already Exists
@@ -430,33 +443,69 @@ private:
 
     float randFloat()
     {
-      return rand()/RAND_MAX;
+      return ((float)rand()/RAND_MAX);
+    }
+
+    ////////////////////////////////////////
+    // SEAWEED SPAWNING FUNCTIONS
+    ////////////////////////////////////////
+    void seaweedSetup()
+    {
+      float totalVertices = chunkSize * chunkSize * numChunks * numChunks;
+      seaweedMin = 1.0 - (((float)maxSeaweed / (float)totalVertices) / (maxSeaweedSpawnChance / 2));
+
+      while( seaweedMin < 0)
+      {
+        maxSeaweedSpawnChance += 0.01;
+        seaweedMin = 1.0 - (((float)maxSeaweed / (float)totalVertices) / (maxSeaweedSpawnChance / 2));
+      }
+      std::cout << "Vertices: " << totalVertices << '\n';
+      std::cout << "Max Seaweed: " << maxSeaweed << '\n';
+      std::cout << "SeaweedMin: " << seaweedMin << '\n';
+      std::cout << "MaxSpawnChance: " << maxSeaweedSpawnChance << '\n';
+    }
+
+    int spawnSeaweed(float noise, float min, float maxSpawnChance)
+    {
+      if(noise < min)
+      {
+        return 0.;
+      }
+      else
+      {
+        if((((noise - min) / (1.0 - min)) * maxSpawnChance) > randFloat())
+        {
+          didSpawn++;
+          return 1.;
+        }
+        else
+        {
+          didntSpawn++;
+          return 0.;
+        }
+      }
     }
 
     void seaweedPosition(glm::vec3 position)
     {
       float noise = (glm::perlin(glm::vec2((float)(position.x+seed)/(noiseScale/8.), (float)(position.z+seed)/(noiseScale/8.)))+.707)/1.414;
 
-      float pLow = 0.0001;
-      float pHigh = 0.01;
-
-      float p = pLow + noise*(pHigh - pLow);
-
-      std::cout << "P: " << p << '\n';
       if(seaweedCount < maxSeaweed)
       {
-        if(p > randFloat())
+        if(spawnSeaweed(noise, seaweedMin, maxSeaweedSpawnChance) == 1.0)
         {
           if(position.y < 0)
           {
-            //std::cout << "Pos: " << position.x << " " << position.y << " " << position.z << '\n';
             seaweedPos[seaweedCount] = position;
             seaweedCount++;
           }
         }
-
       }
     }
+
+    ////////////////////////////////////////
+    // END SEAWEED SPAWNING FUNCTIONS
+    ////////////////////////////////////////
 
     // initializes all the buffer objects/arrays
     // inside the chunk from the current data
