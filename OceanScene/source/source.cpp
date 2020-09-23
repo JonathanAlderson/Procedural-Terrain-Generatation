@@ -92,6 +92,10 @@ int main()
     Scene scene = Scene();
 
 
+    // Water Setup
+    // --------------------
+    //WaterFrameBuffers fbos = new WaterFrameBuffers()
+
 
     while (!glfwWindowShouldClose(window))
        {

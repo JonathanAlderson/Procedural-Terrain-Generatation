@@ -55,26 +55,38 @@ public:
 
     }
 
-    // render the mesh
-    void Draw(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time)
+    void DrawSetup(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera)
     {
+      // Does everything to draw except the actual drawing
       // Clear screen
       glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // view/projection/model transformations
-      projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-      view = camera.GetViewMatrix();
-      model = glm::mat4(1.0f);
-
-
-      // Draw all the things in the scene
-      terrain->Draw(model, view, projection, time, camera.Position);
-      seaweed->Draw(model, view, projection, time);
-      water->Draw(waterTile, model, view, projection, camera);
-
-
-
+      this->projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+      this->view = camera.GetViewMatrix();
+      this->model = glm::mat4(1.0f);
     }
+
+    // render everything
+    void Draw(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time)
+    {
+      DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
+      // Draw all the things in the scene
+      terrain->Draw(this->model, this->view, this->projection, time, camera.Position);
+      seaweed->Draw(this->model, this->view, this->projection, time);
+      water->Draw(waterTile, this->model, this->view, this->projection, camera);
+    }
+
+    // render everything
+    void DrawNoWater(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time)
+    {
+      DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
+      // Draw all the things in the scene
+      terrain->Draw(this->model, this->view, this->projection, time, camera.Position);
+      seaweed->Draw(this->model, this->view, this->projection, time);
+    }
+
+
 };
 #endif
