@@ -9,11 +9,8 @@
 #include "stb_image.h"
 #include "shader.h"
 #include "camera.h"
-// #include "terrain.h"
-// #include "fileLoader.h"
-// #include "seaweed.h"
 #include "scene.h"
-
+#include "waterFrameBuffers.h"
 #include "sceneSetup.h"
 #include "texturesSetup.h"
 #include "shadersSetup.h"
@@ -94,7 +91,7 @@ int main()
 
     // Water Setup
     // --------------------
-    //WaterFrameBuffers fbos = new WaterFrameBuffers()
+    WaterFrameBuffers * fbos = new WaterFrameBuffers(SCR_WIDTH, SCR_HEIGHT);
 
 
     while (!glfwWindowShouldClose(window))
@@ -111,6 +108,11 @@ int main()
 
            // render
            // ------
+           glEnable(GL_CLIP_DISTANCE0);
+           fbos->bindReflectionFrameBuffer();
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame);
+           fbos->unbindCurrentFrameBuffer();
+
            scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame);
 
 

@@ -7,6 +7,7 @@
 
 class WaterFrameBuffers
 {
+public:
   int REFLECTION_WIDTH = 320;
   int REFLECTION_HEIGHT = 180;
   int REFRACTION_WIDTH = 320;
