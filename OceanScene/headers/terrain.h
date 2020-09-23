@@ -8,11 +8,13 @@
 #include "gtc/noise.hpp"
 
 #include "shader.h"
+#include "verticies.h"
 
 #include <string>
 #include <vector>
 using namespace std;
 
+/*
 struct Vertex {
     // position
     glm::vec3 Position;
@@ -20,6 +22,7 @@ struct Vertex {
     glm::vec3 Normal;
 };
 
+*/
 
 struct Chunk {
   unsigned int VAO, VBO, EBO;

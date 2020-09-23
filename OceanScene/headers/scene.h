@@ -32,8 +32,8 @@ public:
     {
         terrain = new Terrain(10, 15., 150., .2, 0.1, .8);
         seaweed = new Seaweed(100);
-        // rock arguments: nr Vertices, length of cube grid, rockPosition, isosurface level
-        rock = new Rock(2.0f, 10.0f, glm::vec3(1.0f, 1.0f, 1.0f), 0.07f);
+        // rock arguments: nr Vertices, length of cube grid, rockPosition, isosurface level, noiseScale
+        rock = new Rock(30.0f, 30.0f, glm::vec3(0.0f), 0.07f, 0.1f);
         seed = seed;
 
     }
@@ -54,7 +54,7 @@ public:
       // Draw all the things in the scene
       //terrain->Draw(model, view, projection, time, camera.Position);
       //seaweed->Draw(model, view, projection, time);
-      rock->Draw(model, view, projection, time);
+      rock->Draw(model, view, projection, camera.Position);
 
 
 
