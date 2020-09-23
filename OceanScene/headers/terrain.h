@@ -489,7 +489,7 @@ private:
       {
         if(spawnSeaweed(noise, seaweedMin, maxSeaweedSpawnChance) == 1.0)
         {
-          if(position.y < 0)
+          if(position.y < -5.)
           {
             seaweedPos[seaweedCount] = position;
             seaweedCount++;
