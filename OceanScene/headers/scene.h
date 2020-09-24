@@ -6,6 +6,7 @@
 #include "terrain.h"
 #include "seaweed.h"
 #include "fileLoader.h"
+#include "skybox.h"
 #include "camera.h"
 #include "json.hpp"
 #include <time.h>
@@ -26,6 +27,7 @@ public:
     FileLoader fileSys;
     Terrain* terrain;
     Seaweed* seaweed;
+    Skybox* skybox;
     int seed;
 
     Scene()
@@ -51,6 +53,7 @@ public:
         // else
         // {
           terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30.);
+          skybox = new Skybox("skybox1");
         //   fileSys.writeTerrainFile(seed, terrain);
         // }
 
@@ -75,7 +78,7 @@ public:
       // Draw all the things in the scene
       terrain->Draw(model, view, projection, time, camera.Position);
       seaweed->Draw(model, view, projection, time);
-
+      skybox->Draw(projection, camera);
 
 
     }
