@@ -129,7 +129,7 @@ int main()
            fbos->unbindCurrentFrameBuffer();
 
            // // render to scene
-           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., -1., 0., 9999.));
+           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., -1., 0., 0.));
 
 
 

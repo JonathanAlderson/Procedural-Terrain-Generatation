@@ -83,7 +83,7 @@ public:
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
-      skybox->Draw(this->projection, camera);
+      skybox->Draw(this->projection, camera, clipPlane);
     }
 
     // render everything
@@ -93,7 +93,7 @@ public:
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
-      skybox->Draw(this->projection, camera);
+      skybox->Draw(this->projection, camera, clipPlane);
     }
 
 
