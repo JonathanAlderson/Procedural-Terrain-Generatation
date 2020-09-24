@@ -6,6 +6,8 @@
 #include "camera.h"
 #include "waterTile.h"
 #include "waterFrameBuffers.h"
+#include "filesystem.h"
+#include "texturesSetup.h"
 
 class Water
 {
@@ -15,22 +17,25 @@ public:
   float vertices[12] = { -1., -1., -1., 1., 1., -1., 1., -1., -1., 1., 1., 1. };
   WaterFrameBuffers * fbos;
 
-  unsigned int VAO, VBO;
+  unsigned int VAO, VBO, dudvMap;
   float size;
 
   Water(WaterFrameBuffers * fbos)
   {
     this->fbos = fbos;
+    dudvMap = loadTexture(FileSystem::getPath("resources/textures/waterDudv.png").c_str());
     setupShader();
   }
 
-  void Draw(WaterTile * water, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Camera camera, glm::vec4 clipPlane, float size)
+  void Draw(WaterTile * water, glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, Camera camera, glm::vec4 clipPlane, float size)
   {
     // Activate Texture
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbos->getReflectionTexture());
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, fbos->getRefractionTexture());
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, dudvMap);
 
     // Translate to water position
     model = glm::translate(model, glm::vec3(water->x, water->height, water->z));
@@ -42,6 +47,8 @@ public:
     shader->setMat4("view", view);
     shader->setMat4("model", model);
     shader->setVec4("clipPlane", clipPlane);
+    shader->setFloat("time", time);
+    shader->setVec3("cameraPosition", camera.Position);
 
     // Load and Render
     glBindVertexArray(VAO);
@@ -68,6 +75,7 @@ public:
     shader->use();
     shader->setInt("reflectionTexture", 0);
     shader->setInt("refractionTexture", 1);
+    shader->setInt("dudvMap", 2);
 
   }
 };

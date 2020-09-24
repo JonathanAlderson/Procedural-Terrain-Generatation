@@ -114,8 +114,6 @@ int main()
            // render reflection texture
            fbos->bindReflectionFrameBuffer();
            // move camera
-           std::cout << "----------------------" << '\n';
-
            camReflectDist = 2 * camera.Position.y;
            camera.Position.y -= camReflectDist;
            camera.invertPitch();
