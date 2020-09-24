@@ -24,7 +24,7 @@ void main(void) {
 	gl_ClipDistance[0] = dot(worldSpace , clipPlane);
 
 	// for duvu
-	textureCoords = vec2(position.x/2.0 + 0.5, position.y/2.0 + 0.5); // * tiling;
+	textureCoords = vec2(position.x/2.0 + 0.5, position.y/2.0 + 0.5) * tiling;
 
 	// for frenel
 	toCameraVector = cameraPosition - worldSpace.xyz;
