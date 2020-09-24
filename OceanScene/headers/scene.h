@@ -6,6 +6,7 @@
 #include "terrain.h"
 #include "seaweed.h"
 #include "fileLoader.h"
+#include "skybox.h"
 #include "camera.h"
 #include "json.hpp"
 #include "water.h"
@@ -30,6 +31,7 @@ public:
     Seaweed* seaweed;
     Water* water;
     WaterTile* waterTile;
+    Skybox* skybox;
 
     int seed;
     float waterSize;
@@ -53,7 +55,7 @@ public:
 
         waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
 
-
+        skybox = new Skybox("skybox1");
 
 
 
@@ -81,6 +83,7 @@ public:
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
+      skybox->Draw(this->projection, camera);
     }
 
     // render everything
@@ -90,6 +93,7 @@ public:
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      skybox->Draw(this->projection, camera);
     }
 
 
