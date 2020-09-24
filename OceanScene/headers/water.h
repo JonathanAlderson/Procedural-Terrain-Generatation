@@ -5,6 +5,7 @@
 #include "glm.hpp"
 #include "camera.h"
 #include "waterTile.h"
+#include "waterFrameBuffers.h"
 
 class Water
 {
@@ -12,19 +13,28 @@ public:
 
   Shader * shader = new Shader("waterVertex.vs", "waterFragment.fs");
   float vertices[12] = { -1., -1., -1., 1., 1., -1., 1., -1., -1., 1., 1., 1. };
+  WaterFrameBuffers * fbos;
 
   unsigned int VAO, VBO;
+  float size;
 
-  Water()
+  Water(WaterFrameBuffers * fbos)
   {
+    this->fbos = fbos;
     setupShader();
   }
 
-  void Draw(WaterTile * water, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Camera camera, glm::vec4 clipPlane)
+  void Draw(WaterTile * water, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Camera camera, glm::vec4 clipPlane, float size)
   {
+    // Activate Texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbos->getReflectionTexture());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fbos->getRefractionTexture());
 
     // Translate to water position
     model = glm::translate(model, glm::vec3(water->x, water->height, water->z));
+    model = glm::scale(model, glm::vec3(size, size, size));
 
     // Set Uniforms
     shader->use();
@@ -53,6 +63,11 @@ public:
     // vertex positions
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    // Set texture var in shader
+    shader->use();
+    shader->setInt("reflectionTexture", 0);
+    shader->setInt("refractionTexture", 1);
 
   }
 };

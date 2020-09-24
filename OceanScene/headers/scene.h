@@ -32,8 +32,9 @@ public:
     WaterTile* waterTile;
 
     int seed;
+    float waterSize;
 
-    Scene()
+    Scene(WaterFrameBuffers *fbos)
     {
         srand(time(NULL));
         seed = rand()%10000;
@@ -48,7 +49,10 @@ public:
 
 
         waterTile = new WaterTile(0., 0., 0.);
-        water = new Water();
+        water = new Water(fbos);
+
+        waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
+
 
 
 
@@ -75,7 +79,7 @@ public:
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
-      water->Draw(waterTile, this->model, this->view, this->projection, camera, clipPlane);
+      water->Draw(waterTile, this->model, this->view, this->projection, camera, clipPlane, waterSize);
     }
 
     // render everything

@@ -84,15 +84,15 @@ int main()
     glEnable(GL_DEPTH_TEST);
     //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-
-    //  Scene Setup
-    // --------------------
-    Scene scene = Scene();
-
-
     // Water Setup
     // --------------------
     WaterFrameBuffers * fbos = new WaterFrameBuffers(SCR_WIDTH, SCR_HEIGHT);
+
+    //  Scene Setup
+    // --------------------
+    Scene scene = Scene(fbos);
+
+
 
 
     while (!glfwWindowShouldClose(window))
