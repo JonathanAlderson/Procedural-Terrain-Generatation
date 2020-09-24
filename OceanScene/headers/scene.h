@@ -66,6 +66,9 @@ public:
       glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      std::cout << "Cam: " << camera.Position.y << '\n';
+      std::cout << "Pitch: " << camera.Pitch << '\n';
+
       // view/projection/model transformations
       this->projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
       this->view = camera.GetViewMatrix();
@@ -75,6 +78,7 @@ public:
     // render everything
     void Draw(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time, glm::vec4 clipPlane)
     {
+
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);

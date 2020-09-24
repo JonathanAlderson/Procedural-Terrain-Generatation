@@ -114,13 +114,16 @@ int main()
            // render reflection texture
            fbos->bindReflectionFrameBuffer();
            // move camera
+           std::cout << "----------------------" << '\n';
+
            camReflectDist = 2 * camera.Position.y;
            camera.Position.y -= camReflectDist;
-           camera.Pitch = -camera.Pitch;
+           camera.invertPitch();
+
            scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., 1., 0., 0.));
            fbos->unbindCurrentFrameBuffer();
            camera.Position.y += camReflectDist;
-           camera.Pitch = -camera.Pitch;
+           camera.invertPitch();
 
            // render refraction texture
            fbos->bindRefractionFrameBuffer();

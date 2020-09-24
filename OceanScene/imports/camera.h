@@ -73,6 +73,12 @@ public:
         updateCameraVectors();
     }
 
+    void invertPitch()
+    {
+      this->Pitch = -Pitch;
+      updateCameraVectors();
+    }
+
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
