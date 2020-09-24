@@ -9,6 +9,7 @@ out float ID;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec4 clipPlane;
 
 
 // Code for rotatings
@@ -55,4 +56,7 @@ void main()
     ID = gl_InstanceID;
     TexCoords = aTexCoords;
     gl_Position = projection * view * movedModel * vec4(vert, 1.0);
+
+    // Set the clipping plane
+    gl_ClipDistance[0] = dot(movedModel * vec4(vert, 1.0) , clipPlane);
 }

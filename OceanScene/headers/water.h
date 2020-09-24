@@ -20,7 +20,7 @@ public:
     setupShader();
   }
 
-  void Draw(WaterTile * water, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Camera camera)
+  void Draw(WaterTile * water, glm::mat4 model, glm::mat4 view, glm::mat4 projection, Camera camera, glm::vec4 clipPlane)
   {
 
     // Translate to water position
@@ -31,6 +31,7 @@ public:
     shader->setMat4("projection", projection);
     shader->setMat4("view", view);
     shader->setMat4("model", model);
+    shader->setVec4("clipPlane", clipPlane);
 
     // Load and Render
     glBindVertexArray(VAO);

@@ -44,7 +44,7 @@ public:
     }
 
     // render the mesh
-    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time)
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec4 clipPlane)
     {
         // Activate Texture
         glActiveTexture(GL_TEXTURE0);
@@ -56,6 +56,7 @@ public:
         shader->setMat4("view", view);
         shader->setMat4("projection", projection);
         shader->setFloat("time", time);
+        shader->setVec4("clipPlane", clipPlane);
 
         // Draw
         glBindVertexArray(VAO);

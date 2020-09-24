@@ -69,22 +69,22 @@ public:
     }
 
     // render everything
-    void Draw(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time)
+    void Draw(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time, glm::vec4 clipPlane)
     {
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
-      terrain->Draw(this->model, this->view, this->projection, time, camera.Position);
-      seaweed->Draw(this->model, this->view, this->projection, time);
-      water->Draw(waterTile, this->model, this->view, this->projection, camera);
+      terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
+      seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      water->Draw(waterTile, this->model, this->view, this->projection, camera, clipPlane);
     }
 
     // render everything
-    void DrawNoWater(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time)
+    void DrawNoWater(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera, float time, glm::vec4 clipPlane)
     {
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
-      terrain->Draw(this->model, this->view, this->projection, time, camera.Position);
-      seaweed->Draw(this->model, this->view, this->projection, time);
+      terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
+      seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
     }
 
 

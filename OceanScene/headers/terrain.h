@@ -195,7 +195,7 @@ public:
 
 
     // render the mesh
-    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos, glm::vec4 clipPlane)
     {
         shader->use();
         shader->setFloat("time", time);
@@ -203,6 +203,7 @@ public:
         shader->setMat4("view", view);
         shader->setMat4("model", model);
         shader->setVec3("viewPos", camPos);
+        shader->setVec4("clipPlane", clipPlane);
         // draw each chunk individually
         for(int i = 0; i < numChunks * numChunks; i++)
         {
