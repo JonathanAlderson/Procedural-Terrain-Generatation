@@ -43,7 +43,7 @@ public:
         int maxSeaweed = 20000;
         std::cout << "Seed: " << seed << '\n';
 
-        terrain = new Terrain(seed, 6, 15., 150., .2, 0.1, 2., 30., maxSeaweed);
+        terrain = new Terrain(seed, 10, 15., 150., .2, 0.1, 9., 30., maxSeaweed);
         maxSeaweed = terrain->maxSeaweed;
 
         std::cout << "Max Seaweed: " << maxSeaweed << '\n';
