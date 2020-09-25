@@ -39,7 +39,11 @@ public:
     glBindTexture(GL_TEXTURE_2D, dudvMap);
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, normalMap);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, fbos->getRefractionDepthTexture());
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
     // Translate to water position
@@ -54,11 +58,14 @@ public:
     shader->setVec4("clipPlane", clipPlane);
     shader->setFloat("time", time);
     shader->setVec3("cameraPosition", camera.Position);
+    shader->setFloat("near", glm::radians(camera.Zoom));
+    shader->setFloat("far", 1000.);
 
     // Load and Render
     glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+    glDisable(GL_BLEND);
   }
 
   void setupShader()
@@ -82,6 +89,7 @@ public:
     shader->setInt("refractionTexture", 1);
     shader->setInt("dudvMap", 2);
     shader->setInt("normalMap", 3);
+    shader->setInt("depthMap", 4);
 
     // directional light
     shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);

@@ -17,8 +17,12 @@ uniform sampler2D reflectionTexture;
 uniform sampler2D refractionTexture;
 uniform sampler2D dudvMap;
 uniform sampler2D normalMap;
+uniform sampler2D depthMap;
 uniform float time;
 uniform DirLight dirLight;
+uniform float near;
+uniform float far;
+
 
 const float waveSpeed = 0.1;
 const float noiseScale = .01;
@@ -39,15 +43,27 @@ void main(void) {
 	vec2 refractTexCoords = vec2(ndc.x, ndc.y);
 	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 
+	// Depth
+
+	float depth = texture(depthMap, refractTexCoords).r;
+	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+
+	depth = gl_FragCoord.z;
+	float waterDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+
+	float waterDepth = floorDistance - waterDistance;
+
+
+	// Distortion
 	vec2 dist = (texture(dudvMap, vec2(textureCoords.x + waveSpeed * time),
 	                                    textureCoords.y)).rg * 0.1;
 	dist = textureCoords + vec2(dist.x, dist.y + waveSpeed * time);
-
-	vec2 totalDist = (texture(dudvMap, dist).rg * 2.0 - 1.0) * waveStrength;
+	vec2 totalDist = (texture(dudvMap, dist).rg * 2.0 - 1.0) * waveStrength * clamp(waterDepth/20., 0., 1.);
 
 	reflectTexCoords += totalDist;
 	refractTexCoords += totalDist;
 
+	// Clamping to avoid ndc tear issues
 	reflectTexCoords.x = clamp(reflectTexCoords.x, 0.01, 0.99);
 	reflectTexCoords.y = clamp(reflectTexCoords.y, -0.99, -0.01);
 
@@ -56,19 +72,21 @@ void main(void) {
 	vec4 reflectColour = texture(reflectionTexture, reflectTexCoords);
 	vec4 refractColour = texture(refractionTexture, refractTexCoords);
 
+	// normals and highlights
+	vec4 normMap = texture(normalMap, totalDist);
+	vec3 normal = vec3(normMap.r * 2.0 - 1.0, normMap.g * 3.0, normMap.b * 2.0 - 1.0);
+	normal = normalize(normal);
+
+
 	// frenel effects
 	vec3 viewVector = normalize(toCameraVector);
-	float refractiveFactor = dot(viewVector, vec3(0., 1., 0.));
+	float refractiveFactor = dot(viewVector, normal);
 
-	vec4 normMap = texture(normalMap, totalDist);
-	vec3 normal = vec3(normMap.r * 2.0 - 1.0, normMap.g, normMap.b * 2.0 - 1.0);
-	normal = normalize(normal);
 
 	vec3 reflectedLight = reflect(normalize(-dirLight.direction), normal);
 	float specular = max(dot(reflectedLight, viewVector), 0.0);
 	specular = pow(specular, shineDamper);
-	vec3 specularHighlights = dirLight.specular * specular * reflectivity;
-
+	vec3 specularHighlights = dirLight.specular * specular * reflectivity  * clamp(waterDepth/5., 0., 1.);
 
 
 	// If above water to fresnel effect
@@ -84,7 +102,9 @@ void main(void) {
 
 
 	// Add ocean colour
-	out_Color = mix(out_Color, oceanColour, oceanBlend);
+	out_Color = mix(out_Color, oceanColour, 0.2); // waterDepth/200.);
 
 	out_Color += vec4(specularHighlights, 1.0);
+
+	out_Color.a = clamp(waterDepth/10., 0., 1.);
 }
