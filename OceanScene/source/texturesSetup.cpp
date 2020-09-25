@@ -3,20 +3,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
+#include <fstream>
+#include <iostream>
 
 // Global Texture Names
 unsigned int diffuseMap;
 unsigned int specularMap;
-unsigned int seaweedTex;
-unsigned int fishTex;
 
 // List below all textures used in the scene
 void texturesSetup()
 {
-  diffuseMap = loadTexture(FileSystem::getPath("resources/textures/marble.jpg").c_str());
-  specularMap = loadTexture(FileSystem::getPath("resources/textures/metal.png").c_str());
-  seaweedTex = loadTexture(FileSystem::getPath("resources/textures/allSeaweed.png").c_str());
-  fishTex = loadTexture(FileSystem::getPath("resources/textures/allFish.png").c_str());
+  diffuseMap = loadTexture(FileSystem::getPath("resources/textures/marble.jpg").c_str(), 0);
+  specularMap = loadTexture(FileSystem::getPath("resources/textures/metal.png").c_str(), 0);
   return;
 }
 
@@ -24,7 +22,7 @@ void texturesSetup()
 
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
-unsigned int loadTexture(char const * path)
+unsigned int loadTexture(char const * path, int repeat)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -46,8 +44,19 @@ unsigned int loadTexture(char const * path)
         glGenerateMipmap(GL_TEXTURE_2D);
 
         // Changed these to test some transparent textures
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        if(repeat == 1)
+        {
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+        else
+        {
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
+
+
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

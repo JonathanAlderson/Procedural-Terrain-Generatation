@@ -10,15 +10,11 @@ extern unsigned int cubeVBO, cubeVAO;
 extern unsigned int lightCubeVAO;
 extern unsigned int seaweedVAO, quadVBO;
 extern unsigned int terrainVBO, terrainVAO, terrainEBO;
-extern unsigned int fishVAO, fishVBO;
 
 
 // Individual Setup Functions
 void cubesSetup();
 void lightsSetup();
-extern void seaweedSetup(int max);
-glm::vec3 * fishSetup(int max, glm::vec3 * translations);
-glm::vec3 * updateFish(int max, glm::vec3 * translations);
 void terrainSetup();
 
 

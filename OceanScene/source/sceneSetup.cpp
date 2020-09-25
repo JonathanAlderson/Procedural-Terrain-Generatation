@@ -9,8 +9,7 @@
 // Global Defenitions For Scene Setup
 unsigned int cubeVBO, cubeVAO;
 unsigned int lightCubeVAO;
-unsigned int seaweedVAO, quadVBO;
-unsigned int fishVAO, fishVBO;
+unsigned int quadVBO;
 
 glm::vec3 cubePositions[10] = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -65,92 +64,57 @@ void lightsSetup()
   glEnableVertexAttribArray(0);
 }
 
-void seaweedSetup(int max)
-{
-  // Get the random positions of the seaweed
-  glm::vec3 translations[max];
-  for (int i = 0; i < max; i++)
-  {
-    translations[i] = glm::vec3((float)(i%10), 0., (i/10));
-  }
-
-  unsigned int instanceVBO;
-  glGenBuffers(1, &instanceVBO);
-  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  glGenVertexArrays(1, &seaweedVAO);
-  glBindVertexArray(seaweedVAO);
-  glGenBuffers(1, &quadVBO);
-  glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticies), quadVerticies, GL_STATIC_DRAW);
-  glBindVertexArray(seaweedVAO);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
-  glEnableVertexAttribArray(2);
-  glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glVertexAttribDivisor(2, 1);
-
-}
-
-
-glm::vec3 * fishSetup(int max, glm::vec3 * translations)
-{
-  float randX = (float)(rand()) / RAND_MAX;
-  float randY = (float)(rand()) / RAND_MAX;
-  // Get the random positions of the seaweed
-  for (int i = 0; i < max; i++)
-  {
-
-    translations[i] = glm::vec3((float)(i%10) + randX, 0., (i/10) + randY);
-  }
-
-
-  glGenBuffers(1, &fishVBO);
-  glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  glGenVertexArrays(1, &fishVAO);
-  glBindVertexArray(fishVAO);
-  glGenBuffers(1, &quadVBO);
-  glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticies), quadVerticies, GL_STATIC_DRAW);
-  glBindVertexArray(fishVAO);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
-  glEnableVertexAttribArray(2);
-  glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glVertexAttribDivisor(2, 1);
-
-  return translations;
-
-}
-
-
-glm::vec3 *  updateFish(int max, glm::vec3 * translations)
-{
-  float p;
-  float speed = 50.;
-  for (int i = 0; i < max; i++)
-  {
-    p = glm::perlin(glm::vec2(translations[i].x, translations[i].y));
-    translations[i].z += sin(3.14159 * p)/speed;
-    translations[i].x += cos(3.14159 * p)/speed;
-  }
-  glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  return translations;
-}
+// glm::vec3 * fishSetup(int max, glm::vec3 * translations)
+// {
+//   float randX = (float)(rand()) / RAND_MAX;
+//   float randY = (float)(rand()) / RAND_MAX;
+//   // Get the random positions of the seaweed
+//   for (int i = 0; i < max; i++)
+//   {
+//
+//     translations[i] = glm::vec3((float)(i%10) + randX, 0., (i/10) + randY);
+//   }
+//
+//
+//   glGenBuffers(1, &fishVBO);
+//   glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
+//   glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//
+//   glGenVertexArrays(1, &fishVAO);
+//   glBindVertexArray(fishVAO);
+//   glGenBuffers(1, &quadVBO);
+//   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+//   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticies), quadVerticies, GL_STATIC_DRAW);
+//   glBindVertexArray(fishVAO);
+//   glEnableVertexAttribArray(0);
+//   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+//   glEnableVertexAttribArray(1);
+//   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+//
+//   glEnableVertexAttribArray(2);
+//   glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
+//   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//   glVertexAttribDivisor(2, 1);
+//
+//   return translations;
+//
+// }
+//
+//
+// glm::vec3 *  updateFish(int max, glm::vec3 * translations)
+// {
+//   float p;
+//   float speed = 50.;
+//   for (int i = 0; i < max; i++)
+//   {
+//     p = glm::perlin(glm::vec2(translations[i].x, translations[i].y));
+//     translations[i].z += sin(3.14159 * p)/speed;
+//     translations[i].x += cos(3.14159 * p)/speed;
+//   }
+//   glBindBuffer(GL_ARRAY_BUFFER, fishVBO);
+//   glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//   return translations;
+// }

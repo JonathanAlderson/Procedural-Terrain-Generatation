@@ -9,6 +9,7 @@ out float ID;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec4 clipPlane;
 
 
 // Code for rotatings
@@ -44,7 +45,7 @@ void main()
 
     // Scale the seaweed randomly
     vec3 vert = aPos;
-    float scale = 0.2 + 1.5 * rand(vec2(gl_InstanceID, 36.7));
+    float scale = 0.2 + 0.8 * rand(vec2(gl_InstanceID, 36.7));
     vert = vert * scale;
 
     // Adjust the height after scaling
@@ -55,4 +56,7 @@ void main()
     ID = gl_InstanceID;
     TexCoords = aTexCoords;
     gl_Position = projection * view * movedModel * vec4(vert, 1.0);
+
+    // Set the clipping plane
+    gl_ClipDistance[0] = dot(movedModel * vec4(vert, 1.0) , clipPlane);
 }

@@ -9,8 +9,8 @@
 #include "stb_image.h"
 #include "shader.h"
 #include "camera.h"
-#include "terrain.h"
-
+#include "scene.h"
+#include "waterFrameBuffers.h"
 #include "sceneSetup.h"
 #include "texturesSetup.h"
 #include "shadersSetup.h"
@@ -23,21 +23,19 @@ unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 400;
-const int MAX_SEAWEED = 0;
-const int MAX_FISH = 100;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+float camReflectDist = 0.;
+float underwater;
 
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-
 
 
 
@@ -71,6 +69,7 @@ int main()
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -82,48 +81,17 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-
+    // Water Setup
+    // --------------------
+    WaterFrameBuffers * fbos = new WaterFrameBuffers(SCR_WIDTH, SCR_HEIGHT);
 
     //  Scene Setup
     // --------------------
-    cubesSetup();
-    lightsSetup();
-    seaweedSetup(MAX_SEAWEED);
-    glm::vec3 *fishLocations = (glm::vec3 *)malloc(sizeof(glm::vec3) * MAX_FISH);
-
-    fishLocations = fishSetup(MAX_FISH, fishLocations);
+    Scene scene = Scene(fbos);
 
 
-    //terrainSetup();
-
-    Terrain t = Terrain(100, 500, 3.0, 40., .2);
-
-
-    // load textures
-    // --------------------
-    texturesSetup();
-
-
-    // create shaders
-    // ------------------------------------
-    Shader lightingShader("6.multiple_lights.vs", "6.multiple_lights.fs");
-    Shader lightCubeShader("6.light_cube.vs", "6.light_cube.fs");
-    Shader seaweedShader("seaweed.vs", "seaweed.fs");
-    Shader terrainShader("terrain.vs", "terrain.fs");
-    Shader fishShader("fish.vs", "fish.fs");
-    //shadersSetup();
-
-    // shader configuration
-    // --------------------
-    lightingShaderSetup(lightingShader, camera);
-    terrainShaderSetup(terrainShader);
-
-
-    // Seaweed setup stuff
-    seaweedShader.use();
-    seaweedShader.setInt("texture1", 0);
-    seaweedShader.setFloat("time", 1);
 
 
     while (!glfwWindowShouldClose(window))
@@ -140,132 +108,32 @@ int main()
 
            // render
            // ------
-           glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           glEnable(GL_CLIP_DISTANCE0);
 
 
-           ///////////////////////////////////////////
-           // Render logic
-           ///////////////////////////////////////////
+           // render reflection texture
+           fbos->bindReflectionFrameBuffer();
+           // move camera
+           camReflectDist = 2 * camera.Position.y;
+           underwater = (camera.Position.y < 0) ? -1 : (camera.Position.y > 0);
+
+           camera.Position.y -= camReflectDist;
+           camera.invertPitch();
+
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., 1. * underwater, 0., 0.));
+           fbos->unbindCurrentFrameBuffer();
+           camera.Position.y += camReflectDist;
+           camera.invertPitch();
+
+           // render refraction texture
+           fbos->bindRefractionFrameBuffer();
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., -1. * underwater, 0., 0.));
+           fbos->unbindCurrentFrameBuffer();
+
+           // // render to scene
+           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., -1., 0., 999999.));
 
 
-           // be sure to activate shader when setting uniforms/drawing objects
-           lightingShader.use();
-           lightingShader.setVec3("viewPos", camera.Position);
-           lightingShader.setFloat("material.shininess", 32.0f);
-
-           /*
-              Here we set all the uniforms for the 5/6 types of lights we have. We have to set them manually and index
-              the proper PointLight struct in the array to set each uniform variable. This can be done more code-friendly
-              by defining light types as classes and set their values in there, or by using a more efficient uniform approach
-              by using 'Uniform buffer objects', but that is something we'll discuss in the 'Advanced GLSL' tutorial.
-           */
-           // spotLight
-           lightingShader.setVec3("spotLight.position", camera.Position);
-           lightingShader.setVec3("spotLight.direction", camera.Front);
-
-           // view/projection transformations
-           glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-           glm::mat4 view = camera.GetViewMatrix();
-           lightingShader.setMat4("projection", projection);
-           lightingShader.setMat4("view", view);
-
-           // world transformation
-           glm::mat4 model = glm::mat4(1.0f);
-           lightingShader.setMat4("model", model);
-
-           // bind diffuse map
-           glActiveTexture(GL_TEXTURE0);
-           glBindTexture(GL_TEXTURE_2D, diffuseMap);
-           // bind specular map
-           glActiveTexture(GL_TEXTURE1);
-           glBindTexture(GL_TEXTURE_2D, specularMap);
-
-
-           // // render containers
-           glBindVertexArray(cubeVAO);
-           for (unsigned int i = 0; i < 0; i++)
-           {
-               // calculate the model matrix for each object and pass it to shader before drawing
-               glm::mat4 model = glm::mat4(1.0f);
-               model = glm::translate(model, cubePositions[i]);
-               float angle = 20.0f * i;
-               model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-               lightingShader.setMat4("model", model);
-
-               glDrawArrays(GL_TRIANGLES, 0, 36);
-           }
-
-            // also draw the lamp object(s)
-            lightCubeShader.use();
-            lightCubeShader.setMat4("projection", projection);
-            lightCubeShader.setMat4("view", view);
-
-            // we now draw as many light bulbs as we have point lights.
-            glBindVertexArray(lightCubeVAO);
-            for (unsigned int i = 0; i < 4; i++)
-            {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, pointLightPositions[i]);
-                model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-                lightCubeShader.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-
-
-
-            // Draw Seaweed
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, seaweedTex);
-            model = glm::mat4(1.0f);
-            seaweedShader.use();
-            seaweedShader.setMat4("model", model);
-            seaweedShader.setMat4("view", view);
-            seaweedShader.setMat4("projection", projection);
-            seaweedShader.setFloat("time", glfwGetTime());
-
-            glBindVertexArray(seaweedVAO);
-
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_SEAWEED);
-            glBindVertexArray(0);
-
-
-
-            // Draw Terrain
-
-            // terrainShader.use();
-            // terrainShader.setMat4("projection", projection);
-            // terrainShader.setMat4("view", view);
-            //
-            // model = glm::translate(model, glm::vec3(-2., -1., -5.));
-            // terrainShader.setMat4("model", model);
-            // terrainShader.setVec3("viewPos", camera.Position);
-            // t.Draw();
-
-
-            // Draw Fish
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, fishTex);
-
-            fishLocations = updateFish(MAX_FISH, fishLocations);
-
-            model = glm::mat4(1.0f);
-            fishShader.use();
-            fishShader.setMat4("model", model);
-            fishShader.setMat4("view", view);
-            fishShader.setMat4("projection", projection);
-            fishShader.setFloat("time", glfwGetTime());
-
-
-
-            glBindVertexArray(fishVAO);
-
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, MAX_FISH);
-            glBindVertexArray(0);
-
-            ///////////////////////////////////////////
-            // END OF RENDER LOGIC
-            ///////////////////////////////////////////
 
            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
            // -------------------------------------------------------------------------------
@@ -275,11 +143,7 @@ int main()
 
        // optional: de-allocate all resources once they've outlived their purpose:
        // ------------------------------------------------------------------------
-       glDeleteVertexArrays(1, &cubeVAO);
-       glDeleteVertexArrays(1, &lightCubeVAO);
-       glDeleteVertexArrays(1, &seaweedVAO);
-       glDeleteBuffers(1, &cubeVBO);
-       glDeleteBuffers(1, &quadVBO);
+       // cleanup done somewhere else
 
        // glfw: terminate, clearing all previously allocated GLFW resources.
        // ------------------------------------------------------------------
