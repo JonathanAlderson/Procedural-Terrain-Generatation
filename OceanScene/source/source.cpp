@@ -31,6 +31,7 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 float camReflectDist = 0.;
+float underwater;
 
 // timing
 float deltaTime = 0.0f;
@@ -111,21 +112,24 @@ int main()
            // ------
            glEnable(GL_CLIP_DISTANCE0);
 
+
            // render reflection texture
            fbos->bindReflectionFrameBuffer();
            // move camera
            camReflectDist = 2 * camera.Position.y;
+           underwater = (camera.Position.y < 0) ? -1 : (camera.Position.y > 0);
+
            camera.Position.y -= camReflectDist;
            camera.invertPitch();
 
-           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., 1., 0., 0.));
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., 1. * underwater, 0., 0.));
            fbos->unbindCurrentFrameBuffer();
            camera.Position.y += camReflectDist;
            camera.invertPitch();
 
            // render refraction texture
            fbos->bindRefractionFrameBuffer();
-           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., -1., 0., 0.));
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame, glm::vec4(0., -1. * underwater, 0., 0.));
            fbos->unbindCurrentFrameBuffer();
 
            // // render to scene

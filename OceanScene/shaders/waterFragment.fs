@@ -14,6 +14,9 @@ uniform float time;
 const float waveSpeed = 0.0;
 const float noiseScale = 1.;
 
+const vec4 oceanColour = vec4(112./255., 214./255., 255./255., 1.);
+const float oceanBlend = 0.2;
+
 
 void main(void) {
 
@@ -42,11 +45,20 @@ void main(void) {
 	vec4 refractColour = texture(refractionTexture, refractTexCoords);
 
 	// frenel effects
-	//vec3 viewVector = normalize(toCameraVector);
-	//float refractiveFactor = dot(viewVector, vec3(0., 1., 0.));
+	vec3 viewVector = normalize(toCameraVector);
+	float refractiveFactor = dot(viewVector, vec3(0., 1., 0.));
 
 
-	//out_Color = reflectColour;
-	out_Color = mix(reflectColour, refractColour, 0.5);
+	// If above water to fresnel effect
+	out_Color = mix(reflectColour, refractColour, refractiveFactor);
 
+	// If underwater, only do refraction
+	if(toCameraVector.y < 0)
+	{
+		out_Color = refractColour;
+	}
+
+
+	// Add ocean colour
+	out_Color = mix(out_Color, oceanColour, oceanBlend);
 }
