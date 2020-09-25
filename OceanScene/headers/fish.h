@@ -15,34 +15,53 @@ class Fish
 public:
 
   unsigned int VBO, VAO, quadVBO, texture;
-  glm::vec3 * translations;
+  glm::vec4 * translations;
   int max;
+  int schoolSize;
+  float oceanSize;
   Shader * shader = new Shader("fish.vs", "fish.fs");
 
 
-  Fish(int max)
+  Fish(int max, int schoolSize, float oceanSize)
   {
     this->max = max;
-    translations = (glm::vec3 *) malloc(max * sizeof(glm::vec3));
+    this->schoolSize = schoolSize;
+    this->oceanSize = oceanSize;
+    translations = (glm::vec4 *) malloc(max * sizeof(glm::vec4));
 
     setupFish();
+  }
+
+  float randFloat()
+  {
+    return (float)(rand()) / RAND_MAX;
   }
 
   void setupFish()
   {
     texture = loadTexture(FileSystem::getPath("resources/textures/allFish.png").c_str(), 0);
 
-    float randX = (float)(rand()) / RAND_MAX;
-    float randY = (float)(rand()) / RAND_MAX;
-    for (int i = 0; i < max; i++)
-    {
+    float x;
+    float y;
+    float z;
 
-      translations[i] = glm::vec3((float)(i%10) + randX, 0., (i/10) + randY);
+    for (int i = 0; i < max/schoolSize; i++)
+    {
+      x = (randFloat()-.5)*oceanSize*2.0;
+      z = (randFloat()-.5)*oceanSize*2.0;
+      y = -1 + -randFloat() * 5.;
+      for(int j = 0; j < schoolSize; j ++)
+      {
+        x += (randFloat()-.5)*.5;
+        y += (randFloat()-.5)*.5;
+        z += (randFloat()-.5)*.5;
+        translations[j + i*schoolSize] = glm::vec4(x, y, z, 0.);
+      }
     }
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * max, &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenVertexArrays(1, &VAO);
@@ -58,7 +77,7 @@ public:
 
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(2, 1);
 
@@ -74,15 +93,21 @@ public:
     glBindTexture(GL_TEXTURE_2D, texture);
 
     float p;
-    float speed = 50.;
+    float speed = 500.;
     for (int i = 0; i < max; i++)
     {
-      p = glm::perlin(glm::vec2(translations[i].x, translations[i].y));
-      translations[i].z += sin(3.14159 * p)/speed;
-      translations[i].x += cos(3.14159 * p)/speed;
+      p = (glm::perlin(glm::vec2(translations[i].x, translations[i].y))+.707)/1.414;
+      translations[i].z += sin(2. * 3.14159 * p)/speed;
+      translations[i].x += cos(2. * 3.14159 * p)/speed;
+      translations[i].w = 2. * 3.14159 * p;
+
+      if(translations[i].x < -oceanSize){ translations[i].x += 2*oceanSize; }
+      if(translations[i].x > oceanSize){ translations[i].x -= 2*oceanSize; }
+      if(translations[i].z < -oceanSize){ translations[i].z += 2*oceanSize; }
+      if(translations[i].z > oceanSize){ translations[i].z -= 2*oceanSize; }
     }
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * max, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * max, &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
      shader->use();

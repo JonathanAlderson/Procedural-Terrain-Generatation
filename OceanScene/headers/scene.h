@@ -43,7 +43,8 @@ public:
         srand(time(NULL));
         seed = rand()%10000;
         int maxSeaweed = 20000;
-        int maxFish = 100;
+        int maxFish = 3000;
+        int schoolSize = 20;
 
         // Terrain
         std::cout << "Seed: " << seed << '\n';
@@ -63,7 +64,7 @@ public:
         skybox = new Skybox("skybox1");
 
         // Fish
-        fish = new Fish(maxFish);
+        fish = new Fish(maxFish, schoolSize, waterSize);
 
 
     }
