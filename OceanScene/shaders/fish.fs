@@ -25,7 +25,7 @@ void main()
 
 
   // create a random fish
-  float fishID = float(int(r * 5.));
+  float fishID = float(int(floor(ID/20))%5);
   vec2 tex = TexCoords;
   tex.x *= 2.;
   tex.x += 0.2 * fishID;
