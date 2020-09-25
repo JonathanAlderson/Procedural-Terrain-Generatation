@@ -93,13 +93,19 @@ public:
     glBindTexture(GL_TEXTURE_2D, texture);
 
     float p;
-    float speed = 500.;
+    float speed = .02;
+    float scale = 5.;
     for (int i = 0; i < max; i++)
     {
-      p = (glm::perlin(glm::vec2(translations[i].x, translations[i].y))+.707)/1.414;
-      translations[i].z += sin(2. * 3.14159 * p)/speed;
-      translations[i].x += cos(2. * 3.14159 * p)/speed;
-      translations[i].w = 2. * 3.14159 * p;
+      // +.707)/1.414
+      p = glm::simplex(glm::vec2(translations[i].x * scale, translations[i].y * scale));
+      translations[i].z += sin(2. * 3.14159 * p)*speed;
+      translations[i].x += cos(2. * 3.14159 * p)*speed;
+      translations[i].y += ((randFloat()-.5)*.5)*speed;
+      if(translations[i].y > -1.){translations[i].y -= 0.01; }
+      translations[i].w = 2. * 3.14159 * p; // set the rotation
+
+      //std::cout << "Fish: " << translations[i].x << " " << translations[i].z  << " --> " << p << std::endl;
 
       if(translations[i].x < -oceanSize){ translations[i].x += 2*oceanSize; }
       if(translations[i].x > oceanSize){ translations[i].x -= 2*oceanSize; }
