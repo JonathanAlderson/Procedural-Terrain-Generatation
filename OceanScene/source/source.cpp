@@ -39,8 +39,6 @@ float lastFrame = 0.0f;
 
 
 
-
-
 int main()
 {
     // glfw: initialize and configure
