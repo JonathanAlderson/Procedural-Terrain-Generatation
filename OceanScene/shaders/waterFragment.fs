@@ -11,7 +11,7 @@ uniform sampler2D refractionTexture;
 uniform sampler2D dudvMap;
 uniform float time;
 
-const float waveSpeed = 0.0;
+const float waveSpeed = 0.1;
 const float noiseScale = .01;
 
 const vec4 oceanColour = vec4(112./255., 214./255., 255./255., 1.);
@@ -29,10 +29,10 @@ void main(void) {
 	vec2 distortion1 = (texture(dudvMap, vec2(textureCoords.x + waveSpeed * time,
 		                                       textureCoords.y )).rg * 2.0 - 1.0) * waveStrength;
 
-  /* vec2 distortion2 = texture(dudvMap, vec2(-textureCoords.x * noiseScale,
-		                                        textureCoords.y * noiseScale + waveSpeed * time)).rg; // * 2.0 - 1.0; */
+  vec2 distortion2 = (texture(dudvMap, vec2(-textureCoords.x,
+		                                        textureCoords.y + waveSpeed * time)).rg * 2.0 - 1.0) * waveStrength;
 
-	vec2 distortion = distortion1; // + distortion2;
+	vec2 distortion = distortion1 + distortion2;
 
 	reflectTexCoords += distortion;
 	refractTexCoords += distortion;
