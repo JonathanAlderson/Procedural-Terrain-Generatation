@@ -10,6 +10,7 @@
 #include "camera.h"
 #include "json.hpp"
 #include "water.h"
+#include "fish.h"
 #include "waterTile.h"
 #include <time.h>
 
@@ -32,6 +33,7 @@ public:
     Water* water;
     WaterTile* waterTile;
     Skybox* skybox;
+    Fish* fish;
 
     int seed;
     float waterSize;
@@ -41,22 +43,27 @@ public:
         srand(time(NULL));
         seed = rand()%10000;
         int maxSeaweed = 20000;
-        std::cout << "Seed: " << seed << '\n';
+        int maxFish = 100;
 
+        // Terrain
+        std::cout << "Seed: " << seed << '\n';
         terrain = new Terrain(seed, 10, 15., 150., .2, 0.1, 9., 30., maxSeaweed);
         maxSeaweed = terrain->maxSeaweed;
 
+        // Seaweed
         std::cout << "Max Seaweed: " << maxSeaweed << '\n';
         seaweed = new Seaweed(maxSeaweed, terrain->seaweedPos);
 
-
+        // Water
         waterTile = new WaterTile(0., 0., 0.);
         water = new Water(fbos);
-
         waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
 
+        // Skybox
         skybox = new Skybox("skybox1");
 
+        // Fish
+        fish = new Fish(maxFish);
 
 
     }
@@ -83,6 +90,7 @@ public:
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
+      fish->Draw(this->model, this->view, this->projection, time, clipPlane);
       skybox->Draw(this->projection, camera, clipPlane);
     }
 
@@ -93,6 +101,7 @@ public:
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      fish->Draw(this->model, this->view, this->projection, time, clipPlane);
       skybox->Draw(this->projection, camera, clipPlane);
     }
 
