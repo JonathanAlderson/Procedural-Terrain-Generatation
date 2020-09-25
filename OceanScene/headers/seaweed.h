@@ -32,7 +32,7 @@ public:
     {
 
       seaweedNum = maxSeaweed;
-      texture = loadTexture(FileSystem::getPath("resources/textures/allSeaweed.png").c_str());
+      texture = loadTexture(FileSystem::getPath("resources/textures/allSeaweed.png").c_str(), 0);
 
       this->shader = new Shader("seaweed.vs", "seaweed.fs");
       // Malloc for translations

@@ -23,7 +23,7 @@ public:
   Water(WaterFrameBuffers * fbos)
   {
     this->fbos = fbos;
-    dudvMap = loadTexture(FileSystem::getPath("resources/textures/waterDudv.png").c_str());
+    dudvMap = loadTexture(FileSystem::getPath("resources/textures/waterDudv.png").c_str(), 1);
     setupShader();
   }
 
