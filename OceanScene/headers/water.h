@@ -17,13 +17,14 @@ public:
   float vertices[12] = { -1., -1., -1., 1., 1., -1., 1., -1., -1., 1., 1., 1. };
   WaterFrameBuffers * fbos;
 
-  unsigned int VAO, VBO, dudvMap;
+  unsigned int VAO, VBO, dudvMap, normalMap;
   float size;
 
   Water(WaterFrameBuffers * fbos)
   {
     this->fbos = fbos;
     dudvMap = loadTexture(FileSystem::getPath("resources/textures/waterDudv.png").c_str(), 1);
+    normalMap = loadTexture(FileSystem::getPath("resources/textures/normalMap.png").c_str(), 1);
     setupShader();
   }
 
@@ -36,6 +37,10 @@ public:
     glBindTexture(GL_TEXTURE_2D, fbos->getRefractionTexture());
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, dudvMap);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+
+
 
     // Translate to water position
     model = glm::translate(model, glm::vec3(water->x, water->height, water->z));
@@ -76,6 +81,13 @@ public:
     shader->setInt("reflectionTexture", 0);
     shader->setInt("refractionTexture", 1);
     shader->setInt("dudvMap", 2);
+    shader->setInt("normalMap", 3);
+
+    // directional light
+    shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+    shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+    shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
+    shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
   }
 };

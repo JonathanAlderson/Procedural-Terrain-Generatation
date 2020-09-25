@@ -5,11 +5,14 @@ out vec4 clipSpace;
 out vec2 textureCoords;
 out vec3 toCameraVector;
 
+
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 uniform vec4 clipPlane;
 uniform vec3 cameraPosition;
+
+
 
 const float tiling = 6.0;
 
@@ -28,6 +31,5 @@ void main(void) {
 
 	// for frenel
 	toCameraVector = cameraPosition - worldSpace.xyz;
-
 
 }
