@@ -19,7 +19,7 @@ public:
   int max;
   int schoolSize;
   float oceanSize;
-  float seed;
+  float * seeds;
   Shader * shader = new Shader("fish.vs", "fish.fs");
 
 
@@ -28,7 +28,7 @@ public:
     this->max = max;
     this->schoolSize = schoolSize;
     this->oceanSize = oceanSize;
-    this->seed = rand()%10000;
+    seeds = (float *) malloc(sizeof(float) * (max / schoolSize));
     translations = (glm::vec4 *) malloc(max * sizeof(glm::vec4));
 
     setupFish();
@@ -59,7 +59,11 @@ public:
         z += (randFloat()-.5)*.5;
         translations[j + i*schoolSize] = glm::vec4(x, y, z, 0.);
       }
+
+      seeds[i] = rand()%10000;
     }
+
+
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -97,11 +101,12 @@ public:
     float p;
     float speed = .02;
     float scale = .2;
+    int j;
 
     for (int i = 0; i < max; i++)
     {
-      // +.707)/1.414
-      p = glm::perlin(glm::vec2((translations[i].x + translations[i].y)*scale + seed, (translations[i].z+ + translations[i].y)*scale + seed));
+      j = i/schoolSize;
+      p = glm::perlin(glm::vec2((translations[i].x + translations[i].y)*scale + seeds[j], (translations[i].z+ + translations[i].y)*scale + seeds[j]));
       translations[i].z += sin(2. * 3.14159 * p)*speed;
       translations[i].x += cos(2. * 3.14159 * p)*speed;
       translations[i].y += ((randFloat()-.5)*.5)*speed;
@@ -110,10 +115,13 @@ public:
 
       //std::cout << "Fish: " << translations[i].x << " " << translations[i].z  << " --> " << p << std::endl;
 
-      if(translations[i].x < -oceanSize){ translations[i].x += 2*oceanSize; }
-      if(translations[i].x > oceanSize){ translations[i].x -= 2*oceanSize; }
-      if(translations[i].z < -oceanSize){ translations[i].z += 2*oceanSize; }
-      if(translations[i].z > oceanSize){ translations[i].z -= 2*oceanSize; }
+
+      if(translations[i].x < -oceanSize || translations[i].x > oceanSize || translations[i].z < -oceanSize|| translations[i].z > oceanSize)
+      {
+        translations[i].x = 0.;
+        translations[i].z = 0;
+      }
+
     }
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * max, &translations[0], GL_STATIC_DRAW);
