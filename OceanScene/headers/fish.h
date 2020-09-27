@@ -19,6 +19,7 @@ public:
   int max;
   int schoolSize;
   float oceanSize;
+  float seed;
   Shader * shader = new Shader("fish.vs", "fish.fs");
 
 
@@ -27,6 +28,7 @@ public:
     this->max = max;
     this->schoolSize = schoolSize;
     this->oceanSize = oceanSize;
+    this->seed = rand()%10000;
     translations = (glm::vec4 *) malloc(max * sizeof(glm::vec4));
 
     setupFish();
@@ -94,11 +96,12 @@ public:
 
     float p;
     float speed = .02;
-    float scale = 5.;
+    float scale = .2;
+
     for (int i = 0; i < max; i++)
     {
       // +.707)/1.414
-      p = glm::simplex(glm::vec2(translations[i].x * scale, translations[i].y * scale));
+      p = glm::perlin(glm::vec2((translations[i].x + translations[i].y)*scale + seed, (translations[i].z+ + translations[i].y)*scale + seed));
       translations[i].z += sin(2. * 3.14159 * p)*speed;
       translations[i].x += cos(2. * 3.14159 * p)*speed;
       translations[i].y += ((randFloat()-.5)*.5)*speed;
