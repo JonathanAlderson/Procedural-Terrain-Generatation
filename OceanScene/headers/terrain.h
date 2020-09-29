@@ -41,7 +41,7 @@ class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 64.;
+    int chunkSize = 16.;
 
     Chunk *chunks;
 
