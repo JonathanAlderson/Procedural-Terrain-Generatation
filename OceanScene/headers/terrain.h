@@ -46,7 +46,7 @@ public:
     int chunkSize = 16.;
 
     Chunk *chunks;
-    unsigned int normalMap;
+    unsigned int rockNormalMap, grassNormalMap, sandNormalMap;
     // mesh Data
     Vertex **vertices;
     glm::vec3 *positions;
@@ -91,7 +91,9 @@ public:
     Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed)
     {
         std::cout << "Generating New Map" << '\n';
-        normalMap = loadTexture(FileSystem::getPath("resources/textures/rockNormal.jpg").c_str(), 1);
+        sandNormalMap = loadTexture(FileSystem::getPath("resources/textures/sandNormal.png").c_str(), 1);
+        rockNormalMap = loadTexture(FileSystem::getPath("resources/textures/rockNormal.jpg").c_str(), 1);
+        grassNormalMap = loadTexture(FileSystem::getPath("resources/textures/grassNormal.jpg").c_str(), 1);
 
         this->numChunks = numChunks;
         this->heightScale = heightScale * 5.0 * (float)numChunks/10.;
@@ -149,7 +151,11 @@ public:
     void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos, glm::vec4 clipPlane)
     {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, normalMap);
+        glBindTexture(GL_TEXTURE_2D, sandNormalMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, grassNormalMap);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, rockNormalMap);
         shader->use();
         shader->setFloat("time", time);
         shader->setMat4("projection", projection);
@@ -171,7 +177,9 @@ public:
       shader->use();
       shader->setFloat("shininess", 32.0f);
       shader->setFloat("maxHeight", heightScale);
-      shader->setInt("normalMap", 0);
+      shader->setInt("sandNormalMap", 0);
+      shader->setInt("grassNormalMap", 1);
+      shader->setInt("rockNormalMap", 2);
 
       // directional light
       shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);

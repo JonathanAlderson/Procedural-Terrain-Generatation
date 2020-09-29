@@ -4,8 +4,9 @@ out vec4 FragColor;
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform sampler2D normalMap;
-
+uniform sampler2D sandNormalMap;
+uniform sampler2D grassNormalMap;
+uniform sampler2D rockNormalMap;
 
 struct DirLight {
     vec3 direction;
@@ -20,6 +21,7 @@ uniform float shininess;
 uniform float maxHeight;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
+
 
 // calculates the color when using a directional light.
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 diffuseCol, vec3 specCol, float shine)
@@ -52,22 +54,12 @@ float noise(float p){
 	return mix(rand(fl), rand(fl + 1.0), fc);
 }
 
-vec3 colour()
+vec3 colour(float height, float sandLower, float sandUpper, float grassLower, float grassUpper)
 {
+  float hMultiplier;
   vec3 sand = rgb(251., 244., 157.);
   vec3 grass = rgb(153., 170., 56.);
   vec3 rock = rgb(124., 124., 124.);
-
-  float height = FragPos.y/maxHeight;
-
-  float sandLower = 0.;
-  float sandUpper = .05;
-
-  float grassLower = 0.05;
-  float grassUpper = 0.6;
-
-  float hMultiplier;
-
   vec3 col = vec3(0.); // vec3(noise(Normal.y), 0., 0.);
 
   if(height < 0.)
@@ -76,22 +68,39 @@ vec3 colour()
   }
   if(height < sandUpper)
   {
-    hMultiplier = (height-sandLower)*(1./sandUpper);
+    hMultiplier = (height - sandLower)/(sandUpper - sandLower);
     return col + (sand * (1. - hMultiplier) + grass * hMultiplier);
   }
   if(height < grassUpper)
   {
-    hMultiplier = (height-grassLower)*(1./grassUpper);
+    hMultiplier = (height - grassLower)/(grassUpper - grassLower);
     return col + (grass * (1.-hMultiplier) + rock * hMultiplier);
   }
 
   return col + rock;
+}
 
-  return vec3(0., 0., 0.);
+// Find the correct normal map based on height
+vec4 getNormalMap(float height, float sandLower, float sandUpper, float grassLower, float grassUpper)
+{
+  float hMultiplier;
 
+  if(height < 0.)
+  {
+    return texture(sandNormalMap, vec2(FragPos.x*.2, FragPos.z*.2));
+  }
+  if(height < sandUpper)
+  {
+    hMultiplier = (height - sandLower)/(sandUpper - sandLower);
+    return (1. -hMultiplier) * texture(sandNormalMap, vec2(FragPos.x*.2, FragPos.z*.2)) + hMultiplier * texture(grassNormalMap, vec2(FragPos.x*.2, FragPos.z*.2));
+  }
+  if(height < grassUpper)
+  {
+    hMultiplier = (height - grassLower)/(grassUpper - grassLower);
+    return (1. -hMultiplier) * texture(grassNormalMap, vec2(FragPos.x*.2, FragPos.z*.2)) + hMultiplier * texture(rockNormalMap, vec2(FragPos.x*.2, FragPos.z*.2));
+  }
 
-  return vec3(FragPos.y, 0., 0.);
-  return rgb(maxHeight, 0. , 0.);
+  return texture(rockNormalMap, vec2(FragPos.x*.2, FragPos.z*.2));;
 
 }
 
@@ -132,8 +141,25 @@ vec3 caustics()
 
 void main()
 {
+
+    // Globals
+
+
+    float height = FragPos.y/maxHeight;
+
+
+    float sandLower = 0.;
+    float sandUpper = .05;
+
+    float grassLower = 0.05;
+    float grassUpper = 0.6;
+
+
+
+
+
     // normals and highlights
-    vec4 normMap = texture(normalMap, vec2(FragPos.x*.2, FragPos.z*.2));
+    vec4 normMap = getNormalMap(height, sandLower, sandUpper, grassLower, grassUpper);
     vec3 norm = vec3(normMap.r * 2.0 - 1.0, normMap.g * 3.0, normMap.b * 2.0 - 1.0);
     norm = normalize(Normal + norm);
 
@@ -142,9 +168,9 @@ void main()
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    float shine = dot(Normal, vec3(0., 1., 0.))*500.;
+    float shine = dot(Normal, vec3(0., 1., 0.))*500.*max(height, 0.);
 
-    vec3 diffuseCol = colour();
+    vec3 diffuseCol = colour(height, sandLower, sandUpper, grassLower, grassUpper);
 
     vec3 specCol = vec3(1., 1., 1.);
 
