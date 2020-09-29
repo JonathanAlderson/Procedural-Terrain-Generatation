@@ -57,6 +57,7 @@ public:
 
     unsigned int VAO;
     int numChunks;
+    int totalChunks;
     float waterLevel;
     float landPrevelence;
     float heightMultiplier;
@@ -67,6 +68,7 @@ public:
     Shader* shader = new Shader("terrain.vs", "terrain.fs");
     int vertRowLen; // For memory offsets
     int chunkID;
+    vector<glm::vec2> validChunks;
     float roughness;
 
     // for generating seaweeds
@@ -100,6 +102,8 @@ public:
         this->maxSeaweed = maxSeaweed;
         this->seaweedCount = 0;
 
+        // Determine which chunks should be spawned in a circle
+        calculateCirlce();
 
         seaweedSetup();
         //this->shader = new Shader("terrain.vs", "terrain.fs");
@@ -110,89 +114,32 @@ public:
         verticesSizeBorder = (chunkSize+3) * (chunkSize+3);
         indicesSize = (chunkSize) * (chunkSize) * 6;
 
-        vertices = (Vertex **) malloc(numChunks * numChunks * sizeof(Vertex *));
-        for(int i = 0; i < numChunks * numChunks; i++)
+        vertices = (Vertex **) malloc(totalChunks * sizeof(Vertex *));
+        for(int i = 0; i < totalChunks; i++)
         {
           vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
         }
         positions = (glm::vec3 *) malloc(verticesSizeBorder * sizeof(glm::vec3));
         normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
-        chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
+        chunks = (Chunk *) malloc(totalChunks * sizeof(Chunk));
 
         seaweedPos = (glm::vec3 *) malloc(maxSeaweed * sizeof(glm::vec3));
 
         vertRowLen = verticesSize;
 
         // Generate data for each chunk
-        for(int i = 0; i < numChunks; i++)
+        for(int i = 0; i < totalChunks; i++)
         {
-          for(int j = 0; j < numChunks; j++)
-          {
-            chunkID = j + (i*numChunks);
-            generateChunkPoints(j, i);
-            setupChunk(j, i);
-          }
+            chunkID = i;
+            generateChunkPoints(validChunks[i].x, validChunks[i].y);
+            setupChunk(validChunks[i].x, validChunks[i].y);
+
         }
         std::cout << "Spawned: " << seaweedCount << std::endl;
         // Don't render the seaweed that didn't get a position
         this->maxSeaweed = seaweedCount;
     }
-
-    // Setup Function For If The Map Already Exists
-    Terrain(int seed, int numChunks, float heightScale, int indicesSize, vector<int> indicesIn, vector<vector<v::Vertex>> positionsIn)
-    {
-        this->seed = seed;
-        this->numChunks = numChunks;
-        this->chunkSize = chunkSize;
-        this->heightScale = heightScale;
-        this->indicesSize = indicesSize;
-
-
-        // Mallocing
-        verticesSize = (chunkSize+1) * (chunkSize+1);
-        vertices = (Vertex **) malloc(numChunks * numChunks * sizeof(Vertex *));
-        indices = (int *) malloc(indicesSize * sizeof(int));
-        for(int i = 0; i < numChunks * numChunks; i++)
-        {
-          vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
-        }
-        chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
-
-        // Assigning Values From File
-        for(int i = 0; i < numChunks * numChunks; i ++)
-        {
-          for(int j = 0; j < verticesSize; j++)
-          {
-            vertices[i][j] = positionsIn[i][j];
-
-          }
-        }
-
-        for(int i = 0; i < indicesSize; i++)
-        {
-          indices[i] = indicesIn[i];
-        }
-
-        this->vertices = vertices;
-        this->indices = indices;
-
-        setupShader();
-
-
-        for(int i = 0; i < numChunks; i++)
-        {
-          for(int j = 0; j < numChunks; j++)
-          {
-            chunkID = j + (i*numChunks);
-            setupChunk(j, i);
-          }
-        }
-    }
-
-
-
-
 
     // render the mesh
     void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos, glm::vec4 clipPlane)
@@ -205,7 +152,7 @@ public:
         shader->setVec3("viewPos", camPos);
         shader->setVec4("clipPlane", clipPlane);
         // draw each chunk individually
-        for(int i = 0; i < numChunks * numChunks; i++)
+        for(int i = 0; i < totalChunks; i++)
         {
           glBindVertexArray(chunks[i].VAO);
           glDrawElements(GL_TRIANGLES, indicesSize , GL_UNSIGNED_INT, 0);
@@ -224,6 +171,27 @@ public:
       shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
       shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
       shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+    }
+
+    void calculateCirlce()
+    {
+      // Go through each chunk and determine which ones can be
+      // in the circle and which didn't make it
+      float r = (int)numChunks/2;
+      int chunksInCircle = 0;
+
+      for(float j = -r + .5; j < r + .5; j ++)
+      {
+        for(float i = -r + .5; i < r + .5; i ++)
+        {
+          if(std::sqrt((i * i) + (j * j)) <= r)
+          {
+            chunksInCircle++;
+            this->validChunks.push_back(glm::vec2((int)(i - .5 + r), (int)(j - .5 + r)));
+          }
+        }
+      }
+      this->totalChunks = chunksInCircle;
     }
 
 
@@ -288,6 +256,8 @@ private:
           posZ = z + offsetZ;
           vertX = posX * scale;
           vertZ = posZ * scale;
+
+          //std::cout << "    XZ: " << x << " - " << z << '\n';
 
           // Calculate the height for this position
           height = getHeight(posX, posZ);
@@ -451,7 +421,7 @@ private:
     ////////////////////////////////////////
     void seaweedSetup()
     {
-      float totalVertices = chunkSize * chunkSize * numChunks * numChunks;
+      float totalVertices = chunkSize * chunkSize * totalChunks;
       seaweedMin = 1.0 - (((float)maxSeaweed / (float)totalVertices) / (maxSeaweedSpawnChance / 2));
 
       while( seaweedMin < 0)
@@ -508,7 +478,6 @@ private:
     void setupChunk(int x, int z)
     {
         // Create the chunk and put it in our chunks
-        int chunkID = x + (z*numChunks);
         Chunk thisChunk = {.VAO = 0,
                            .VBO = 0,
                            .EBO = 0,
