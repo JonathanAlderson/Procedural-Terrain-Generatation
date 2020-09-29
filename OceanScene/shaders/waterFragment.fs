@@ -107,4 +107,9 @@ void main(void) {
 	out_Color += vec4(specularHighlights, 1.0);
 
 	out_Color.a = clamp(waterDepth/10., 0., 1.);
+
+  if(toCameraVector.y < 0)
+  {
+    out_Color = mix(out_Color, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));
+  }
 }
