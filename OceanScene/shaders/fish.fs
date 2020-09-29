@@ -40,5 +40,5 @@ void main()
   vec4 texColor = texture(texture1, tex);
   if(texColor.a < 0.1)
       discard;
-  FragColor = texColor;
+  FragColor = mix(texColor, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));;
 }
