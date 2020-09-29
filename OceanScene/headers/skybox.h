@@ -44,6 +44,7 @@ public:
     shader->setMat4("view", view);
     shader->setMat4("projection", projection);
     shader->setVec4("clipPlane", clipPlane);
+    shader->setVec3("viewPos", camera.Position);
     // skybox cube
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);

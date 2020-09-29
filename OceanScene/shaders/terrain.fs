@@ -168,7 +168,12 @@ void main()
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    float shine = dot(Normal, vec3(0., 1., 0.))*500.*max(height, 0.);
+    float shine = dot(Normal, vec3(0., 1., 0.))*1000.;
+
+    if(height > 0)
+    {
+      shine *= height;
+    }
 
     vec3 diffuseCol = colour(height, sandLower, sandUpper, grassLower, grassUpper);
 
@@ -177,6 +182,12 @@ void main()
     vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
 
     result += caustics();
+
+    // Make things darker underwater
+    if(height < 0)
+    {
+      result = mix(result, vec3(0.243, 0.573, .8), 1. - min(gl_FragCoord.w * 20., 1.0));
+    }
 
     FragColor = vec4(result, 1.0);
 
