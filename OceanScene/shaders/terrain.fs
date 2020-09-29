@@ -4,6 +4,8 @@ out vec4 FragColor;
 in vec3 FragPos;
 in vec3 Normal;
 
+uniform sampler2D normalMap;
+
 
 struct DirLight {
     vec3 direction;
@@ -130,7 +132,14 @@ vec3 caustics()
 
 void main()
 {
-    vec3 norm = normalize(Normal);
+    // normals and highlights
+    vec4 normMap = texture(normalMap, vec2(FragPos.x*.2, FragPos.z*.2));
+    vec3 norm = vec3(normMap.r * 2.0 - 1.0, normMap.g * 3.0, normMap.b * 2.0 - 1.0);
+    norm = normalize(Normal + norm);
+
+    //vec3 norm = normalize(Normal);
+
+
     vec3 viewDir = normalize(viewPos - FragPos);
 
     float shine = dot(Normal, vec3(0., 1., 0.))*500.;
