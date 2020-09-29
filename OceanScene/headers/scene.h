@@ -54,7 +54,7 @@ public:
 
         // Terrain
         std::cout << "Seed: " << seed << '\n';
-        terrain = new Terrain(seed, 40, 1., 50., .8, .0, 1.0, 30., maxSeaweed);
+        terrain = new Terrain(seed, 30, 1., 50., .8, .0, 1.0, 70., maxSeaweed);
         maxSeaweed = terrain->maxSeaweed;
 
         // Seaweed
