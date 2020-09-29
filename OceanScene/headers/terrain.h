@@ -90,12 +90,12 @@ public:
     {
         std::cout << "Generating New Map" << '\n';
         this->numChunks = numChunks;
-        this->heightScale = heightScale;
+        this->heightScale = heightScale * 5.0 * (float)numChunks/10.;
         this->noiseScale = noiseScale;
         this->scale = scale;
         this->roughness = roughness;
         this->waterLevel = waterLevel;
-        this->landPrevelence = landPrevelence;
+        this->landPrevelence = landPrevelence * (float)numChunks/10.;
         this->seed = seed;//(float)rand();
 
         // Seaweed Things
