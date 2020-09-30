@@ -48,8 +48,8 @@ public:
         // large central island 8647
         seed = 8647;
 
-        int maxSeaweed = 10000;
-        int maxFish = 2000;
+        int maxSeaweed = 40000;
+        int maxFish = 10000;
         int schoolSize = 20;
 
         // Terrain

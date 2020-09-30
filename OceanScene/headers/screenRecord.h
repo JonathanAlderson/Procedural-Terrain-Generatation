@@ -25,14 +25,15 @@ public:
    int maxFrames;
 
    // Settings
-   std::string framerate = "30";
+   std::string framerate;
    std::string imagesMergeCommand;
 
-   ScreenRecord(int seed, int maxFrames)
+   ScreenRecord(int seed, int maxFrames, int framerate)
    {
      std::cout << "Init" << '\n';
      this->seed = seed;
      this->maxFrames = maxFrames;
+     this->framerate = std::to_string(framerate);
      time_t rawtime;
      struct tm * timeinfo;
      char buffer[80];
@@ -84,7 +85,7 @@ public:
 
       glPixelStorei(GL_PACK_ALIGNMENT, 1);
       glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
-
+      stbi_flip_vertically_on_write(true);
       int saved = stbi_write_png(filename, width, height, 3, data, 0);
 
       free(data);

@@ -27,11 +27,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
-const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_WIDTH = 1800;
 const unsigned int SCR_HEIGHT = 800;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(20.0f, -17.0f, 250.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -100,22 +100,23 @@ int main()
     // Recording Setup
     // --------------------
     ScreenRecord * screenRecord;
-    int maxFrames = 60;
+    int maxFrames = 999999999;
+    int framerate = 30;
     if(SCREENRECORDING)
     {
+      maxFrames = 1400;
       std::cout << "Screen Recording Enabled" << '\n';
-      screenRecord = new ScreenRecord(scene.seed, maxFrames);
-      std::cout << "Finsh" << '\n';
+      screenRecord = new ScreenRecord(scene.seed, maxFrames, framerate);
       std::thread startUp(&ScreenRecord::clearSections, screenRecord);
       startUp.join();
     }
 
 
-    while (!glfwWindowShouldClose(window) && frame < maxFrames)
+    while (!glfwWindowShouldClose(window) && frame <= maxFrames)
        {
            // per-frame time logic
            // --------------------
-           frameTime = (SCREENRECORDING) ? ((1. / 60.) * frame) : glfwGetTime();
+           frameTime = (SCREENRECORDING) ? ((1. / (float)framerate) * frame) : glfwGetTime();
 
            deltaTime = frameTime - lastFrame;
            lastFrame = frameTime;
@@ -123,6 +124,10 @@ int main()
            // input
            // -----
            processInput(window);
+
+           // auto camera movement
+           camera.Position.z -= 6.0 * deltaTime;
+           camera.Position.y += 1.15 * deltaTime;
 
            // render
            // ------
@@ -157,9 +162,13 @@ int main()
            // -------------------------------------------------------------------------------
            glfwSwapBuffers(window);
            glfwPollEvents();
-           screenRecord->recordFrame(frame);
-           frame++;
-           if((int)frame % 60 == 0 && frame > 0){ std::thread addImagesThread(&ScreenRecord::imagesToVideoSegment, screenRecord); addImagesThread.join(); }
+
+           if(SCREENRECORDING)
+           {
+             screenRecord->recordFrame(frame);
+             frame++;
+             if((int)frame % 60 == 0 && frame > 0){ std::thread addImagesThread(&ScreenRecord::imagesToVideoSegment, screenRecord); addImagesThread.join(); }
+           }
 
        }
 
@@ -169,10 +178,13 @@ int main()
 
        // Save the video
        // -----------------------------------
-       std::cout << "Saving Final Video" << '\n';
-       std::thread compileVideoThread(&ScreenRecord::saveVideo, screenRecord);
-       compileVideoThread.join();
-       std::cout << "Saved" << '\n';
+        if(SCREENRECORDING)
+        {
+          std::cout << "Saving Final Video" << '\n';
+          std::thread compileVideoThread(&ScreenRecord::saveVideo, screenRecord);
+          compileVideoThread.join();
+          std::cout << "Saved" << '\n';
+        }
 
        return 0;
    }
