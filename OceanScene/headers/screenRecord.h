@@ -16,18 +16,23 @@ class ScreenRecord
 public:
 
    std::string joinVideoCommand;
-   std::string imagesMergeCommand = "cat ../videos/frame*.png | ffmpeg -r " + framerate + " -i - -c:v libx264 -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\"  -crf 18 -framerate " + framerate + " -pix_fmt yuv420p ../videos/section" + frameString + ".mp4";
 
    float timeValue;
    std::stringstream frameStream;
    std::string frameString;
+   int seed;
+   int frame;
+   int maxFrames;
 
    // Settings
    std::string framerate = "30";
+   std::string imagesMergeCommand;
 
-
-   ScreenRecord(int seed)
+   ScreenRecord(int seed, int maxFrames)
    {
+     std::cout << "Init" << '\n';
+     this->seed = seed;
+     this->maxFrames = maxFrames;
      time_t rawtime;
      struct tm * timeinfo;
      char buffer[80];
@@ -36,22 +41,30 @@ public:
      strftime(buffer,sizeof(buffer),"_%d-%m-%Y_%H:%M",timeinfo);
      std::string currentTime(buffer);
 
+     imagesMergeCommand = "cat ../videos/frame*.png | ffmpeg -y -f image2pipe -i - ../videos/section";
      joinVideoCommand = "ffmpeg -y -f concat -safe 0 -i ../videos/sections.txt -c copy -pix_fmt yuv420p -crf 18 ../videos/'" + std::to_string(seed) + "'" + currentTime + ".mp4";
-     imagesMergeCommand = "cat ../videos/frame*.png | ffmpeg -r " + framerate + " -i - -c:v libx264 -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\"  -crf 18 -framerate " + framerate + " -pix_fmt yuv420p ../videos/section";
-
-
    }
+
+   void clearSections()
+   {
+      // Ran at the start to delete any spare frames
+      std::cout << "Clearing file" << '\n';
+      std::system("> ../videos/sections.txt");
+   }
+
 
    void recordFrame(int frame)
    {
      timeValue = (1. / 60.) * frame;
+     this->frame = frame;
      frameStream.str("");
      frameStream.clear();
      // Give all the frames a  unique name, ffmpeg breaks with frame numbers < 100 so 100 is added
     frameStream << std::setw(6) << std::setfill('0') << (int)frame + 100;
+    frameString = frameStream.str();
 
+    std::cout << std::to_string((int)(((float)frame/(float)maxFrames)*100.)) << "%" << '\n';
     saveScreenshot(("../videos/frame" + frameString + ".png").c_str());
-    if((int)frame % 60 == 0 && frame > 0){ std::thread addImagesThread(imagesToVideoSegment, imagesMergeCommand, 1, frameString); addImagesThread.join(); }
    }
 
   int saveScreenshot(const char *filename)
@@ -79,30 +92,24 @@ public:
       return saved;
   }
 
-  void imagesToVideoSegment(std::string command, float record, std::string frame)
+  void imagesToVideoSegment()
   {
     // Converts the last 60 frames to a video and
     // deletes the frames
     std::cout << "recording" << std::endl;
-    if(record == 1.0)
-    {
+    std::system((imagesMergeCommand + std::to_string(frame) + ".mp4").c_str());
+    std::system("find ../videos/frame* -exec rm {} \\;");
+    std::system(("echo \"file 'section" + std::to_string(this->frame) + ".mp4'\" >> ../videos/sections.txt").c_str());
 
-      std::system(command.c_str());
-      std::system("find ../videos/frame* -exec rm {} \\;");
-      std::system(("echo \"file 'section" + frame + ".mp4'\" >> ../videos/sections.txt").c_str());
-    }
   }
 
   void saveVideo()
   {
 
-    std::cout << "doing audio" << std::endl;
-
-    if(record == 1.0)
-    {
-      std::system(joinVideoCommand.c_str());
-      std::system("find ../videos/section* -exec rm {} \\;");
-    }
+    std::cout << "Saving Video" << std::endl;
+    std::system(joinVideoCommand.c_str());
+    std::system("find ../videos/section* -exec rm {} \\;");
+    std::cout << "Video Saved" << '\n';
   }
 
 };
