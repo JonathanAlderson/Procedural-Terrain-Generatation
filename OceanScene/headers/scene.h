@@ -90,7 +90,7 @@ public:
         waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
 
         // Rocks
-        rock = new Rock(30.0f, 30.0f, glm::vec3(0.0f), 0.07f, 0.1f);
+        rock = new Rock(100.0f, 30.0f, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, 0.1f, GEN_ROCK);
 
         // Skybox
         skybox = new Skybox("skybox1");
