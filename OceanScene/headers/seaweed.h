@@ -28,27 +28,23 @@ public:
 
 
     // constructor
-    Seaweed(int maxSeaweed)
+    Seaweed(int maxSeaweed, glm::vec3 *positions)
     {
 
       seaweedNum = maxSeaweed;
-      texture = loadTexture(FileSystem::getPath("resources/textures/allSeaweed.png").c_str());
+      texture = loadTexture(FileSystem::getPath("resources/textures/allSeaweed.png").c_str(), 0);
 
       this->shader = new Shader("seaweed.vs", "seaweed.fs");
       // Malloc for translations
-      translations = (glm::vec3 *) malloc(sizeof(glm::vec3) * seaweedNum);
-      // create positions
-      for (int i = 0; i < seaweedNum; i++)
-      {
-        translations[i] = glm::vec3((float)(i%10), 0., (i/10));
-      }
+      translations = positions;
+
 
       // Do all the OpenGL setup
       setupSeaweed();
     }
 
     // render the mesh
-    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time)
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec4 clipPlane)
     {
         // Activate Texture
         glActiveTexture(GL_TEXTURE0);
@@ -60,6 +56,7 @@ public:
         shader->setMat4("view", view);
         shader->setMat4("projection", projection);
         shader->setFloat("time", time);
+        shader->setVec4("clipPlane", clipPlane);
 
         // Draw
         glBindVertexArray(VAO);

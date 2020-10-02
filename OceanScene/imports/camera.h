@@ -6,6 +6,7 @@
 #include "gtc/matrix_transform.hpp"
 
 #include <vector>
+#include <iostream>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -47,6 +48,7 @@ public:
     float MaxAcceleration;
     float Acceleration;
 
+
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), MaxBoost(BOOST), Acceleration(ACCEL)
     {
@@ -71,6 +73,12 @@ public:
         MaxAcceleration = Acceleration;
         Acceleration = 0;
         updateCameraVectors();
+    }
+
+    void invertPitch()
+    {
+      this->Pitch = -Pitch;
+      updateCameraVectors();
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
@@ -144,11 +152,20 @@ public:
         Zoom -= (float)yoffset;
         if (Zoom < 1.0f)
             Zoom = 1.0f;
-        if (Zoom > 45.0f)
-            Zoom = 45.0f;
+        if (Zoom > 70.0f)
+            Zoom = 70.0f;
     }
 
-private:
+    void ShowPosition()
+    {
+      std::cout << "glm::vec3(" << Position.x << ", " << Position.y << ", " << Position.z << ")," << '\n';
+    }
+
+    void ShowRotation()
+    {
+      std::cout << "glm::vec3(" << Yaw << ", " << Pitch << ", " << "0." << ")," << '\n';
+    }
+
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()
     {

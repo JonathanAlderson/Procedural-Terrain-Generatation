@@ -6,14 +6,16 @@
 extern float containerVertices[288];
 extern float quadVerticies[30];
 
-struct Vertex
+namespace v
 {
-    // position
-    glm::vec3 Position;
-    // normal
-    glm::vec3 Normal;
-};
-
+  struct Vertex
+  {
+      // position
+      glm::vec3 Position;
+      // normal
+      glm::vec3 Normal;
+  };
+}
 struct ScalarVertex
 {
     // position
@@ -26,4 +28,5 @@ struct ScalarVertex
 
 extern int edgeTable[256];
 extern int triTable[256][16];
+extern float skyboxVertices[108];
 #endif

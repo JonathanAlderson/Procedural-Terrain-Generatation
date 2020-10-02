@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "glm.hpp"
+#include "gtc/noise.hpp"
 #include "sceneSetup.h"
 #include "verticies.h"
 

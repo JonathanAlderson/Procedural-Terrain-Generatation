@@ -9,15 +9,19 @@
 #include "stb_image.h"
 #include "shader.h"
 #include "camera.h"
-// #include "terrain.h"
-// #include "fileLoader.h"
-// #include "seaweed.h"
 #include "scene.h"
-
+#include "waterFrameBuffers.h"
 #include "sceneSetup.h"
 #include "texturesSetup.h"
 #include "shadersSetup.h"
 
+#define SCREENRECORDING false
+#define RECORDINGFRAMES 500
+#define CAMERADOLLY true
+
+// #if SCREENRECORDING == true
+#include "screenRecord.h"
+// #endif
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -29,17 +33,18 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(20.0f, -17.0f, 250.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+float camReflectDist = 0.;
+float underwater;
 
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-
-
+int frame = 0;
+float frameTime;
 
 
 int main()
@@ -86,28 +91,78 @@ int main()
     glEnable(GL_DEPTH_TEST);
     //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
+    // Water Setup
+    // --------------------
+    WaterFrameBuffers * fbos = new WaterFrameBuffers(SCR_WIDTH, SCR_HEIGHT);
 
     //  Scene Setup
     // --------------------
-    Scene scene = Scene(0);
+    Scene scene = Scene(fbos, &camera, CAMERADOLLY);
+
+    // Recording Setup
+    // --------------------
+    ScreenRecord * screenRecord;
+    int maxFrames = 999999999;
+    int framerate = 30;
+    if(SCREENRECORDING)
+    {
+      maxFrames = RECORDINGFRAMES;
+      std::cout << "Screen Recording Enabled" << '\n';
+      screenRecord = new ScreenRecord(scene.seed, maxFrames, framerate);
+      std::thread startUp(&ScreenRecord::clearSections, screenRecord);
+      startUp.join();
+    }
 
 
-
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window) && frame <= maxFrames)
        {
            // per-frame time logic
            // --------------------
-           float currentFrame = glfwGetTime();
-           deltaTime = currentFrame - lastFrame;
-           lastFrame = currentFrame;
+           frameTime = (SCREENRECORDING) ? ((1. / (float)framerate) * frame) : glfwGetTime();
+
+           deltaTime = frameTime - lastFrame;
+           lastFrame = frameTime;
 
            // input
            // -----
            processInput(window);
 
+           // auto camera movement
+           scene.MoveCamera(&camera, frameTime);
+
+
+           //
+           //std::cout << "T: " << frameTime*0.1 << " P: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << " "  << '\n';
+
+           // camera.Position.z -= 6.0 * deltaTime;
+           // camera.Position.y += 1.15 * deltaTime;
+
            // render
            // ------
-           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, currentFrame);
+           glEnable(GL_CLIP_DISTANCE0);
+
+
+           // render reflection texture
+           fbos->bindReflectionFrameBuffer();
+           // move camera
+           camReflectDist = 2 * camera.Position.y;
+           underwater = (camera.Position.y < 0) ? -1 : (camera.Position.y > 0);
+
+           camera.Position.y -= camReflectDist;
+           camera.invertPitch();
+
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, frameTime, glm::vec4(0., 1. * underwater, 0., 0.));
+           fbos->unbindCurrentFrameBuffer();
+           camera.Position.y += camReflectDist;
+           camera.invertPitch();
+
+           // render refraction texture
+           fbos->bindRefractionFrameBuffer();
+           scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, frameTime, glm::vec4(0., -1. * underwater, 0., 0.));
+           fbos->unbindCurrentFrameBuffer();
+
+           // // render to scene
+           scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, frameTime, glm::vec4(0., -1., 0., 999999.));
 
 
 
@@ -116,15 +171,30 @@ int main()
            // -------------------------------------------------------------------------------
            glfwSwapBuffers(window);
            glfwPollEvents();
-       }
 
-       // optional: de-allocate all resources once they've outlived their purpose:
-       // ------------------------------------------------------------------------
-       // cleanup done somewhere else
+           if(SCREENRECORDING)
+           {
+             screenRecord->recordFrame(frame);
+             frame++;
+             if((int)frame % 60 == 0 && frame > 0){ std::thread addImagesThread(&ScreenRecord::imagesToVideoSegment, screenRecord); addImagesThread.join(); }
+           }
+
+       }
 
        // glfw: terminate, clearing all previously allocated GLFW resources.
        // ------------------------------------------------------------------
        glfwTerminate();
+
+       // Save the video
+       // -----------------------------------
+        if(SCREENRECORDING)
+        {
+          std::cout << "Saving Final Video" << '\n';
+          std::thread compileVideoThread(&ScreenRecord::saveVideo, screenRecord);
+          compileVideoThread.join();
+          std::cout << "Saved" << '\n';
+        }
+
        return 0;
    }
 
@@ -190,4 +260,8 @@ void processInput(GLFWwindow *window)
         camera.ProcessBoost(deltaTime);
     else
         camera.ProcessBoost(-deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        camera.ShowPosition();
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+        camera.ShowRotation();
 }

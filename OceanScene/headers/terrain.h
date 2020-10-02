@@ -4,6 +4,9 @@
 #include <glad/glad.h> // holds all OpenGL type declarations
 #include <time.h>
 #include "glm.hpp"
+#include "json.hpp"
+#include "filesystem.h"
+#include "texturesSetup.h"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/noise.hpp"
 
@@ -12,21 +15,12 @@
 
 #include <string>
 #include <vector>
+
+
 using namespace std;
-
-/*
-struct Vertex {
-    // position
-    glm::vec3 Position;
-    // normal
-    glm::vec3 Normal;
-};
-
-*/
-
 struct Chunk {
   unsigned int VAO, VBO, EBO;
-  Vertex *points;
+  v::Vertex *points;
   int *indices;
   int x;
   int z;
@@ -34,16 +28,17 @@ struct Chunk {
   int chunkSize;
 };
 
+using namespace v;
 class Terrain {
 public:
 
     // Terrain made out of chunks of fixed size
-    int chunkSize = 10.;
+    int chunkSize = 16.;
 
     Chunk *chunks;
-
+    unsigned int rockNormalMap, grassNormalMap, sandNormalMap;
     // mesh Data
-    Vertex *vertices;
+    Vertex **vertices;
     glm::vec3 *positions;
     glm::vec3 *normals;
     int *indices;
@@ -54,6 +49,7 @@ public:
 
     unsigned int VAO;
     int numChunks;
+    int totalChunks;
     float waterLevel;
     float landPrevelence;
     float heightMultiplier;
@@ -62,25 +58,50 @@ public:
     float scale;
     float seed;
     Shader* shader = new Shader("terrain.vs", "terrain.fs");
+    int vertRowLen; // For memory offsets
+    int chunkID;
+    vector<glm::vec2> validChunks;
+    float roughness;
+
+    // for generating seaweeds
+    glm::vec3* seaweedPos;
+    int maxSeaweed;
+    int seaweedCount;
+    float seaweedMin;
+    float maxSeaweedSpawnChance = 0.15;
+    int didntSpawn = 0;
+    int didSpawn = 0;
 
     // constructor
 
     // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
     // 10, 15., 150., .2, 0.1, .8
 
-
-    Terrain(int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence)
+    // Constructor For If We Want To Generate A New Map
+    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed)
     {
+        std::cout << "Generating New Map" << '\n';
+        sandNormalMap = loadTexture(FileSystem::getPath("resources/textures/sandNormal.png").c_str(), 1);
+        rockNormalMap = loadTexture(FileSystem::getPath("resources/textures/rockNormal.jpg").c_str(), 1);
+        grassNormalMap = loadTexture(FileSystem::getPath("resources/textures/grassNormal.jpg").c_str(), 1);
+
         this->numChunks = numChunks;
-        this->heightScale = heightScale;
+        this->heightScale = heightScale * 5.0 * (float)numChunks/10.;
         this->noiseScale = noiseScale;
         this->scale = scale;
+        this->roughness = roughness;
         this->waterLevel = waterLevel;
-        this->landPrevelence = landPrevelence;
-        this->heightMultiplier = ((chunkSize * numChunks)/2.) * landPrevelence;
-        srand(time(NULL));
-        std::cout << rand() << std::endl;
-        this->seed = rand();//(float)rand();
+        this->landPrevelence = landPrevelence * (float)numChunks/10.;
+        this->seed = seed;//(float)rand();
+
+        // Seaweed Things
+        this->maxSeaweed = maxSeaweed;
+        this->seaweedCount = 0;
+
+        // Determine which chunks should be spawned in a circle
+        calculateCirlce();
+
+        seaweedSetup();
         //this->shader = new Shader("terrain.vs", "terrain.fs");
         setupShader();
 
@@ -88,40 +109,52 @@ public:
         verticesSize = (chunkSize+1) * (chunkSize+1);
         verticesSizeBorder = (chunkSize+3) * (chunkSize+3);
         indicesSize = (chunkSize) * (chunkSize) * 6;
-        vertices = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+
+        vertices = (Vertex **) malloc(totalChunks * sizeof(Vertex *));
+        for(int i = 0; i < totalChunks; i++)
+        {
+          vertices[i] = (Vertex *) malloc(verticesSize * sizeof(Vertex));
+        }
         positions = (glm::vec3 *) malloc(verticesSizeBorder * sizeof(glm::vec3));
         normals = (glm::vec3 *) calloc(verticesSizeBorder, sizeof(glm::vec3));
         indices = (int *) malloc(indicesSize * sizeof(int));
-        chunks = (Chunk *) malloc(numChunks * numChunks * sizeof(Chunk));
+        chunks = (Chunk *) malloc(totalChunks * sizeof(Chunk));
+
+        seaweedPos = (glm::vec3 *) malloc(maxSeaweed * sizeof(glm::vec3));
+
+        vertRowLen = verticesSize;
 
         // Generate data for each chunk
-        for(int i = 0; i < numChunks; i++)
+        for(int i = 0; i < totalChunks; i++)
         {
-          for(int j = 0; j < numChunks; j++)
-          {
-            generateChunkPoints(j, i);
-            setupChunk(j, i);
-          }
-        }
+            chunkID = i;
+            generateChunkPoints(validChunks[i].x, validChunks[i].y);
+            setupChunk(validChunks[i].x, validChunks[i].y);
 
-        // Being good
-        free(vertices);
-        free(indices);
-        free(normals);
-        free(positions);
+        }
+        std::cout << "Spawned: " << seaweedCount << std::endl;
+        // Don't render the seaweed that didn't get a position
+        this->maxSeaweed = seaweedCount;
     }
 
     // render the mesh
-    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos)
+    void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, float time, glm::vec3 camPos, glm::vec4 clipPlane)
     {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sandNormalMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, grassNormalMap);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, rockNormalMap);
         shader->use();
         shader->setFloat("time", time);
         shader->setMat4("projection", projection);
         shader->setMat4("view", view);
         shader->setMat4("model", model);
         shader->setVec3("viewPos", camPos);
+        shader->setVec4("clipPlane", clipPlane);
         // draw each chunk individually
-        for(int i = 0; i < numChunks * numChunks; i++)
+        for(int i = 0; i < totalChunks; i++)
         {
           glBindVertexArray(chunks[i].VAO);
           glDrawElements(GL_TRIANGLES, indicesSize , GL_UNSIGNED_INT, 0);
@@ -134,12 +167,41 @@ public:
       shader->use();
       shader->setFloat("shininess", 32.0f);
       shader->setFloat("maxHeight", heightScale);
+      shader->setInt("sandNormalMap", 0);
+      shader->setInt("grassNormalMap", 1);
+      shader->setInt("rockNormalMap", 2);
 
-      // directional light
+      // directional light   normal settings
+      // shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+      // shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+      // shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
+      // shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
       shader->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-      shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-      shader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
-      shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+      shader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.15f);
+      shader->setVec3("dirLight.diffuse", 0.8f, 0.8f, 1.f);
+      shader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.8f);
+    }
+
+    void calculateCirlce()
+    {
+      // Go through each chunk and determine which ones can be
+      // in the circle and which didn't make it
+      float r = (int)numChunks/2;
+      int chunksInCircle = 0;
+
+      for(float j = -r + .5; j < r + .5; j ++)
+      {
+        for(float i = -r + .5; i < r + .5; i ++)
+        {
+          if(std::sqrt((i * i) + (j * j)) <= r)
+          {
+            chunksInCircle++;
+            this->validChunks.push_back(glm::vec2((int)(i - .5 + r), (int)(j - .5 + r)));
+          }
+        }
+      }
+      this->totalChunks = chunksInCircle;
     }
 
 
@@ -205,10 +267,12 @@ private:
           vertX = posX * scale;
           vertZ = posZ * scale;
 
+          //std::cout << "    XZ: " << x << " - " << z << '\n';
+
           // Calculate the height for this position
           height = getHeight(posX, posZ);
 
-          // Update this Vertexs' positon
+          // Update this Vertexs' positon in correct memory space
           positions[((chunkSize+3) * (z+1)) + (x+1)] = glm::vec3(vertX, height, vertZ);
 
           // Create Face
@@ -275,7 +339,7 @@ private:
             thisNormal = glm::normalize(normals[i]);
             thisVertex.Position = positions[i - (chunkSize+4)];
             thisVertex.Normal =  thisNormal;
-            vertices[count] = thisVertex;
+            vertices[chunkID][count] = thisVertex;
             count++;
           }
         }
@@ -302,16 +366,34 @@ private:
       posX += seed;
       posZ += seed;
 
-      // Mountains
+      // Harder to be a mountain as you get further away
+      height = - (.03 * toCenter) ;
+
+      // // // Mountains
       for(int i = 0; i < octaves; i++)
       {
         height += ((glm::perlin(glm::vec2((float)posX/ns , (float)posZ/ns))+.707)/1.414) * hs;
-        ns *= .5;
-        hs *= ((height/heightScale))/1.5;
-      }
 
-      // Less Pronounced as you get further away
-      height = height * 1. / max((6. * (toCenter/heightMultiplier)), 1.);
+
+        if(i == 0)
+        {
+          // Initial height less pronounces as further away
+          height  += (.03 * toCenter);
+          height *= 1./(exp(3. * toCenter/(((chunkSize * numChunks)/2.) * landPrevelence)));
+          height -= (.03 * toCenter);
+          if(height < waterLevel)
+          {
+            break;
+          }
+          // Set rockyness based on height
+          hs = ((height/heightScale))*roughness;
+        }
+
+        // Adjust height and noiseScale
+        hs *= .5;
+        ns *= .5;
+
+      }
 
       // If we are underwater
       if((height/heightScale) < waterLevel)
@@ -334,24 +416,88 @@ private:
       }
       height -= waterLevel * heightScale;
 
+      seaweedPosition(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
+
       return height;
     }
+
+    float randFloat()
+    {
+      return ((float)rand()/RAND_MAX);
+    }
+
+    ////////////////////////////////////////
+    // SEAWEED SPAWNING FUNCTIONS
+    ////////////////////////////////////////
+    void seaweedSetup()
+    {
+      float totalVertices = chunkSize * chunkSize * totalChunks;
+      seaweedMin = 1.0 - (((float)maxSeaweed / (float)totalVertices) / (maxSeaweedSpawnChance / 2));
+
+      while( seaweedMin < 0)
+      {
+        maxSeaweedSpawnChance += 0.01;
+        seaweedMin = 1.0 - (((float)maxSeaweed / (float)totalVertices) / (maxSeaweedSpawnChance / 2));
+      }
+    }
+
+    int spawnSeaweed(float noise, float min, float maxSpawnChance)
+    {
+      if(noise < min)
+      {
+        return 0.;
+      }
+      else
+      {
+        if((((noise - min) / (1.0 - min)) * maxSpawnChance) > randFloat())
+        {
+          didSpawn++;
+          return 1.;
+        }
+        else
+        {
+          didntSpawn++;
+          return 0.;
+        }
+      }
+    }
+
+    void seaweedPosition(glm::vec3 position)
+    {
+      float noise = (glm::perlin(glm::vec2((float)(position.x+seed)/(noiseScale/8.), (float)(position.z+seed)/(noiseScale/8.)))+.707)/1.414;
+
+      if(seaweedCount < maxSeaweed)
+      {
+        if(spawnSeaweed(noise, seaweedMin, maxSeaweedSpawnChance) == 1.0)
+        {
+          if(position.y < -5.)
+          {
+            seaweedPos[seaweedCount] = position;
+            seaweedCount++;
+          }
+        }
+      }
+    }
+
+    ////////////////////////////////////////
+    // END SEAWEED SPAWNING FUNCTIONS
+    ////////////////////////////////////////
 
     // initializes all the buffer objects/arrays
     // inside the chunk from the current data
     void setupChunk(int x, int z)
     {
         // Create the chunk and put it in our chunks
-        int chunkID = x + (z*numChunks);
         Chunk thisChunk = {.VAO = 0,
                            .VBO = 0,
                            .EBO = 0,
-                           .points = vertices,
+                           .points = vertices[chunkID],
                            .indices = indices,
                            .x = x,
                            .z = z,
                            .id = chunkID,
                            .chunkSize = chunkSize};
+
 
         // create buffers/arrays
         glGenVertexArrays(1, &thisChunk.VAO);
@@ -361,7 +507,7 @@ private:
 
         // load data into vertex buffers
         glBindBuffer(GL_ARRAY_BUFFER, thisChunk.VBO);
-        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(Vertex), &vertices[chunkID][0], GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, thisChunk.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
@@ -372,6 +518,7 @@ private:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
         glBindVertexArray(0);
+
 
         // Put the data in the main chunks
         chunks[chunkID] = thisChunk;
