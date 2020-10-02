@@ -13,7 +13,7 @@
 #include "fish.h"
 #include "waterTile.h"
 #include "beizer.h"
-#include "rock.h"
+#include "rocks.h"
 
 #include <time.h>
 #include <string>
@@ -36,8 +36,7 @@ public:
     WaterTile* waterTile;
     Skybox* skybox;
     Fish* fish;
-
-    Rock* rock;
+    Rocks* rocks;
 
     int seed;
     float waterSize;
@@ -91,8 +90,27 @@ public:
         waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
 
         // Rocks
-        rock = new Rock(10.0f, 30.0f, glm::vec3(0.5f, 0.5f, 0.5f), 0.5f, 0.1f, GEN_PEBBLE);
 
+        std::vector<glm::vec3> cameraRotatePoints = {glm::vec3(-180.4, 7.2, 0.),
+                                                     glm::vec3(-0.899945, -1.5, 0.),
+                                                     glm::vec3(116.1, -6, 0.),
+                                                     };
+
+
+
+        std::vector<glm::vec3> rockLocs = {glm::vec3(0., 0., 0.),
+                                          glm::vec3(0., 0., 20.),
+                                          glm::vec3(0., 0., 40.),
+                                          glm::vec3(20., 0., 0.),
+                                          glm::vec3(20., 0., 20.),
+                                          glm::vec3(20., 0., 40.),
+                                          glm::vec3(40., 0., 0.),
+                                          glm::vec3(40., 0., 20.),
+                                          glm::vec3(40., 0., 40.)};
+
+        rocks = new Rocks(10.0f, 30.0f, rockLocs, 0.5f, 0.1f, GEN_ROCK);
+
+        std::cout << "ROCKS SETUP" << '\n';
         // Skybox
         skybox = new Skybox("skybox1");
 
@@ -149,7 +167,7 @@ public:
       //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       //water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
       //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
-      rock->Draw(model, view, projection, camera.Position, clipPlane);
+      rocks->Draw(model, view, projection, camera.Position, clipPlane);
 
       //rock2->Draw(model, view, projection, camera.Position, clipPlane);
       //rock3->Draw(model, view, projection, camera.Position, clipPlane);
@@ -165,7 +183,7 @@ public:
       //terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
-      rock->Draw(model, view, projection, camera.Position, clipPlane);
+      rocks->Draw(model, view, projection, camera.Position, clipPlane);
       //rock2->Draw(model, view, projection, camera.Position, clipPlane);
       //rock3->Draw(model, view, projection, camera.Position, clipPlane);
       //rock4->Draw(model, view, projection, camera.Position, clipPlane);

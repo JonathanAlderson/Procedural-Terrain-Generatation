@@ -25,6 +25,9 @@
 class Rock
 {
 public:
+	// openGL vertex data
+	unsigned int VAO, VBO;
+	int triangleDataSize;
 
 	//
 	// rock arguments in order:
@@ -63,31 +66,7 @@ public:
 
 		setUpGL();
 
-		setupShader();
-	}
-
-	void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 camPos, glm::vec4 clipPlane)
-	{
-		rockShader->use();
-
-		rockShader->setMat4("projection", projection);
-		rockShader->setMat4("view", view);
-		rockShader->setMat4("model", model);
-		rockShader->setVec3("viewPos", camPos);
-		rockShader->setVec4("clipPlane", clipPlane);
-
-		//rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
-
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
-
-		normalShader->use();
-		normalShader->setMat4("projection", projection);
-		normalShader->setMat4("view", view);
-		normalShader->setMat4("model", model);
-
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
+		triangleDataSize = triangleData.size();
 	}
 
 private:
@@ -117,24 +96,9 @@ private:
 	int genType;
 
 	// create a new shader object with the approriate vertex and fragment shaders
-	Shader* rockShader = new Shader("rock.vs", "rock.fs");
-	Shader* normalShader = new Shader("normal.vs", "normal.fs", "normal.gs");
 
-	// openGL vertex data
-	unsigned int VAO, VBO;
+	//Shader* normalShader = new Shader("normal.vs", "normal.fs", "normal.gs");
 
-	//
-	// Sets rock shader uniforms
-	//
-	void setupShader()
-	{
-		rockShader->use();
-		rockShader->setVec3("fragCol", glm::vec3(124.0f, 124.0f, 124.0f));
-		rockShader->setVec3("dirLight.lightPos", 100.0f, 100.0f, 100.0f);
-		rockShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
-		rockShader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
-		rockShader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-	}
 
 	//
 	// Sets OpenGL data (VBO and VAO)
