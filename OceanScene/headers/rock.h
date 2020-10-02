@@ -59,14 +59,15 @@ public:
 
 		this->genType = genType;
 
-
+		std::cout << "1." << '\n';
 		generateVertices();
-
+		std::cout << "2." << '\n';
 		marchingCubes();
-
+		std::cout << "3." << '\n';
 		setUpGL();
-
+		std::cout << "4." << '\n';
 		triangleDataSize = triangleData.size();
+		std::cout << "5." << '\n';
 	}
 
 private:

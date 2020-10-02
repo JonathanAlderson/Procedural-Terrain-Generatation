@@ -35,12 +35,16 @@ public:
     this->isoLevel = isoLevel;
     this->genType = genType;
 
+    std::cout << "malloc" << std::endl;
     rocks = (Rock *) malloc(rockPositions.size() * sizeof(Rock));
-
+    std::cout << "mallocd" << std::endl;
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
+      std::cout << "Rock " << i << std::endl;
       rocks[i] = Rock(nrVertices, length, rockPositions[i], isoLevel, noiseScale, genType);
+      std::cout << "Rockd" << std::endl;
     }
+    std::cout << "Init rock" << std::endl;
 
     setupShader();
   }
@@ -57,6 +61,7 @@ public:
     rockShader->setVec4("clipPlane", clipPlane);
 
     //rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
+    std::cout << "Draw " << std::endl;
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
       glBindVertexArray(rocks[i].VAO);

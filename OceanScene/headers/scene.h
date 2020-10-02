@@ -106,8 +106,16 @@ public:
                                           glm::vec3(20., 0., 40.),
                                           glm::vec3(40., 0., 0.),
                                           glm::vec3(40., 0., 20.),
-                                          glm::vec3(40., 0., 40.)};
+                                          glm::vec3(40., 0., 40.),
+                                        glm::vec3(40., 0., 40.),
+                                      glm::vec3(40., 0., 60.),
+                                    glm::vec3(40., 0., 80.),
+                                  glm::vec3(40., 0., 100.),
+                                glm::vec3(40., 0., 120.),
+                              glm::vec3(40., 0., 140.),
+                            glm::vec3(40., 0., 160.)};
 
+        std::cout << "Setting Up Rocks" << '\n';
         rocks = new Rocks(10.0f, 30.0f, rockLocs, 0.5f, 0.1f, GEN_ROCK);
 
         std::cout << "ROCKS SETUP" << '\n';
