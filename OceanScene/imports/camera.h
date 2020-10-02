@@ -48,6 +48,7 @@ public:
     float MaxAcceleration;
     float Acceleration;
 
+
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), MaxBoost(BOOST), Acceleration(ACCEL)
     {
@@ -165,14 +166,6 @@ public:
       std::cout << "glm::vec3(" << Yaw << ", " << Pitch << ", " << "0." << ")," << '\n';
     }
 
-    void SetRotation(glm::vec3 rotation)
-    {
-      Yaw = rotation.x;
-      Pitch = rotation.y;
-      updateCameraVectors();
-    }
-
-private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()
     {

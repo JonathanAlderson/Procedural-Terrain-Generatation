@@ -12,8 +12,9 @@
 #include "water.h"
 #include "fish.h"
 #include "waterTile.h"
-#include <time.h>
+#include "beizer.h"
 
+#include <time.h>
 #include <string>
 #include <vector>
 using namespace std;
@@ -38,8 +39,27 @@ public:
     int seed;
     float waterSize;
 
-    Scene(WaterFrameBuffers *fbos)
+    int movingCamera;
+
+    // Camera Movement
+    std::vector<glm::vec3> cameraMovePoints = {glm::vec3(90.0369, -6.62232, 101.567),
+                                               glm::vec3(-99.9266, 50.03357, 74.9608),
+                                               glm::vec3(-85.7807, -8.02192, -93.2215),
+                                               };
+
+    std::vector<glm::vec3> cameraRotatePoints = {glm::vec3(-180.4, 7.2, 0.),
+                                                 glm::vec3(-0.899945, -1.5, 0.),
+                                                 glm::vec3(116.1, -6, 0.),
+                                                 };
+
+    BCurve * cameraMoveSpline;
+    BCurve * cameraRotateSpline;
+    float moveSpeed = 0.04;
+
+    Scene(WaterFrameBuffers *fbos, Camera *camera, int movingCam)
     {
+        this->movingCamera = movingCam;
+        // Set Seed
         srand(time(NULL));
         seed = rand()%10000;
 
@@ -48,6 +68,7 @@ public:
         // large central island 8647
         seed = 8647;
 
+        // Settings
         int maxSeaweed = 4000;
         int maxFish = 100;
         int schoolSize = 20;
@@ -72,7 +93,31 @@ public:
         // Fish
         fish = new Fish(maxFish, schoolSize, waterSize);
 
+        // Camera Movement
+        // Beizer Curve Stuff
+        cameraMoveSpline = new BCurve(cameraMovePoints, 100);
+        cameraRotateSpline = new BCurve(cameraRotatePoints, 100);
 
+        std::cout << "Made Splines " << '\n';
+
+
+    }
+
+    void MoveCamera(Camera* camera, float t)
+    {
+      if(movingCamera == 1)
+      {
+        if(cameraMovePoints.size() > 1)
+        {
+          camera->Position = cameraMoveSpline->get(t * moveSpeed);
+        }
+        if(cameraRotatePoints.size() > 1)
+        {
+          camera->Yaw = cameraRotateSpline->get(t * moveSpeed).x;
+          camera->Pitch = cameraRotateSpline->get(t * moveSpeed).y;
+        }
+        camera->updateCameraVectors();
+      }
     }
 
     void DrawSetup(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Camera camera)

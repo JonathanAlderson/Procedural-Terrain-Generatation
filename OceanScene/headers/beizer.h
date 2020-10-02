@@ -5,22 +5,19 @@
 #include <vector>
 #include <iostream>
 
-glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t)
-{
-  return glm::vec3(a.x + (b.x-a.x)*t, a.y + (b.y-a.y)*t, a.z + (b.z-a.z)*t);
-}
 
 class BCurve
 {
 public:
 
-  std::vector<glm::vec3> out;
-  std::vector<glm::vec3> pointsCopy;
-  float t;
-  int steps;
+  std::vector<glm::vec3> out;       // Precalculated Points
+  std::vector<glm::vec3> pointsCopy;// Input Points
+  float t;                          // Current Time
+  int steps;                        // How many points calculated
 
   BCurve(std::vector<glm::vec3> pointsIn, int steps)
   {
+     // Go through every step and calculate final point
      this->steps = steps;
      for(int j = 0; j < steps; j ++)
      {
@@ -34,8 +31,16 @@ public:
      }
   }
 
+  glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t)
+  {
+    return glm::vec3(a.x + (b.x-a.x)*t, a.y + (b.y-a.y)*t, a.z + (b.z-a.z)*t);
+  }
+
+
   glm::vec3 get(float t)
   {
+    // Interpolate between pre computed values
+    t = std::min(t, 1.0f);
     int index1 = int(floor(t /  (1./((float)steps-1.))));
     int index2 = index1 + 1;
 
@@ -51,6 +56,7 @@ public:
 
   std::vector<glm::vec3> calc(std::vector<glm::vec3> points, float t)
   {
+    // Scary Magic
     std::vector<glm::vec3> ret;
     for(unsigned int i = 0; i < points.size() - 1; i++)
     {

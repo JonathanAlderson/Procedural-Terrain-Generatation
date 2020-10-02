@@ -14,9 +14,10 @@
 #include "sceneSetup.h"
 #include "texturesSetup.h"
 #include "shadersSetup.h"
-#include "beizer.h"
 
 #define SCREENRECORDING false
+#define RECORDINGFRAMES 500
+#define CAMERADOLLY true
 
 // #if SCREENRECORDING == true
 #include "screenRecord.h"
@@ -96,7 +97,7 @@ int main()
 
     //  Scene Setup
     // --------------------
-    Scene scene = Scene(fbos);
+    Scene scene = Scene(fbos, &camera, CAMERADOLLY);
 
     // Recording Setup
     // --------------------
@@ -105,29 +106,12 @@ int main()
     int framerate = 30;
     if(SCREENRECORDING)
     {
-      maxFrames = 1400;
+      maxFrames = RECORDINGFRAMES;
       std::cout << "Screen Recording Enabled" << '\n';
       screenRecord = new ScreenRecord(scene.seed, maxFrames, framerate);
       std::thread startUp(&ScreenRecord::clearSections, screenRecord);
       startUp.join();
     }
-
-
-    // Beizer Curve Stuff
-    std::vector<glm::vec3> cameraMovePoints = {glm::vec3(90.0369, -6.62232, 101.567),
-                                              glm::vec3(-99.9266, 50.03357, 74.9608),
-                                              glm::vec3(-85.7807, -8.02192, -93.2215),
-                                              };
-
-    std::vector<glm::vec3> cameraRotatePoints = {glm::vec3(-180.4, 7.2, 0.),
-                                                 glm::vec3(-0.899945, -1.5, 0.),
-                                                 glm::vec3(116.1, -6, 0.),
-                                               };
-
-    BCurve cameraMoveSpline = BCurve(cameraMovePoints, 100);
-    BCurve cameraRotateSpline = BCurve(cameraRotatePoints, 100);
-
-
 
 
     while (!glfwWindowShouldClose(window) && frame <= maxFrames)
@@ -144,8 +128,9 @@ int main()
            processInput(window);
 
            // auto camera movement
-           camera.Position = cameraMoveSpline.get(frameTime * 0.1);
-           camera.SetRotation(cameraRotateSpline.get(frameTime * 0.1));
+           scene.MoveCamera(&camera, frameTime);
+
+
            //
            //std::cout << "T: " << frameTime*0.1 << " P: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << " "  << '\n';
 
