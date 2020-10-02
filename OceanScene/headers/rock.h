@@ -80,7 +80,7 @@ public:
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
-		
+
 		normalShader->use();
 		normalShader->setMat4("projection", projection);
 		normalShader->setMat4("view", view);
@@ -314,7 +314,13 @@ private:
 					for (int l = 0; triTable[cubeIndex][l] != -1; l += 3)
 					{
 						// push triangle data to a float vector
+
+
 						glm::vec3 faceNormal = normal(cubeVertices[triTable[cubeIndex][l]], cubeVertices[triTable[cubeIndex][l + 1]], cubeVertices[triTable[cubeIndex][l + 2]]);
+						//glm::vec3 faceNormal = normal(cubeVertices[triTable[cubeIndex][l+1]], cubeVertices[triTable[cubeIndex][l + 2]], cubeVertices[triTable[cubeIndex][l]]);
+
+						//glm::vec3 faceNormal =  normal(cubeVertices[triTable[cubeIndex][l+2]], cubeVertices[triTable[cubeIndex][l]], cubeVertices[triTable[cubeIndex][l + 1]]);
+
 
 						pushVecComp(cubeVertices[triTable[cubeIndex][l]]);
 						pushVecComp(faceNormal);

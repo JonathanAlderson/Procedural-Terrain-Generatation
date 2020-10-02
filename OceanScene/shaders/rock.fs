@@ -52,7 +52,9 @@ void main()
 
     vec3 specCol = vec3(1.0, 1., 1.0);
 
-    vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
+    vec3 result = CalcDirLight(dirLight, vec3(-norm.x, -norm.y, -norm.z), viewDir, diffuseCol, specCol, shine);
+
+    //result += CalcDirLight(dirLight, -norm, viewDir, diffuseCol, specCol, shine);
 
     FragColor = vec4(result, 1.0);
 
