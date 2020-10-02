@@ -32,8 +32,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 diffuseCol, ve
     vec3 specular = light.specular * spec * specCol;
 
     //return specular;
-    return ambient + specular;
-    //return ( ambient + diffuse +  specular);
+    return ( ambient + diffuse +  specular);
 }
 
 vec3 rgb(float r, float g, float b)
@@ -52,7 +51,7 @@ void main()
 
     vec3 specCol = vec3(1.0, 1., 1.0);
 
-    vec3 result = CalcDirLight(dirLight, vec3(-norm.x, -norm.y, -norm.z), viewDir, diffuseCol, specCol, shine);
+    vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
 
     //result += CalcDirLight(dirLight, -norm, viewDir, diffuseCol, specCol, shine);
 

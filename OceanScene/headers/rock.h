@@ -77,6 +77,7 @@ public:
 		rockShader->setVec4("clipPlane", clipPlane);
 
 		rockShader->setVec3("fragCol", glm::vec3(124.0f, 124.0f, 124.0f));
+		rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
@@ -322,13 +323,13 @@ private:
 						//glm::vec3 faceNormal =  normal(cubeVertices[triTable[cubeIndex][l+2]], cubeVertices[triTable[cubeIndex][l]], cubeVertices[triTable[cubeIndex][l + 1]]);
 
 
-						pushVecComp(cubeVertices[triTable[cubeIndex][l]]);
+						pushVecComp(cubeVertices[triTable[cubeIndex][l + 2]]);
 						pushVecComp(faceNormal);
 
 						pushVecComp(cubeVertices[triTable[cubeIndex][l + 1]]);
 						pushVecComp(faceNormal);
 
-						pushVecComp(cubeVertices[triTable[cubeIndex][l + 2]]);
+						pushVecComp(cubeVertices[triTable[cubeIndex][l + 0]]);
 						pushVecComp(faceNormal);
 
 						nTriangles++;
