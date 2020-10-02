@@ -14,8 +14,9 @@
 #include "sceneSetup.h"
 #include "texturesSetup.h"
 #include "shadersSetup.h"
+#include "beizer.h"
 
-#define SCREENRECORDING true
+#define SCREENRECORDING false
 
 // #if SCREENRECORDING == true
 #include "screenRecord.h"
@@ -27,7 +28,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(const char *path);
 void processInput(GLFWwindow *window);
 // settings
-const unsigned int SCR_WIDTH = 1800;
+const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
 // camera
@@ -110,6 +111,20 @@ int main()
       std::thread startUp(&ScreenRecord::clearSections, screenRecord);
       startUp.join();
     }
+
+
+    // Beizer Curve Stuff
+    std::vector<glm::vec3> points = {glm::vec3(5, 5, 0), glm::vec3(5, 0, 0), glm::vec3(10, 0, 0)};
+    BCurve test = BCurve(points, 10);
+
+    glm::vec3 val;
+
+    for(int i = 0; i < 100; i++)
+    {
+      val = test.get((float)i/100.);
+      std::cout << "i: " << (float)i/100 << " --> " << val.x << " " << val.y << " " << val.z  << '\n';
+    }
+
 
 
     while (!glfwWindowShouldClose(window) && frame <= maxFrames)
