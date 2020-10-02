@@ -36,10 +36,8 @@ public:
     WaterTile* waterTile;
     Skybox* skybox;
     Fish* fish;
+
     Rock* rock;
-    Rock* rock2;
-    Rock* rock3;
-    Rock* rock4;
 
     int seed;
     float waterSize;
@@ -94,9 +92,6 @@ public:
 
         // Rocks
         rock = new Rock(10.0f, 30.0f, glm::vec3(0.5f, 0.5f, 0.5f), 0.5f, 0.1f, GEN_PEBBLE);
-        //rock2 = new Rock(10.0f, 30.0f, glm::vec3(20.65f, 0.76f, 0.23f), 0.5f, 0.1f, GEN_ROCK);
-        //rock3 = new Rock(10.0f, 30.0f, glm::vec3(40.64f, 0.35f, 0.87f), 0.5f, 0.1f, GEN_ROCK);
-        //rock4 = new Rock(10.0f, 30.0f, glm::vec3(60.2f, 0.654f, 0.6754f), 0.5f, 0.1f, GEN_ROCK);
 
         // Skybox
         skybox = new Skybox("skybox1");

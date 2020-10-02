@@ -76,8 +76,7 @@ public:
 		rockShader->setVec3("viewPos", camPos);
 		rockShader->setVec4("clipPlane", clipPlane);
 
-		rockShader->setVec3("fragCol", glm::vec3(124.0f, 124.0f, 124.0f));
-		rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
+		//rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
@@ -130,7 +129,7 @@ private:
 	void setupShader()
 	{
 		rockShader->use();
-
+		rockShader->setVec3("fragCol", glm::vec3(124.0f, 124.0f, 124.0f));
 		rockShader->setVec3("dirLight.lightPos", 100.0f, 100.0f, 100.0f);
 		rockShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
 		rockShader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
@@ -315,13 +314,7 @@ private:
 					for (int l = 0; triTable[cubeIndex][l] != -1; l += 3)
 					{
 						// push triangle data to a float vector
-
-
-						glm::vec3 faceNormal = normal(cubeVertices[triTable[cubeIndex][l]], cubeVertices[triTable[cubeIndex][l + 1]], cubeVertices[triTable[cubeIndex][l + 2]]);
-						//glm::vec3 faceNormal = normal(cubeVertices[triTable[cubeIndex][l+1]], cubeVertices[triTable[cubeIndex][l + 2]], cubeVertices[triTable[cubeIndex][l]]);
-
-						//glm::vec3 faceNormal =  normal(cubeVertices[triTable[cubeIndex][l+2]], cubeVertices[triTable[cubeIndex][l]], cubeVertices[triTable[cubeIndex][l + 1]]);
-
+						glm::vec3 faceNormal = normal(cubeVertices[triTable[cubeIndex][l + 2]], cubeVertices[triTable[cubeIndex][l + 1]], cubeVertices[triTable[cubeIndex][l + 0]]);
 
 						pushVecComp(cubeVertices[triTable[cubeIndex][l + 2]]);
 						pushVecComp(faceNormal);
