@@ -48,13 +48,13 @@ public:
         // large central island 8647
         seed = 8647;
 
-        int maxSeaweed = 40000;
-        int maxFish = 10000;
+        int maxSeaweed = 4000;
+        int maxFish = 100;
         int schoolSize = 20;
 
         // Terrain
         std::cout << "Seed: " << seed << '\n';
-        terrain = new Terrain(seed, 40, 1., 50., .8, .25, .25, 70., maxSeaweed);
+        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .25, 70., maxSeaweed);
         maxSeaweed = terrain->maxSeaweed;
 
         // Seaweed

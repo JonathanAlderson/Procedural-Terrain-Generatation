@@ -114,16 +114,19 @@ int main()
 
 
     // Beizer Curve Stuff
-    std::vector<glm::vec3> points = {glm::vec3(5, 5, 0), glm::vec3(5, 0, 0), glm::vec3(10, 0, 0)};
-    BCurve test = BCurve(points, 10);
+    std::vector<glm::vec3> cameraMovePoints = {glm::vec3(90.0369, -6.62232, 101.567),
+                                              glm::vec3(-99.9266, 50.03357, 74.9608),
+                                              glm::vec3(-85.7807, -8.02192, -93.2215),
+                                              };
 
-    glm::vec3 val;
+    std::vector<glm::vec3> cameraRotatePoints = {glm::vec3(-180.4, 7.2, 0.),
+                                                 glm::vec3(-0.899945, -1.5, 0.),
+                                                 glm::vec3(116.1, -6, 0.),
+                                               };
 
-    for(int i = 0; i < 100; i++)
-    {
-      val = test.get((float)i/100.);
-      std::cout << "i: " << (float)i/100 << " --> " << val.x << " " << val.y << " " << val.z  << '\n';
-    }
+    BCurve cameraMoveSpline = BCurve(cameraMovePoints, 100);
+    BCurve cameraRotateSpline = BCurve(cameraRotatePoints, 100);
+
 
 
 
@@ -141,8 +144,13 @@ int main()
            processInput(window);
 
            // auto camera movement
-           camera.Position.z -= 6.0 * deltaTime;
-           camera.Position.y += 1.15 * deltaTime;
+           camera.Position = cameraMoveSpline.get(frameTime * 0.1);
+           camera.SetRotation(cameraRotateSpline.get(frameTime * 0.1));
+           //
+           //std::cout << "T: " << frameTime*0.1 << " P: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << " "  << '\n';
+
+           // camera.Position.z -= 6.0 * deltaTime;
+           // camera.Position.y += 1.15 * deltaTime;
 
            // render
            // ------
@@ -266,4 +274,8 @@ void processInput(GLFWwindow *window)
         camera.ProcessBoost(deltaTime);
     else
         camera.ProcessBoost(-deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+        camera.ShowPosition();
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+        camera.ShowRotation();
 }

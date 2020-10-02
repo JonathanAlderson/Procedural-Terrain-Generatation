@@ -6,6 +6,7 @@
 #include "gtc/matrix_transform.hpp"
 
 #include <vector>
+#include <iostream>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -152,6 +153,23 @@ public:
             Zoom = 1.0f;
         if (Zoom > 70.0f)
             Zoom = 70.0f;
+    }
+
+    void ShowPosition()
+    {
+      std::cout << "glm::vec3(" << Position.x << ", " << Position.y << ", " << Position.z << ")," << '\n';
+    }
+
+    void ShowRotation()
+    {
+      std::cout << "glm::vec3(" << Yaw << ", " << Pitch << ", " << "0." << ")," << '\n';
+    }
+
+    void SetRotation(glm::vec3 rotation)
+    {
+      Yaw = rotation.x;
+      Pitch = rotation.y;
+      updateCameraVectors();
     }
 
 private:

@@ -36,9 +36,16 @@ public:
 
   glm::vec3 get(float t)
   {
-    int index = round(t /  (1./((float)steps-1.)));
+    int index1 = int(floor(t /  (1./((float)steps-1.))));
+    int index2 = index1 + 1;
 
-    return out[index];
+    float t1 = index1 * (1. / ((float)steps-1.));
+    float t2 = index2 * (1. / ((float)steps-1.));
+
+    // Distance to interpolate
+    float c = (t - t1) / (t2 - t1);
+
+    return lerp(out[index1], out[index2], c);
 
   }
 
