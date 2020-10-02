@@ -37,6 +37,9 @@ public:
     Skybox* skybox;
     Fish* fish;
     Rock* rock;
+    Rock* rock2;
+    Rock* rock3;
+    Rock* rock4;
 
     int seed;
     float waterSize;
@@ -90,7 +93,10 @@ public:
         waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
 
         // Rocks
-        rock = new Rock(100.0f, 30.0f, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f, 0.1f, GEN_ROCK);
+        rock = new Rock(10.0f, 30.0f, glm::vec3(0.5f, 0.5f, 0.5f), 0.5f, 0.1f, GEN_PEBBLE);
+        //rock2 = new Rock(10.0f, 30.0f, glm::vec3(20.65f, 0.76f, 0.23f), 0.5f, 0.1f, GEN_ROCK);
+        //rock3 = new Rock(10.0f, 30.0f, glm::vec3(40.64f, 0.35f, 0.87f), 0.5f, 0.1f, GEN_ROCK);
+        //rock4 = new Rock(10.0f, 30.0f, glm::vec3(60.2f, 0.654f, 0.6754f), 0.5f, 0.1f, GEN_ROCK);
 
         // Skybox
         skybox = new Skybox("skybox1");
@@ -144,11 +150,15 @@ public:
 
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
-      terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
-      seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
-      water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
-      fish->Draw(this->model, this->view, this->projection, time, clipPlane);
+      //terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
+      //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      //water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
+      //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
       rock->Draw(model, view, projection, camera.Position, clipPlane);
+
+      //rock2->Draw(model, view, projection, camera.Position, clipPlane);
+      //rock3->Draw(model, view, projection, camera.Position, clipPlane);
+      //rock4->Draw(model, view, projection, camera.Position, clipPlane);
       skybox->Draw(this->projection, camera, clipPlane);
     }
 
@@ -157,9 +167,13 @@ public:
     {
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
-      terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
-      seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
-      fish->Draw(this->model, this->view, this->projection, time, clipPlane);
+      //terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
+      //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
+      rock->Draw(model, view, projection, camera.Position, clipPlane);
+      //rock2->Draw(model, view, projection, camera.Position, clipPlane);
+      //rock3->Draw(model, view, projection, camera.Position, clipPlane);
+      //rock4->Draw(model, view, projection, camera.Position, clipPlane);
       skybox->Draw(this->projection, camera, clipPlane);
     }
 

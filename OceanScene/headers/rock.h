@@ -1,7 +1,7 @@
 #ifndef ROCK_H
 #define ROCK_H
 
-#include <GLAD/glad.h>
+#include <glad/glad.h>
 #include <time.h>
 #include <vector>
 
@@ -12,6 +12,8 @@
 #include "verticies.h"
 #include "shader.h"
 
+#define GEN_ROCK 0
+#define GEN_PEBBLE 1
 
 //
 // Abstract away the class:
@@ -20,7 +22,7 @@
 //
 
 
-class Rock 
+class Rock
 {
 public:
 
@@ -30,9 +32,10 @@ public:
 	// nLength    -> length/height/width of the grid area
 	// nRockPos   -> Position of the rock in world space
 	// isoLevel   -> value that determines whether a vertex is in or out of a surface for marching cube algorithm
-	// noiseScale -> scalar used to modify perlin noise 
+	// noiseScale -> scalar used to modify perlin noise
+	// genType    -> the kind of shape to generate either rock or pebble
 	//
-	Rock(float nVertices, float nLength, glm::vec3 nRockPos, float isoLevel, float noiseScale) 
+	Rock(float nVertices, float nLength, glm::vec3 nRockPos, float isoLevel, float noiseScale, int genType)
 	{
 		this->nrVertices = nVertices;
 		this->totalVertices = nrVertices * nrVertices * nrVertices;
@@ -42,15 +45,20 @@ public:
 
 		this->length = nLength;
 
+
 		this->rockPos = nRockPos;
 
-		this->seed = 0.3;
+
+		this->seed = nRockPos.x + nRockPos.y + nRockPos.z;
 		this->noiseScale = noiseScale;
 		this->isoLevel = isoLevel;
 
-		
+
+		this->genType = genType;
+
+
 		generateVertices();
-		
+
 		marchingCubes();
 
 		setUpGL();
@@ -58,7 +66,7 @@ public:
 		setupShader();
 	}
 
-	void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 camPos)
+	void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 camPos, glm::vec4 clipPlane)
 	{
 		rockShader->use();
 
@@ -66,12 +74,20 @@ public:
 		rockShader->setMat4("view", view);
 		rockShader->setMat4("model", model);
 		rockShader->setVec3("viewPos", camPos);
+		rockShader->setVec4("clipPlane", clipPlane);
 
 		rockShader->setVec3("fragCol", glm::vec3(124.0f, 124.0f, 124.0f));
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
+		
+		normalShader->use();
+		normalShader->setMat4("projection", projection);
+		normalShader->setMat4("view", view);
+		normalShader->setMat4("model", model);
 
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, triangleData.size());
 	}
 
 private:
@@ -87,10 +103,7 @@ private:
 
 	ScalarVertex* grid;
 
-	std::vector<ScalarVertex> rockVerticies;
-
 	std::vector<float> triangleData;
-	std::vector<float> indices;
 
 	// position of the rock in world space
 	glm::vec3 rockPos;
@@ -100,6 +113,9 @@ private:
 	float noiseScale;
 	float isoLevel;
 
+	// type of grid vertex scalar attribution
+	int genType;
+
 	// create a new shader object with the approriate vertex and fragment shaders
 	Shader* rockShader = new Shader("rock.vs", "rock.fs");
 	Shader* normalShader = new Shader("normal.vs", "normal.fs", "normal.gs");
@@ -108,14 +124,14 @@ private:
 	unsigned int VAO, VBO;
 
 	//
-	// Sets rock shader uniforms 
+	// Sets rock shader uniforms
 	//
 	void setupShader()
 	{
 		rockShader->use();
 
 		rockShader->setVec3("dirLight.lightPos", 100.0f, 100.0f, 100.0f);
-		rockShader->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+		rockShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
 		rockShader->setVec3("dirLight.diffuse", 1.f, 1.f, 1.f);
 		rockShader->setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 	}
@@ -155,6 +171,8 @@ private:
 		// get the starting position of the grid space from the rock's position
 		glm::vec3 currPos = rockPos;
 		glm::vec3 rockCenter = rockPos + glm::vec3(length / 2.0f, length / 2.0f, length / 2.0f);
+		glm::vec3 rockBottom = rockPos + glm::vec3(length / 2.0f, 0.f, length / 2.0f);
+		float radius = length / 4.0f;
 
 		// outer loop for y
 		for (int i = 0; i < nrVertices; i++)
@@ -166,8 +184,30 @@ private:
 				for (int k = 0; k < nrVertices; k++)
 				{
 					// set the vertex's position and get the associated seeded perlin noise scalar
-					grid[index(i,j,k)].Position = currPos;
-					grid[index(i,j,k)].Scalar   = glm::perlin( noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale* currPos + glm::vec3(seed, seed, seed));
+					if (genType)
+					{
+						// GEN PEBBLE
+						grid[index(i,j,k)].Position = currPos + rockPos;
+						grid[index(i,j,k)].Scalar   = glm::perlin( noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale* currPos + glm::vec3(seed, seed, seed));
+					}
+					else
+					{
+						// GEN ROCK
+						grid[index(i, j, k)].Position = currPos + rockPos;
+
+						//std::cout << currPos.x << ", " << currPos.y << ", " << currPos.z  << '\n';
+						if ( (glm::distance(rockBottom, currPos) <= radius))
+						{
+							//std::cout << "    Yes " << '\n';
+							grid[index(i, j, k)].Scalar = .4 + glm::perlin(noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale * currPos + glm::vec3(seed, seed, seed));
+							//std::cout << ": " << grid[index(i, j, k)].Scalar << '\n';
+								//glm::perlin(noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale * currPos + glm::vec3(seed, seed, seed));
+						}
+						else
+						{
+							grid[index(i, j, k)].Scalar = 0.0f;
+						}
+					}
 
 					currPos += glm::vec3(length / nrVertices, 0.0f, 0.0f);
 				}
@@ -189,7 +229,7 @@ private:
 	//
 	// marching cubes algorithm
 	//
-	void marchingCubes() 
+	void marchingCubes()
 	{
 		int cubeIndex = 0;
 		int nTriangles = 0;
@@ -230,8 +270,8 @@ private:
 					if (edgeTable[cubeIndex] == 0)
 						continue;
 					// otherwise...
-					// Use the 8 bit cubeindex to determine which cube edges are intersected in the current 
-					// configuration and set the intersection points 
+					// Use the 8 bit cubeindex to determine which cube edges are intersected in the current
+					// configuration and set the intersection points
 					if (edgeTable[cubeIndex] & 1)
 						cubeVertices[0] =
 						interpIntersect(marchingCube[0].Position, marchingCube[1].Position, marchingCube[0].Scalar, marchingCube[1].Scalar);
@@ -313,7 +353,7 @@ private:
 	//
 	// Utility function for calculating the midpoint between two vertices
 	//
-	const glm::vec3 midPoint(glm::vec3 vertex1, glm::vec3 vertex2) 
+	const glm::vec3 midPoint(glm::vec3 vertex1, glm::vec3 vertex2)
 	{
 		return glm::vec3(vertex2.x - vertex1.x, vertex2.y - vertex1.y, vertex2.z - vertex1.z);
 	}
@@ -321,7 +361,7 @@ private:
 	//
 	// Utility function to push coordinate components of triangle vertex positions
 	//
-	void pushVecComp(glm::vec3 pos) 
+	void pushVecComp(glm::vec3 pos)
 	{
 		triangleData.push_back(pos.x);
 		triangleData.push_back(pos.y);
@@ -339,13 +379,13 @@ private:
 	//
 	// Utility function for printing a vector to terminal
 	//
-	void printVec(glm::vec3 vec) 
+	void printVec(glm::vec3 vec)
 	{
 		std::cout << "Vector -> x: " << vec.x << " y: " << vec.y << " z: " << vec.z << std::endl;
 	}
 
 	//
-	// Takes a vector as argument and returns a scalar value for multiplying noise value depending on 
+	// Takes a vector as argument and returns a scalar value for multiplying noise value depending on
 	// how close the given vertex is to the center of the grid as a sigmoid function
 	//
 	const float noiseDistScale(glm::vec3 vertex, glm::vec3 gridCenter, float alpha)
