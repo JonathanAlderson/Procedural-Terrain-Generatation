@@ -75,11 +75,14 @@ public:
         int maxSeaweed = 4000;
         int maxFish = 100;
         int schoolSize = 20;
+        int maxPebbles = 100;
+
 
         // Terrain
         std::cout << "Seed: " << seed << '\n';
-        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .25, 70., maxSeaweed);
+        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .25, 70., maxSeaweed, maxPebbles);
         maxSeaweed = terrain->maxSeaweed;
+        maxPebbles = terrain->maxPebbles;
 
         // Seaweed
         std::cout << "Max Seaweed: " << maxSeaweed << '\n';
@@ -90,31 +93,13 @@ public:
         water = new Water(fbos);
         waterSize = .5 * terrain->numChunks * terrain->chunkSize * terrain->scale;
 
-        // Rocks
-        std::vector<glm::vec3> pebbleLocs = {glm::vec3(0., 0., 0.),
-                                          glm::vec3(0., 0., 20.),
-                                          glm::vec3(0., 0., 40.),
-                                          glm::vec3(20., 0., 0.),
-                                          glm::vec3(20., 0., 20.),
-                                          glm::vec3(20., 0., 40.),
-                                          glm::vec3(40., 0., 0.),
-                                          glm::vec3(40., 0., 20.),
-                                          glm::vec3(40., 0., 40.),
-                                        glm::vec3(40., 0., 40.),
-                                      glm::vec3(40., 0., 60.),
-                                    glm::vec3(40., 0., 80.),
-                                  glm::vec3(40., 0., 100.),
-                                glm::vec3(40., 0., 120.),
-                              glm::vec3(40., 0., 140.),
-                            glm::vec3(40., 0., 160.)};
-
         std::vector<glm::vec3> boulderLocs = {glm::vec3(0., 0., 0.),
                                               glm::vec3(0., 0., 20.),
                                               glm::vec3(20., 0., 20.),
                                               glm::vec3(20., 0., 0.)};
                                       //  };
 
-        pebbles = new Rocks(10.0f, 30.0f, pebbleLocs, 0.5f, 0.1f, GEN_PEBBLE);
+        pebbles = new Rocks(10.0f, 30.0f, terrain->pebblePos, 0.5f, 0.1f, GEN_PEBBLE);
 
         //boulders = new Rocks(15.0f, 30.0f, boulderLocs, 0.5f, 0.22f, GEN_ROCK);
 
@@ -170,11 +155,11 @@ public:
 
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
-      //terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
+      terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       //water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
       //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
-      pebbles->Draw(model, view, projection, camera.Position, clipPlane);
+      pebbles->Draw(this->model, this->view, this->projection, camera.Position, clipPlane);
       //boulders->Draw(model, view, projection, camera.Position, clipPlane);
 
       //rock2->Draw(model, view, projection, camera.Position, clipPlane);
@@ -188,10 +173,10 @@ public:
     {
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
-      //terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
+      terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
-      pebbles->Draw(model, view, projection, camera.Position, clipPlane);
+      pebbles->Draw(this->model, this->view, this->projection, camera.Position, clipPlane);
       //boulders->Draw(model, view, projection, camera.Position, clipPlane);
 
       skybox->Draw(this->projection, camera, clipPlane);

@@ -63,7 +63,7 @@ public:
     vector<glm::vec2> validChunks;
     float roughness;
 
-    // for generating seaweeds
+    // for generating seaweed and rocks
     glm::vec3* seaweedPos;
     int maxSeaweed;
     int seaweedCount;
@@ -72,13 +72,17 @@ public:
     int didntSpawn = 0;
     int didSpawn = 0;
 
+    std::vector<glm::vec3> pebblePos;
+    int maxPebbles;
+    int pebbleCount;
+
     // constructor
 
     // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
     // 10, 15., 150., .2, 0.1, .8
 
     // Constructor For If We Want To Generate A New Map
-    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed)
+    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed, int maxPebbles)
     {
         std::cout << "Generating New Map" << '\n';
         sandNormalMap = loadTexture(FileSystem::getPath("resources/textures/sandNormal.png").c_str(), 1);
@@ -97,6 +101,10 @@ public:
         // Seaweed Things
         this->maxSeaweed = maxSeaweed;
         this->seaweedCount = 0;
+
+        // Pebble Thigns
+        this->maxPebbles = maxPebbles;
+        this->pebbleCount = 0;
 
         // Determine which chunks should be spawned in a circle
         calculateCirlce();
@@ -416,7 +424,21 @@ private:
       }
       height -= waterLevel * heightScale;
 
-      seaweedPosition(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
+      // Check if there has been a piece of seaweed
+      if(seaweedPosition(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale)) == 0)
+      {
+        // If there is no seaweed here, make a rock
+        if(pebbleCount < maxPebbles)
+        {
+          if(randFloat() > 0.98888)
+          {
+            pebbleCount++;
+            pebblePos.push_back(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
+            std::cout << "Position: " << pebblePos[0].x << " "  << pebblePos[0].y << " " << pebblePos[0].z << " "  << '\n';
+          }
+        }
+      }
+
 
       return height;
     }
@@ -462,7 +484,7 @@ private:
       }
     }
 
-    void seaweedPosition(glm::vec3 position)
+    int seaweedPosition(glm::vec3 position)
     {
       float noise = (glm::perlin(glm::vec2((float)(position.x+seed)/(noiseScale/8.), (float)(position.z+seed)/(noiseScale/8.)))+.707)/1.414;
 
@@ -474,9 +496,11 @@ private:
           {
             seaweedPos[seaweedCount] = position;
             seaweedCount++;
+            return 1;
           }
         }
       }
+      return 0;
     }
 
     ////////////////////////////////////////

@@ -42,8 +42,9 @@ public:
     rocks = (Rock **) malloc(rockPositions.size() * sizeof(Rock*));
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
-      std::cout << "Pos: " << rockPositions[i].x << " " << rockPositions[i].z << '\n';
-      rocks[i] = new Rock(nrVertices, length * (.5 + ((float)i/(float)rockPositions.size())), rockPositions[i], isoLevel, noiseScale, genType);
+      rocks[i] = new Rock(nrVertices, length, rockPositions[i], isoLevel, noiseScale, genType);
+
+ ///  * (.5 + ((float)i/(float)rockPositions.size()))
 
     }
 

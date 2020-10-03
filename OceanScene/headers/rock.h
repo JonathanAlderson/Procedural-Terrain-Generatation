@@ -41,7 +41,7 @@ public:
 	//
 	Rock(float nVertices, float nLength, glm::vec3 nRockPos, float isoLevel, float noiseScale, int genType)
 	{
-		if((int)nVertices%2 == 0){nVertices+=1; std::cout << "Made odd" << '\n';} // Makes it an odd number for sure
+		if((int)nVertices%2 == 0){ nVertices += 1;} // Makes it an odd number for sure
 		this->nrVertices = nVertices;
 		this->totalVertices = nrVertices * nrVertices * nrVertices;
 
@@ -50,9 +50,9 @@ public:
 
 		this->length = nLength;
 
-
-		this->rockPos = nRockPos;
-
+		std::cout << "Rock Pos: " << nRockPos.x << " "  << nRockPos.y << " "  << nRockPos.z << " "  << '\n';
+		this->rockPos = glm::vec3(nRockPos.x - nLength*.5, nRockPos.y, nRockPos.z - nLength*.5);
+		std::cout << "Rock Pos: " << rockPos.x << " "  << rockPos.y << " "  << rockPos.z << " "  << '\n';
 
 		this->seed = nRockPos.x + nRockPos.y + nRockPos.z;
 		this->noiseScale = noiseScale;
@@ -120,26 +120,6 @@ private:
 	// Finds all the surrounding vertices to a point
 	void surroundingVertices(std::vector<glm::vec2> * points, glm::vec2 point)
 	{
-		// points->push_back(point);
-		// point.x  -= 1.;
-		// points->push_back(point);
-		// point.y  += 1.;
-		// points->push_back(point);
-		// point.x  += 1.;
-		// points->push_back(point);
-		// point.x  += 1.;
-		// points->push_back(point);
-		// point.y  -= 1.;
-		// points->push_back(point);
-		// point.y  -= 1.;
-		// points->push_back(point);
-		// point.x  -= 1.;
-		// points->push_back(point);
-		// point.x  -= 1.;
-		// points->push_back(point);
-		// point.y  += 1.;
-		// points->push_back(point);
-
 		point.x  -= 1.;
 		points->push_back(point);
 		point.x  += 2.;
@@ -214,7 +194,8 @@ private:
 					{
 						// GEN BOULDER
 						// Check if we can use this point
-						grid[index(i,j,k)].Position = currPos + rockPos;
+						//grid[index(i,j,k)].Position = currPos + rockPos;
+						grid[index(i,j,k)].Position = currPos;
 
 						if (std::find(previousLayer.begin(), previousLayer.end(), glm::vec2((float)k, (float)j)) != previousLayer.end())
 						{
@@ -243,7 +224,7 @@ private:
 						// GEN PEBBLE
 
 						// Generate points inside a sphere
-						grid[index(i, j, k)].Position = currPos + rockPos;
+						grid[index(i, j, k)].Position = currPos;
 
 						//std::cout << currPos.x << ", " << currPos.y << ", " << currPos.z  << '\n';
 						if ( (glm::distance(rockBottom, currPos) <= radius))
