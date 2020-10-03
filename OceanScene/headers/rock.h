@@ -41,6 +41,7 @@ public:
 	//
 	Rock(float nVertices, float nLength, glm::vec3 nRockPos, float isoLevel, float noiseScale, int genType)
 	{
+		if((int)nVertices%2 == 0){nVertices+=1; std::cout << "Made odd" << '\n';} // Makes it an odd number for sure
 		this->nrVertices = nVertices;
 		this->totalVertices = nrVertices * nrVertices * nrVertices;
 
@@ -119,24 +120,35 @@ private:
 	// Finds all the surrounding vertices to a point
 	void surroundingVertices(std::vector<glm::vec2> * points, glm::vec2 point)
 	{
+		// points->push_back(point);
+		// point.x  -= 1.;
+		// points->push_back(point);
+		// point.y  += 1.;
+		// points->push_back(point);
+		// point.x  += 1.;
+		// points->push_back(point);
+		// point.x  += 1.;
+		// points->push_back(point);
+		// point.y  -= 1.;
+		// points->push_back(point);
+		// point.y  -= 1.;
+		// points->push_back(point);
+		// point.x  -= 1.;
+		// points->push_back(point);
+		// point.x  -= 1.;
+		// points->push_back(point);
+		// point.y  += 1.;
+		// points->push_back(point);
+
+		point.x  -= 1.;
+		points->push_back(point);
+		point.x  += 2.;
 		points->push_back(point);
 		point.x  -= 1.;
 		points->push_back(point);
 		point.y  += 1.;
 		points->push_back(point);
-		point.x  += 1.;
-		points->push_back(point);
-		point.x  += 1.;
-		points->push_back(point);
-		point.y  -= 1.;
-		points->push_back(point);
-		point.y  -= 1.;
-		points->push_back(point);
-		point.x  -= 1.;
-		points->push_back(point);
-		point.x  -= 1.;
-		points->push_back(point);
-		point.y  += 1.;
+		point.y  -= 2.;
 		points->push_back(point);
 	}
 
@@ -155,26 +167,47 @@ private:
 		glm::vec3 rockBottom = rockPos + glm::vec3(length / 2.0f, 0.f, length / 2.0f);
 		float radius = length / 4.0f;
 
-		std::vector<glm::vec2> testPoints = { glm::vec2(4., 2.),
-																				glm::vec2(5., 2.),
-																				glm::vec2(3., 3.),
-																				glm::vec2(6., 3.),
-																				glm::vec2(2., 4.),
-																				glm::vec2(7., 4.),
-																				glm::vec2(2., 5.),
-																				glm::vec2(7., 5.),
-																				glm::vec2(3., 6.),
-																				glm::vec2(6., 6.),
-																				glm::vec2(4., 7.),
-																				glm::vec2(5., 7.)};
+		// std::vector<glm::vec2> startLayer = { glm::vec2(4., 2.),
+		// 																		glm::vec2(5., 2.),
+		// 																		glm::vec2(3., 3.),
+		// 																		glm::vec2(6., 3.),
+		// 																		glm::vec2(2., 4.),
+		// 																		glm::vec2(7., 4.),
+		// 																		glm::vec2(2., 5.),
+		// 																		glm::vec2(7., 5.),
+		// 																		glm::vec2(3., 6.),
+		// 																		glm::vec2(6., 6.),
+		// 																		glm::vec2(4., 7.),
+		// 																		glm::vec2(5., 7.)};
+
+		std::vector<glm::vec2> startLayer;
+
+		int midPoint = (int)nrVertices/2;
+
+		// Generate the four sides of the square
+		for(int i = 1; i <= midPoint; i ++)
+		{
+			// 1
+			startLayer.push_back(glm::vec2((float)i, float(midPoint + 1 - i)));
+
+			// 2
+			startLayer.push_back(glm::vec2((float)(i + midPoint -1), float(nrVertices - i - 1)));
+
+			// 3
+			startLayer.push_back(glm::vec2((float)(i + midPoint -1), float(i)));
+
+			// 4
+			startLayer.push_back(glm::vec2((float)i, float(midPoint + i - 1)));
+		}
+
 
 		std::vector<glm::vec2> previousLayer;
 		std::vector<glm::vec2> thisLayer;
 
 		// Add all points to the previous layer
-		for(unsigned int i = 0; i < testPoints.size(); i++)
+		for(unsigned int i = 0; i < startLayer.size(); i++)
 		{
-			surroundingVertices(&previousLayer, testPoints[i]);
+			surroundingVertices(&previousLayer, startLayer[i]);
 		}
 
 		// outer loop for y
@@ -195,8 +228,20 @@ private:
 
 						if (std::find(previousLayer.begin(), previousLayer.end(), glm::vec2((float)k, (float)j)) != previousLayer.end())
 						{
-							grid[index(i,j,k)].Scalar  = -.54+ (1. - ((float)i/(float)nrVertices)) + (glm::perlin( noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale* currPos + glm::vec3(seed, seed, seed))+.707)/1.414;
-							//std::cout << "X: " << k << " Z: " << j <<  "   Val: " << grid[index(i, j, k)].Scalar << '\n';
+							// Check if not on edges
+							if(j != 0 && k != 0 && j != nrVertices-1 && k != nrVertices-1 && i != nrVertices-1)
+							{
+								grid[index(i,j,k)].Scalar  =  .3 * (1. - ((float)i/(float)nrVertices)) + .5*(glm::perlin( noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale* currPos + glm::vec3(seed, seed, seed))+.707)/1.414;
+								// Will be in the mesh
+								if(grid[index(i,j,k)].Scalar > isoLevel)
+								{
+									surroundingVertices(&thisLayer, glm::vec2((float)k, (float)j));
+								}
+							}
+							else
+							{
+								grid[index(i,j,k)].Scalar = 0.;
+							}
 						}
 						else
 						{		// Not Allowed To The Surfae Party
@@ -206,15 +251,14 @@ private:
 					else
 					{
 						// GEN PEBBLE
+
+						// Generate points inside a sphere
 						grid[index(i, j, k)].Position = currPos + rockPos;
 
 						//std::cout << currPos.x << ", " << currPos.y << ", " << currPos.z  << '\n';
 						if ( (glm::distance(rockBottom, currPos) <= radius))
 						{
-							//std::cout << "    Yes " << '\n';
 							grid[index(i, j, k)].Scalar = .4 + glm::perlin(noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale * currPos + glm::vec3(seed, seed, seed));
-							//std::cout << ": " << grid[index(i, j, k)].Scalar << '\n';
-								//glm::perlin(noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale * currPos + glm::vec3(seed, seed, seed));
 						}
 						else
 						{
@@ -227,6 +271,11 @@ private:
 				currPos += glm::vec3(-length, 0.0f, length / nrVertices);
 			}
 			currPos += glm::vec3(0.0f, length / nrVertices, -length);
+
+			// new layer time
+			previousLayer = thisLayer;
+			thisLayer.clear();
+
 		}
 	}
 

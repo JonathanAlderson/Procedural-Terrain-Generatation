@@ -42,7 +42,9 @@ public:
     rocks = (Rock **) malloc(rockPositions.size() * sizeof(Rock*));
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
-      rocks[i] = new Rock(nrVertices, length, rockPositions[i], isoLevel, noiseScale, genType);
+      std::cout << "Pos: " << rockPositions[i].x << " " << rockPositions[i].z << '\n';
+      rocks[i] = new Rock(nrVertices, length * (.5 + ((float)i/(float)rockPositions.size())), rockPositions[i], isoLevel, noiseScale, genType);
+
     }
 
     texture = loadTexture(FileSystem::getPath("resources/textures/UnderwaterRockTexture.png").c_str(), 1);

@@ -108,15 +108,15 @@ public:
                               glm::vec3(40., 0., 140.),
                             glm::vec3(40., 0., 160.)};
 
-        std::vector<glm::vec3> boulderLocs = {glm::vec3(0., 0., 0.)};
-                                          // glm::vec3(0., 0., 20.),
-                                          // glm::vec3(0., 0., 40.),
-                                          // glm::vec3(20., 0., 0.),
+        std::vector<glm::vec3> boulderLocs = {glm::vec3(0., 0., 0.),
+                                              glm::vec3(0., 0., 20.),
+                                              glm::vec3(20., 0., 20.),
+                                              glm::vec3(20., 0., 0.)};
                                       //  };
 
         //pebbles = new Rocks(10.0f, 30.0f, pebbleLocs, 0.5f, 0.1f, GEN_PEBBLE);
 
-        boulders = new Rocks(10.0f, 30.0f, boulderLocs, 0.5f, 0.1f, GEN_ROCK);
+        boulders = new Rocks(15.0f, 30.0f, boulderLocs, 0.5f, 0.22f, GEN_ROCK);
 
         // Skybox
         skybox = new Skybox("skybox1");
