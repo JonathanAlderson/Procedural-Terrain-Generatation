@@ -19,9 +19,11 @@ public:
   float nrCubes;
   float totalCubes;
 
-  Rock * rocks;
 
   Shader* rockShader = new Shader("rock.vs", "rock.fs");
+
+  Rock **rocks;
+
 
   Rocks(float nVertices, float nLength, std::vector<glm::vec3> rockPositions, float isoLevel, float noiseScale, int genType)
   {
@@ -35,17 +37,11 @@ public:
     this->isoLevel = isoLevel;
     this->genType = genType;
 
-    std::cout << "malloc" << std::endl;
-    rocks = (Rock *) malloc(rockPositions.size() * sizeof(Rock));
-    std::cout << "mallocd" << std::endl;
+    rocks = (Rock **) malloc(rockPositions.size() * sizeof(Rock*));
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
-      std::cout << "Rock " << i << std::endl;
-      rocks[i] = Rock(nrVertices, length, rockPositions[i], isoLevel, noiseScale, genType);
-      std::cout << "Rockd" << std::endl;
+      rocks[i] = new Rock(nrVertices, length, rockPositions[i], isoLevel, noiseScale, genType);
     }
-    std::cout << "Init rock" << std::endl;
-
     setupShader();
   }
 
@@ -60,14 +56,13 @@ public:
     rockShader->setVec3("viewPos", camPos);
     rockShader->setVec4("clipPlane", clipPlane);
 
-    //rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
-    std::cout << "Draw " << std::endl;
+    rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
-      glBindVertexArray(rocks[i].VAO);
-      glDrawArrays(GL_TRIANGLES, 0, rocks[i].triangleDataSize);
+      glBindVertexArray(rocks[i]->VAO);
+      glDrawArrays(GL_TRIANGLES, 0, rocks[i]->triangleDataSize);
     }
-    //
+
     // normalShader->use();
     // normalShader->setMat4("projection", projection);
     // normalShader->setMat4("view", view);
