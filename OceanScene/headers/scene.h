@@ -114,9 +114,9 @@ public:
                                               glm::vec3(20., 0., 0.)};
                                       //  };
 
-        //pebbles = new Rocks(10.0f, 30.0f, pebbleLocs, 0.5f, 0.1f, GEN_PEBBLE);
+        pebbles = new Rocks(10.0f, 30.0f, pebbleLocs, 0.5f, 0.1f, GEN_PEBBLE);
 
-        boulders = new Rocks(15.0f, 30.0f, boulderLocs, 0.5f, 0.22f, GEN_ROCK);
+        //boulders = new Rocks(15.0f, 30.0f, boulderLocs, 0.5f, 0.22f, GEN_ROCK);
 
         // Skybox
         skybox = new Skybox("skybox1");
@@ -174,8 +174,8 @@ public:
       //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       //water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
       //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
-      //pebbles->Draw(model, view, projection, camera.Position, clipPlane);
-      boulders->Draw(model, view, projection, camera.Position, clipPlane);
+      pebbles->Draw(model, view, projection, camera.Position, clipPlane);
+      //boulders->Draw(model, view, projection, camera.Position, clipPlane);
 
       //rock2->Draw(model, view, projection, camera.Position, clipPlane);
       //rock3->Draw(model, view, projection, camera.Position, clipPlane);
@@ -191,8 +191,8 @@ public:
       //terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
       //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
       //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
-      //pebbles->Draw(model, view, projection, camera.Position, clipPlane);
-      boulders->Draw(model, view, projection, camera.Position, clipPlane);
+      pebbles->Draw(model, view, projection, camera.Position, clipPlane);
+      //boulders->Draw(model, view, projection, camera.Position, clipPlane);
 
       skybox->Draw(this->projection, camera, clipPlane);
     }

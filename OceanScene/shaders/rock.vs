@@ -23,8 +23,18 @@ void main()
 	gl_ClipDistance[0] = dot(model * vec4(aPos, 1.0) , clipPlane);
 
 	// for texturing
+	// makes a good guess at the texure coords
 
-	// TODO
-	// put the normal in here
-	textureCoords = vec2(aPos.x + aPos.y, aPos.z) * .2;
+	/* float hAngle = dot(Normal.xz, vec2(1., 0.));
+	float vAngle = dot(Normal.yz, vec2(1., 0.));
+
+	float texX = aPos.x * sin(hAngle) + aPos.z * cos(hAngle);
+	float texY = aPos.z * sin(vAngle) + aPos.y * cos(vAngle); */
+
+	float hAngle = dot(Normal.xz, vec2(1., 0.));
+
+	float texX = aPos.x + cos(hAngle)*aPos.y;
+	float texY = aPos.z;// + sin(hAngle)*aPos.y;
+
+	textureCoords = vec2(texX, texY) * .2;
 }

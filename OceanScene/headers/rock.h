@@ -167,47 +167,37 @@ private:
 		glm::vec3 rockBottom = rockPos + glm::vec3(length / 2.0f, 0.f, length / 2.0f);
 		float radius = length / 4.0f;
 
-		// std::vector<glm::vec2> startLayer = { glm::vec2(4., 2.),
-		// 																		glm::vec2(5., 2.),
-		// 																		glm::vec2(3., 3.),
-		// 																		glm::vec2(6., 3.),
-		// 																		glm::vec2(2., 4.),
-		// 																		glm::vec2(7., 4.),
-		// 																		glm::vec2(2., 5.),
-		// 																		glm::vec2(7., 5.),
-		// 																		glm::vec2(3., 6.),
-		// 																		glm::vec2(6., 6.),
-		// 																		glm::vec2(4., 7.),
-		// 																		glm::vec2(5., 7.)};
-
 		std::vector<glm::vec2> startLayer;
-
-		int midPoint = (int)nrVertices/2;
-
-		// Generate the four sides of the square
-		for(int i = 1; i <= midPoint; i ++)
-		{
-			// 1
-			startLayer.push_back(glm::vec2((float)i, float(midPoint + 1 - i)));
-
-			// 2
-			startLayer.push_back(glm::vec2((float)(i + midPoint -1), float(nrVertices - i - 1)));
-
-			// 3
-			startLayer.push_back(glm::vec2((float)(i + midPoint -1), float(i)));
-
-			// 4
-			startLayer.push_back(glm::vec2((float)i, float(midPoint + i - 1)));
-		}
-
-
 		std::vector<glm::vec2> previousLayer;
 		std::vector<glm::vec2> thisLayer;
 
-		// Add all points to the previous layer
-		for(unsigned int i = 0; i < startLayer.size(); i++)
+		if (genType)
 		{
-			surroundingVertices(&previousLayer, startLayer[i]);
+
+			int midPoint = (int)nrVertices/2;
+
+			// Generate the four sides of the square
+			for(int i = 1; i <= midPoint; i ++)
+			{
+				// 1
+				startLayer.push_back(glm::vec2((float)i, float(midPoint + 1 - i)));
+
+				// 2
+				startLayer.push_back(glm::vec2((float)(i + midPoint -1), float(nrVertices - i - 1)));
+
+				// 3
+				startLayer.push_back(glm::vec2((float)(i + midPoint -1), float(i)));
+
+				// 4
+				startLayer.push_back(glm::vec2((float)i, float(midPoint + i - 1)));
+			}
+
+			// Add all points to the previous layer
+			for(unsigned int i = 0; i < startLayer.size(); i++)
+			{
+				surroundingVertices(&previousLayer, startLayer[i]);
+			}
+
 		}
 
 		// outer loop for y
@@ -273,8 +263,12 @@ private:
 			currPos += glm::vec3(0.0f, length / nrVertices, -length);
 
 			// new layer time
-			previousLayer = thisLayer;
-			thisLayer.clear();
+			if(genType)
+			{
+				previousLayer = thisLayer;
+				thisLayer.clear();
+			}
+
 
 		}
 	}
