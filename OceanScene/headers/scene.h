@@ -81,7 +81,7 @@ public:
 
         // Terrain
         std::cout << "Seed: " << seed << '\n';
-        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .25, 70., maxSeaweed, maxPebbles, maxBoulders);
+        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .7, 70., maxSeaweed, maxPebbles, maxBoulders);
         maxSeaweed = terrain->maxSeaweed;
         maxPebbles = terrain->maxPebbles;
 
