@@ -59,7 +59,10 @@ void main()
     vec4 result = vec4(CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine), 1.0);
 
     // Make bluer as get further away
-    result = mix(result, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));
+    if(FragPos.y < 0.)
+    {
+      result = mix(result, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));
+    }
 
     FragColor = result;
 

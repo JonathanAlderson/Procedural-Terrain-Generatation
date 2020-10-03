@@ -50,9 +50,7 @@ public:
 
 		this->length = nLength;
 
-		std::cout << "Rock Pos: " << nRockPos.x << " "  << nRockPos.y << " "  << nRockPos.z << " "  << '\n';
 		this->rockPos = glm::vec3(nRockPos.x - nLength*.5, nRockPos.y, nRockPos.z - nLength*.5);
-		std::cout << "Rock Pos: " << rockPos.x << " "  << rockPos.y << " "  << rockPos.z << " "  << '\n';
 
 		this->seed = nRockPos.x + nRockPos.y + nRockPos.z;
 		this->noiseScale = noiseScale;
@@ -196,6 +194,7 @@ private:
 						// Check if we can use this point
 						//grid[index(i,j,k)].Position = currPos + rockPos;
 						grid[index(i,j,k)].Position = currPos;
+						grid[index(i,j,k)].Scalar = 0.;
 
 						if (std::find(previousLayer.begin(), previousLayer.end(), glm::vec2((float)k, (float)j)) != previousLayer.end())
 						{
@@ -209,15 +208,8 @@ private:
 									surroundingVertices(&thisLayer, glm::vec2((float)k, (float)j));
 								}
 							}
-							else
-							{
-								grid[index(i,j,k)].Scalar = 0.;
-							}
 						}
-						else
-						{		// Not Allowed To The Surfae Party
-								grid[index(i,j,k)].Scalar = 0.;
-						}
+
 					}
 					else
 					{
@@ -225,15 +217,23 @@ private:
 
 						// Generate points inside a sphere
 						grid[index(i, j, k)].Position = currPos;
+						grid[index(i, j, k)].Scalar = 0.0f;
 
-						//std::cout << currPos.x << ", " << currPos.y << ", " << currPos.z  << '\n';
+						// If inside radius
 						if ( (glm::distance(rockBottom, currPos) <= radius))
 						{
-							grid[index(i, j, k)].Scalar = .4 + glm::perlin(noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale * currPos + glm::vec3(seed, seed, seed));
-						}
-						else
-						{
-							grid[index(i, j, k)].Scalar = 0.0f;
+							if(j != 0 && k != 0 && j != nrVertices-1 && k != nrVertices-1 && i != nrVertices-1)
+							{
+								if (i == 0 || std::find(previousLayer.begin(), previousLayer.end(), glm::vec2((float)k, (float)j)) != previousLayer.end())
+								{
+									grid[index(i, j, k)].Scalar = .4 + glm::perlin(noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale * currPos + glm::vec3(seed, seed, seed));
+									// Will be in the mesh
+									if(grid[index(i,j,k)].Scalar > isoLevel)
+									{
+										surroundingVertices(&thisLayer, glm::vec2((float)k, (float)j));
+									}
+								}
+							}
 						}
 					}
 
@@ -244,11 +244,9 @@ private:
 			currPos += glm::vec3(0.0f, length / nrVertices, -length);
 
 			// new layer time
-			if(genType)
-			{
-				previousLayer = thisLayer;
-				thisLayer.clear();
-			}
+			previousLayer = thisLayer;
+			thisLayer.clear();
+
 
 
 		}

@@ -76,13 +76,17 @@ public:
     int maxPebbles;
     int pebbleCount;
 
+    std::vector<glm::vec3> boulderPos;
+    int maxBoulders;
+    int boulderCount;
+
     // constructor
 
     // Num chunks, heightscale, noiseScale, scale, waterLevel, landPrevelence
     // 10, 15., 150., .2, 0.1, .8
 
     // Constructor For If We Want To Generate A New Map
-    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed, int maxPebbles)
+    Terrain(int seed, int numChunks, float heightScale, float noiseScale, float scale, float waterLevel, float landPrevelence, float roughness, int maxSeaweed, int maxPebbles, int maxBoulders)
     {
         std::cout << "Generating New Map" << '\n';
         sandNormalMap = loadTexture(FileSystem::getPath("resources/textures/sandNormal.png").c_str(), 1);
@@ -105,6 +109,10 @@ public:
         // Pebble Thigns
         this->maxPebbles = maxPebbles;
         this->pebbleCount = 0;
+
+        // Boulder Thigns
+        this->maxBoulders = maxBoulders;
+        this->boulderCount = 0;
 
         // Determine which chunks should be spawned in a circle
         calculateCirlce();
@@ -430,13 +438,27 @@ private:
         // If there is no seaweed here, make a rock
         if(pebbleCount < maxPebbles)
         {
-          if(randFloat() > 0.98888)
+          if(height < -3.)
           {
-            pebbleCount++;
-            pebblePos.push_back(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
-            std::cout << "Position: " << pebblePos[0].x << " "  << pebblePos[0].y << " " << pebblePos[0].z << " "  << '\n';
+            if(randFloat() > 0.999)
+            {
+              pebbleCount++;
+              pebblePos.push_back(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
+            }
           }
         }
+        if(boulderCount < maxBoulders)
+        {
+          if(height < -8.)
+          {
+            if(randFloat() > 0.9999)
+            {
+              boulderCount++;
+              boulderPos.push_back(glm::vec3((posX-seed) * scale, height, (posZ-seed) * scale));
+            }
+          }
+        }
+
       }
 
 

@@ -73,14 +73,15 @@ public:
 
         // Settings
         int maxSeaweed = 4000;
-        int maxFish = 100;
-        int schoolSize = 20;
+        int maxFish = 1000;
+        int schoolSize = 500;
         int maxPebbles = 100;
+        int maxBoulders = 10.;
 
 
         // Terrain
         std::cout << "Seed: " << seed << '\n';
-        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .25, 70., maxSeaweed, maxPebbles);
+        terrain = new Terrain(seed, 20, 1., 50., .8, .25, .25, 70., maxSeaweed, maxPebbles, maxBoulders);
         maxSeaweed = terrain->maxSeaweed;
         maxPebbles = terrain->maxPebbles;
 
@@ -99,9 +100,9 @@ public:
                                               glm::vec3(20., 0., 0.)};
                                       //  };
 
-        pebbles = new Rocks(10.0f, 30.0f, terrain->pebblePos, 0.5f, 0.1f, GEN_PEBBLE);
+        pebbles = new Rocks(10.0f, 8.0f, terrain->pebblePos, 0.5f, 0.1f, GEN_PEBBLE);
 
-        //boulders = new Rocks(15.0f, 30.0f, boulderLocs, 0.5f, 0.22f, GEN_ROCK);
+        boulders = new Rocks(10.0f, 15.0f, terrain->boulderPos, 0.5f, 0.22f, GEN_ROCK);
 
         // Skybox
         skybox = new Skybox("skybox1");
@@ -156,15 +157,12 @@ public:
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
-      //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
-      //water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
-      //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
+      seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      water->Draw(waterTile, this->model, this->view, this->projection, time, camera, clipPlane, waterSize);
+      fish->Draw(this->model, this->view, this->projection, time, clipPlane);
       pebbles->Draw(this->model, this->view, this->projection, camera.Position, clipPlane);
-      //boulders->Draw(model, view, projection, camera.Position, clipPlane);
+      boulders->Draw(this->model, this->view, this->projection, camera.Position, clipPlane);
 
-      //rock2->Draw(model, view, projection, camera.Position, clipPlane);
-      //rock3->Draw(model, view, projection, camera.Position, clipPlane);
-      //rock4->Draw(model, view, projection, camera.Position, clipPlane);
       skybox->Draw(this->projection, camera, clipPlane);
     }
 
@@ -174,10 +172,10 @@ public:
       DrawSetup(SCR_WIDTH, SCR_HEIGHT, camera);
       // Draw all the things in the scene
       terrain->Draw(this->model, this->view, this->projection, time, camera.Position, clipPlane);
-      //seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
-      //fish->Draw(this->model, this->view, this->projection, time, clipPlane);
+      seaweed->Draw(this->model, this->view, this->projection, time, clipPlane);
+      fish->Draw(this->model, this->view, this->projection, time, clipPlane);
       pebbles->Draw(this->model, this->view, this->projection, camera.Position, clipPlane);
-      //boulders->Draw(model, view, projection, camera.Position, clipPlane);
+      boulders->Draw(this->model, this->view, this->projection, camera.Position, clipPlane);
 
       skybox->Draw(this->projection, camera, clipPlane);
     }
