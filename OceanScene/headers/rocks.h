@@ -3,6 +3,8 @@
 
 
 #include "rock.h"
+#include "filesystem.h"
+#include "texturesSetup.h"
 #include <vector>
 
 class Rocks
@@ -18,7 +20,7 @@ public:
   float totalVertices;
   float nrCubes;
   float totalCubes;
-
+  unsigned int texture, normalMap;
 
   Shader* rockShader = new Shader("rock.vs", "rock.fs");
 
@@ -42,21 +44,30 @@ public:
     {
       rocks[i] = new Rock(nrVertices, length, rockPositions[i], isoLevel, noiseScale, genType);
     }
+
+    texture = loadTexture(FileSystem::getPath("resources/textures/UnderwaterRockTexture.png").c_str(), 1);
+    normalMap = loadTexture(FileSystem::getPath("resources/textures/UnderwaterRockNormal.png").c_str(), 1);
+
     setupShader();
   }
 
 
   void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection, glm::vec3 camPos, glm::vec4 clipPlane)
   {
-    rockShader->use();
+    // Activate Texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, normalMap);
 
+    rockShader->use();
     rockShader->setMat4("projection", projection);
     rockShader->setMat4("view", view);
     rockShader->setMat4("model", model);
     rockShader->setVec3("viewPos", camPos);
     rockShader->setVec4("clipPlane", clipPlane);
 
-    rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
+    //rockShader->setVec3("dirLight.lightPos", camPos.x, camPos.y, camPos.z);
     for(unsigned int i = 0; i < rockPositions.size(); i++)
     {
       glBindVertexArray(rocks[i]->VAO);
@@ -75,6 +86,8 @@ public:
   void setupShader()
   {
     rockShader->use();
+    rockShader->setInt("diffuseTexture", 0);
+    rockShader->setInt("normalTexture", 1);
     rockShader->setVec3("fragCol", glm::vec3(124.0f, 124.0f, 124.0f));
     rockShader->setVec3("dirLight.lightPos", 100.0f, 100.0f, 100.0f);
     rockShader->setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);

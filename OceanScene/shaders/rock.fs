@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 textureCoords;
 
 
 struct DirLight {
@@ -16,6 +17,8 @@ struct DirLight {
 uniform vec3 viewPos;
 uniform vec3 fragCol;
 uniform DirLight dirLight;
+uniform sampler2D diffuseTexture;
+uniform sampler2D normalTexture;
 
 // calculates the color when using a directional light.
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 diffuseCol, vec3 specCol, float shine)
@@ -42,18 +45,18 @@ vec3 rgb(float r, float g, float b)
 
 void main()
 {
-    vec3 norm = normalize(Normal);
+    vec3 normMap = texture(normalTexture, textureCoords).xyz;
+    vec3 normal = vec3(normMap.r * 2.0 - 1.0, normMap.g * 3.0, normMap.b * 2.0 - 1.0);
+    vec3 norm = normalize(Normal + normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 
     float shine = 50.0f;
 
-    vec3 diffuseCol = rgb(124., 124., 124.);
+    vec3 diffuseCol = texture(diffuseTexture, textureCoords).xyz;
 
-    vec3 specCol = vec3(1.0, 1., 1.0);
+    vec3 specCol = vec3(1.0, 1.0, 1.0);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir, diffuseCol, specCol, shine);
-
-    //result += CalcDirLight(dirLight, -norm, viewDir, diffuseCol, specCol, shine);
 
     FragColor = vec4(result, 1.0);
 

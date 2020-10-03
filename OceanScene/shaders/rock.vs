@@ -9,6 +9,7 @@ uniform vec4 clipPlane;
 
 out vec3 FragPos;
 out vec3 Normal;
+out vec2 textureCoords;
 
 void main()
 {
@@ -19,5 +20,8 @@ void main()
 	gl_Position = projection * model * view * vec4(aPos, 1.0f);
 
 	// Set the clipping plane
-	gl_ClipDistance[0] = 1.; //dot(model * vec4(aPos, 1.0) , clipPlane);
+	gl_ClipDistance[0] = dot(model * vec4(aPos, 1.0) , clipPlane);
+
+	// for texturing
+	textureCoords = vec2(aPos.x + aPos.y, aPos.z) * .2;
 }
