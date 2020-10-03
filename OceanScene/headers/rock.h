@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <time.h>
 #include <vector>
+#include <algorithm>
 
 #include "glm.hpp"
 #include "gtc/matrix_transform.hpp"
@@ -12,8 +13,8 @@
 #include "verticies.h"
 #include "shader.h"
 
-#define GEN_ROCK 0
-#define GEN_PEBBLE 1
+#define GEN_ROCK 1
+#define GEN_PEBBLE 0
 
 //
 // Abstract away the class:
@@ -91,10 +92,6 @@ private:
 	// type of grid vertex scalar attribution
 	int genType;
 
-	// create a new shader object with the approriate vertex and fragment shaders
-
-	//Shader* normalShader = new Shader("normal.vs", "normal.fs", "normal.gs");
-
 
 	//
 	// Sets OpenGL data (VBO and VAO)
@@ -119,6 +116,30 @@ private:
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	}
 
+	// Finds all the surrounding vertices to a point
+	void surroundingVertices(std::vector<glm::vec2> * points, glm::vec2 point)
+	{
+		points->push_back(point);
+		point.x  -= 1.;
+		points->push_back(point);
+		point.y  += 1.;
+		points->push_back(point);
+		point.x  += 1.;
+		points->push_back(point);
+		point.x  += 1.;
+		points->push_back(point);
+		point.y  -= 1.;
+		points->push_back(point);
+		point.y  -= 1.;
+		points->push_back(point);
+		point.x  -= 1.;
+		points->push_back(point);
+		point.x  -= 1.;
+		points->push_back(point);
+		point.y  += 1.;
+		points->push_back(point);
+	}
+
 	//
 	// get a grid of points around the object's position
 	//
@@ -134,6 +155,28 @@ private:
 		glm::vec3 rockBottom = rockPos + glm::vec3(length / 2.0f, 0.f, length / 2.0f);
 		float radius = length / 4.0f;
 
+		std::vector<glm::vec2> testPoints = { glm::vec2(4., 2.),
+																				glm::vec2(5., 2.),
+																				glm::vec2(3., 3.),
+																				glm::vec2(6., 3.),
+																				glm::vec2(2., 4.),
+																				glm::vec2(7., 4.),
+																				glm::vec2(2., 5.),
+																				glm::vec2(7., 5.),
+																				glm::vec2(3., 6.),
+																				glm::vec2(6., 6.),
+																				glm::vec2(4., 7.),
+																				glm::vec2(5., 7.)};
+
+		std::vector<glm::vec2> previousLayer;
+		std::vector<glm::vec2> thisLayer;
+
+		// Add all points to the previous layer
+		for(unsigned int i = 0; i < testPoints.size(); i++)
+		{
+			surroundingVertices(&previousLayer, testPoints[i]);
+		}
+
 		// outer loop for y
 		for (int i = 0; i < nrVertices; i++)
 		{
@@ -146,13 +189,23 @@ private:
 					// set the vertex's position and get the associated seeded perlin noise scalar
 					if (genType)
 					{
-						// GEN PEBBLE
+						// GEN BOULDER
+						// Check if we can use this point
 						grid[index(i,j,k)].Position = currPos + rockPos;
-						grid[index(i,j,k)].Scalar   = glm::perlin( noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale* currPos + glm::vec3(seed, seed, seed));
+
+						if (std::find(previousLayer.begin(), previousLayer.end(), glm::vec2((float)k, (float)j)) != previousLayer.end())
+						{
+							grid[index(i,j,k)].Scalar  = -.54+ (1. - ((float)i/(float)nrVertices)) + (glm::perlin( noiseDistScale(currPos, rockCenter, 2.9f) * noiseScale* currPos + glm::vec3(seed, seed, seed))+.707)/1.414;
+							//std::cout << "X: " << k << " Z: " << j <<  "   Val: " << grid[index(i, j, k)].Scalar << '\n';
+						}
+						else
+						{		// Not Allowed To The Surfae Party
+								grid[index(i,j,k)].Scalar = 0.;
+						}
 					}
 					else
 					{
-						// GEN ROCK
+						// GEN PEBBLE
 						grid[index(i, j, k)].Position = currPos + rockPos;
 
 						//std::cout << currPos.x << ", " << currPos.y << ", " << currPos.z  << '\n';

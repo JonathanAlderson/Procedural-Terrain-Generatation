@@ -23,5 +23,8 @@ void main()
 	gl_ClipDistance[0] = dot(model * vec4(aPos, 1.0) , clipPlane);
 
 	// for texturing
+
+	// TODO
+	// put the normal in here
 	textureCoords = vec2(aPos.x + aPos.y, aPos.z) * .2;
 }
