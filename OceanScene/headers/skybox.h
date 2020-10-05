@@ -18,13 +18,15 @@ public:
   unsigned int skyboxVAO, skyboxVBO;
   unsigned int cubemapTexture;
 
+  float waterSize;
+
   glm::mat4 view;
 
 
 
-  Skybox(std::string skyboxName)
+  Skybox(std::string skyboxName, float waterSize)
   {
-
+    this->waterSize = waterSize;
     // Get files
     faces.push_back(FileSystem::getPath("resources/textures/" + skyboxName + "/right.png"));
     faces.push_back(FileSystem::getPath("resources/textures/" + skyboxName + "/left.png"));
@@ -46,6 +48,7 @@ public:
     shader->setMat4("projection", projection);
     shader->setVec4("clipPlane", clipPlane);
     shader->setVec3("viewPos", camera.Position);
+    shader->setFloat("planeSize", waterSize);
     // skybox cube
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);

@@ -105,7 +105,7 @@ public:
         boulders = new Rocks(10.0f, 15.0f, terrain->boulderPos, 0.5f, 0.22f, GEN_ROCK);
 
         // Skybox
-        skybox = new Skybox("skybox1");
+        skybox = new Skybox("skybox1", waterSize);
 
         // Fish
         fish = new Fish(maxFish, schoolSize, waterSize);
