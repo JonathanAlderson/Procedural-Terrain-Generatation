@@ -109,9 +109,9 @@ vec4 getNormalMap(float height, float sandLower, float sandUpper, float grassLow
 vec3 caustics()
 {
   float tau = 6.28318530718;
-  int max_iter = 4;
+  int max_iter = 5;
 
-  float cTime = time * .5+23.0;
+  float cTime = time * .3 + FragPos.x;
     // uv should be the 0-1 uv of texture...
 	vec2 uv = FragPos.xz * .1;
 
@@ -121,11 +121,11 @@ vec3 caustics()
 
 	vec2 i = vec2(p);
 	float c = 1.0;
-	float inten = .002;
+	float inten = .003;
 
 	for (int n = 0; n < max_iter; n++)
 	{
-		float t = cTime * (1.0 - (3.5 / float(n+1))) + FragPos.x + FragPos.z;
+    float t = cTime * (1.0 - (3.5 / float(n+1))) + (FragPos.x * .0005) + (FragPos.z * .005);
 		i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
 		c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
 	}
