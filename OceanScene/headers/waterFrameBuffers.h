@@ -8,10 +8,10 @@
 class WaterFrameBuffers
 {
 public:
-  int REFLECTION_WIDTH = 320;
-  int REFLECTION_HEIGHT = 180;
-  int REFRACTION_WIDTH = 320;
-  int REFRACTION_HEIGHT = 180;
+  int REFLECTION_WIDTH = 1920;
+  int REFLECTION_HEIGHT = 1080;
+  int REFRACTION_WIDTH = 1920;
+  int REFRACTION_HEIGHT = 1080;
 
 	int reflectionFrameBuffer;
 	int reflectionTexture;

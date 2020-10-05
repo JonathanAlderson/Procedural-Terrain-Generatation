@@ -61,7 +61,7 @@ void main()
     // Make bluer as get further away
     if(FragPos.y < 0.)
     {
-      result = mix(result, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));
+      result = mix(result, vec4(0.463, 0.714, 0.768, 1.), 1. - min(gl_FragCoord.w * 10., 1.0));
     }
 
     FragColor = result;

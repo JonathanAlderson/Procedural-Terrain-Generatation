@@ -111,6 +111,6 @@ void main(void) {
   // Sea colouring depth
   if(toCameraVector.y < 0)
   {
-    out_Color = mix(out_Color, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));
+    out_Color = mix(out_Color, vec4(0.463, 0.714, 0.768, 1.), 1. - min(gl_FragCoord.w * 10., 1.0));
   }
 }

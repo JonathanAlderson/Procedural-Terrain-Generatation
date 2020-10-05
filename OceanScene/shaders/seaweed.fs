@@ -45,6 +45,6 @@ void main()
   if(texColor.a < 0.1)
       discard;
 
-  FragColor = mix(texColor, vec4(0.243, 0.573, .8, 1.), 1. - min(gl_FragCoord.w * 20., 1.0));
+  FragColor = mix(texColor, vec4(0.463, 0.714, 0.768, 1.), 1. - min(gl_FragCoord.w * 10., 1.0));
 
 }

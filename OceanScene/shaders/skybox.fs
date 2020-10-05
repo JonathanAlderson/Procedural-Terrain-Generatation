@@ -34,7 +34,7 @@ void main()
         }
         else
         {
-          FragColor = vec4(0.243, 0.573, .8, 1.); // sea colour
+          FragColor = vec4(0.463, 0.714, 0.768, 1.); // sea colour
         }
         return;
       }
@@ -42,7 +42,7 @@ void main()
     }
     if(viewPos.y < 0  && TexCoords.y < 0 )
     {
-      FragColor = vec4(0.243, 0.573, .8, 1.);
+      FragColor = vec4(0.463, 0.714, 0.768, 1.);
     }
     else
     {

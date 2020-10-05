@@ -186,7 +186,7 @@ void main()
     // Make things darker underwater
     if(height < 0)
     {
-      result = mix(result, vec3(0.243, 0.573, .8), 1. - min(gl_FragCoord.w * 20., 1.0));
+      result = mix(result, vec3(0.463, 0.714, 0.768), 1. - min(gl_FragCoord.w * 10., 1.0));
     }
 
     FragColor = vec4(result, 1.0);
