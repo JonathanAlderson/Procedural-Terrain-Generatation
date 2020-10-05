@@ -60,7 +60,8 @@ vec3 colour(float height, float sandLower, float sandUpper, float grassLower, fl
   vec3 sand = rgb(251., 244., 157.);
   vec3 grass = rgb(153., 170., 56.);
   vec3 rock = rgb(124., 124., 124.);
-  vec3 col = vec3(0.); // vec3(noise(Normal.y), 0., 0.);
+
+  vec3 col = .2 * vec3(noise(Normal.y), noise(FragPos.x*0.043), noise(FragPos.z*.035));
 
   if(height < 0.)
   {
@@ -170,10 +171,9 @@ void main()
 
     float shine = dot(Normal, vec3(0., 1., 0.))*1000.;
 
-    if(height > 0)
-    {
-      shine *= height;
-    }
+    shine = 3000. * (2.5 - height);
+
+
 
     vec3 diffuseCol = colour(height, sandLower, sandUpper, grassLower, grassUpper);
 
