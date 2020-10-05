@@ -8,9 +8,8 @@ out vec2 textureCoords;
 
 void main()
 {
-  //gl_Position = vec4(aPos, 1.0);
+  gl_Position = vec4(aPos, 1.0);
 
-  gl_Position = vec4(.5, .5, .0, 1.0);
 
   textureCoords = aTexCoord;
 

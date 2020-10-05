@@ -163,7 +163,7 @@ int main()
            scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, frameTime, glm::vec4(0., -1., 0., 999999.));
            fbos->unbindCurrentFrameBuffer();
 
-           postProcessing.Draw(fbos->getPostProcessingTexture());
+           postProcessing.Draw(fbos->getPostProcessingTexture(), fbos->getPostProcessingDepthTexture());
 
 
            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

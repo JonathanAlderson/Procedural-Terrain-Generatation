@@ -21,6 +21,7 @@ public:
 	int refractionDepthTexture;
   int postProcessingTexture;
   int postProcessingDepthTexture;
+  int postProcessingDepthBuffer;
   int postProcessingFrameBuffer;
 
   int scrWidth;
@@ -76,9 +77,14 @@ public:
     return postProcessingTexture;
   }
 
-  int getPostProcessingDepthTexturew()
+  int getPostProcessingDepthTexture()
   {
     return postProcessingDepthTexture;
+  }
+
+  int getPostProcessingDepthBuffer()
+  {
+    return postProcessingDepthBuffer;
   }
 
 	void initialiseReflectionFrameBuffer()
@@ -101,7 +107,8 @@ public:
   {
     postProcessingFrameBuffer = createFrameBuffer();
     postProcessingTexture = createTextureAttachment(scrWidth, scrHeight);
-    postProcessingDepthTexture = createDepthBufferAttachment(scrWidth, scrHeight);
+    postProcessingDepthTexture = createDepthTextureAttachment(scrWidth, scrHeight);
+    unbindCurrentFrameBuffer();
   }
 
 	void bindFrameBuffer(int frameBuffer, int width, int height)

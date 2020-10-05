@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 #include "verticies.h"
 #include "shader.h"
+#include "filesystem.h"
+#include "texturesSetup.h"
 
 class PostProcessing
 {
@@ -30,11 +32,19 @@ public:
     setupPostProcessing();
   }
 
-  void Draw(int texture)
+  void Draw(int colourTexture, int depthTexture)
   {
-     glClear(GL_COLOR_BUFFER_BIT);
+     glClearColor(0.1f, 0.4f, 0.1f, 1.0f);
+     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+     glEnable(GL_BLEND);
+     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
      glActiveTexture(GL_TEXTURE0);
-     glBindTexture(GL_TEXTURE_2D, texture);
+     glBindTexture(GL_TEXTURE_2D, colourTexture);
+
+     glActiveTexture(GL_TEXTURE1);
+     glBindTexture(GL_TEXTURE_2D, depthTexture);
+
      shader->use();
 
      glBindVertexArray(VAO_texture);
@@ -69,6 +79,7 @@ public:
     // Set texture var in shader
     shader->use();
     shader->setInt("colourTexture", 0);
+    shader->setInt("depthTexture", 1);
   }
 };
 
