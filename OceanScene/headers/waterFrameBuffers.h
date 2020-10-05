@@ -19,6 +19,9 @@ public:
 	int refractionFrameBuffer;
 	int refractionTexture;
 	int refractionDepthTexture;
+  int postProcessingTexture;
+  int postProcessingDepthTexture;
+  int postProcessingFrameBuffer;
 
   int scrWidth;
   int scrHeight;
@@ -29,6 +32,7 @@ public:
     scrHeight = h;
     initialiseReflectionFrameBuffer();
     initialiseRefractionFrameBuffer();
+    initialisePostProcessingFrameBuffer();
   }
 
   void bindReflectionFrameBuffer()
@@ -39,6 +43,11 @@ public:
   void bindRefractionFrameBuffer()
   {//call before rendering to this FBO
     bindFrameBuffer(refractionFrameBuffer,REFRACTION_WIDTH,REFRACTION_HEIGHT);
+  }
+
+  void bindPostProcessingFrameBuffer()
+  {//call before rendering to this FBO
+    bindFrameBuffer(postProcessingFrameBuffer, scrWidth, scrHeight);
   }
 
   void unbindCurrentFrameBuffer()
@@ -62,6 +71,16 @@ public:
 		return refractionDepthTexture;
 	}
 
+  int getPostProcessingTexture()
+  {
+    return postProcessingTexture;
+  }
+
+  int getPostProcessingDepthTexturew()
+  {
+    return postProcessingDepthTexture;
+  }
+
 	void initialiseReflectionFrameBuffer()
   {
 		reflectionFrameBuffer = createFrameBuffer();
@@ -77,6 +96,13 @@ public:
 		refractionDepthTexture = createDepthTextureAttachment(REFRACTION_WIDTH,REFRACTION_HEIGHT);
 		unbindCurrentFrameBuffer();
 	}
+
+  void initialisePostProcessingFrameBuffer()
+  {
+    postProcessingFrameBuffer = createFrameBuffer();
+    postProcessingTexture = createTextureAttachment(scrWidth, scrHeight);
+    postProcessingDepthTexture = createDepthBufferAttachment(scrWidth, scrHeight);
+  }
 
 	void bindFrameBuffer(int frameBuffer, int width, int height)
   {

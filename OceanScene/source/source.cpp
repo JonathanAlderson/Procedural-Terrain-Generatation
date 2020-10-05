@@ -14,6 +14,7 @@
 #include "sceneSetup.h"
 #include "texturesSetup.h"
 #include "shadersSetup.h"
+#include "postProcessing.h"
 
 #define SCREENRECORDING false
 #define RECORDINGFRAMES 500
@@ -113,6 +114,9 @@ int main()
       startUp.join();
     }
 
+    // Post Processing Setup
+    // --------------------------
+    PostProcessing postProcessing = PostProcessing();
 
     while (!glfwWindowShouldClose(window) && frame <= maxFrames)
        {
@@ -130,20 +134,9 @@ int main()
            // auto camera movement
            scene.MoveCamera(&camera, frameTime);
 
-
-           //
-           //std::cout << "T: " << frameTime*0.1 << " P: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << " "  << '\n';
-
-           // camera.Position.z -= 6.0 * deltaTime;
-           // camera.Position.y += 1.15 * deltaTime;
-
            // render
            // ------
            glEnable(GL_CLIP_DISTANCE0);
-
-           // glEnable(GL_CULL_FACE);
-           // glCullFace(GL_BACK);
-
 
            // render reflection texture
            fbos->bindReflectionFrameBuffer();
@@ -164,10 +157,13 @@ int main()
            scene.DrawNoWater(SCR_WIDTH, SCR_HEIGHT, camera, frameTime, glm::vec4(0., -1. * underwater, 0., 0.));
            fbos->unbindCurrentFrameBuffer();
 
-           // // render to scene
+
+           // // render to post processing texture
+           fbos->bindPostProcessingFrameBuffer();
            scene.Draw(SCR_WIDTH, SCR_HEIGHT, camera, frameTime, glm::vec4(0., -1., 0., 999999.));
+           fbos->unbindCurrentFrameBuffer();
 
-
+           postProcessing.Draw(fbos->getPostProcessingTexture());
 
 
            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
