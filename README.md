@@ -26,6 +26,7 @@ Stretch Goals
 ---
 Related Videos
 ======
+[![Final Video](https://img.youtube.com/vi/kZjSDhBzD8U/0.jpg)](https://www.youtube.com/watch?v=kZjSDhBzD8U)
 
 [![Marching Cubes](http://img.youtube.com/vi/M3iI2l0ltbE/0.jpg)](http://www.youtube.com/watch?v=M3iI2l0ltbE)
 ---
